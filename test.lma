@@ -1,0 +1,13 @@
+(def (hello name)
+  (prn "hello, " name))
+
+(hello "andre")
+
+(def (map f lst)
+   (if (empty? lst)
+       '()
+       (cons (f (car lst)) (map f (cdr lst)))))
+
+(def names '("cory" "andre" "patrick" "link"))
+
+(map (fn (x) (hello x)) names)
