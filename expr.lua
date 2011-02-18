@@ -8,7 +8,6 @@ local stringp = '^(".-")'
 local atoms = {
    ['^(%()']            = 'open',
    ['^(%))']            = 'close',
-   ['^(\\)']            = 'backslash',
    [stringp]            = 'string',
    ['^([%+%-]?%d+%.?%d+)']     = 'number',   -- with decimal point
    ['^([%+%-]?%d+)']    = 'number',          -- without decimal point
@@ -25,6 +24,34 @@ local atoms = {
 }
 
 local whitespace = '^([%s\n]+)'
+
+function treeify(t)
+   local refs = {}
+   local ref = {{}, 'list'}
+   local parens = 0
+   
+   for i, v in ipairs(t) do
+      if v[2] == 'open' then
+         local next = {{}, 'list'}
+         table.insert(ref, next)
+         table.insert(refs, ref)
+         ref = {{}, 'list'}
+         parens = parens + 1
+      elseif v[2] == 'close' then
+         ref = table.remove(refs)
+         parens = parens - 1
+      else
+         if parens > 0 then
+            local ref = refs[#refs]
+            table.insert(ref[1], v)
+         else
+            return v
+         end
+      end
+   end
+   
+   return ref
+end
 
 function expr(f)    -- read one expression from f, nil on error, 'eof' on eof
    local parens = 0
@@ -58,7 +85,7 @@ function expr(f)    -- read one expression from f, nil on error, 'eof' on eof
               elseif v == 'close' then
                  parens = parens - 1
               elseif v == 'number' then
-                 c = c + 0          -- coerce c to a number value
+                 c = tonumber(c)
               elseif v == 'string' then
                  local m = j
                  while string.sub(c, -2, -2) == '\\' do
@@ -91,6 +118,6 @@ function expr(f)    -- read one expression from f, nil on error, 'eof' on eof
         end
      end
    until parens == 0
-
-   return t, lines
+   
+   return treeify(t), lines
 end
