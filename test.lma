@@ -1,3 +1,5 @@
+(def meaning-of-life 42)
+
 (def (hello name)
   (prn "hello, " name))
 
@@ -11,3 +13,5 @@
 (def names '("cory" "andre" "patrick" "link"))
 
 (map (fn (x) (hello x)) names)
+
+"string \"test\" smiles"
