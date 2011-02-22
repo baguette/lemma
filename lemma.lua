@@ -2,11 +2,13 @@
 -- The Lemma REPL
 --
 
+-- TODO: implement a writer
 -- TODO: lexical scope
 -- TODO: more special forms
 -- TODO: macros
 
-require 'expr'
+require 'stream'
+require 'read'
 require 'eval'
 require 'env'
 
@@ -23,11 +25,12 @@ else
    prompt = '> '
 end
 
+f = stream(f)
+
 while not done do
    if prompt then io.write(prompt) end
    
-   local t, c, e = expr(f)                -- read an expression!
-   count = count + c
+   local t, e = read(f)                   -- read an expression!
    
    if t then
       if t == 'eof' then
@@ -37,8 +40,6 @@ while not done do
          if prompt then print (val) end   -- print the value!
       end
    else
-      if e ~= 'comment' then
-         print (count .. ': ' .. e)
-      end
+      print (f:lines() .. ': ' .. e)
    end
 end                                       -- loop!

@@ -48,5 +48,9 @@ function eval(t, env)
       end
    }
    
-   return switch[typ]()
+   local evaluator = switch[typ]
+   if not evaluator then
+      print ('Unknown type: '..typ)
+   end
+   return evaluator()
 end

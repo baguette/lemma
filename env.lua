@@ -13,6 +13,10 @@ function lookup(env, sym)
    end
 end
 
+function quote(env, ...)
+   return ...
+end
+
 function xdo(env, ...)     -- this will eventually become let
    local exps = {...}
    local val
@@ -75,7 +79,7 @@ env = {
       prn = print, ['+'] = add, ['-'] = sub
    },
    fsubr = {
-      def = def, times = times, ['do'] = xdo
+      def = def, times = times, ['do'] = xdo, quote = quote
    },
    expr = {},
    fexpr = {},
