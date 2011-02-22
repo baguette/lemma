@@ -1,3 +1,6 @@
+--
+-- The Lemma Evaluator
+--
 
 function eval(t, env)
    local val, typ

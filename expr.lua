@@ -1,6 +1,14 @@
+--
+-- The Lemma Reader
+--
+
+-- TODO: reader macros
+-- TODO: refactor!
+-- TODO: name it read() instead of expr() -_-
+
 
 local symbol =          -- this is perhaps a little permissive
-[[^([%a%-%?%*%+%%%$%^<>/\_=~:&|!][%a%d%-%?%*%+%%%$%^<>/\_=~:&|!@']*)]]
+[[^([%a%-%?%*%+%%%$%^<>/\_=:&|!][%a%d%-%?%*%+%%%$%^<>/\_=:&|!@']*)]]
 
 local stringp = '^(".-")'
 
@@ -14,7 +22,7 @@ local atoms = {
    ['^(#\\[^%s%(%)]+)'] = 'character',
    ['^(\')']            = 'quote',
    ['^(`)']             = 'quasiquote',
-   ['^(,)']             = 'unquote',
+   ['^(~)']             = 'unquote',
    ['^(@)']             = 'splice',
    ['^(;.-)$']          = 'comment',
    ['^(#|)']            = 'opencomment', -- comments cannot be nested yet
@@ -23,7 +31,7 @@ local atoms = {
    [symbol]             = 'symbol'
 }
 
-local whitespace = '^([%s\n]+)'
+local whitespace = '^([,%s\n]+)'
 
 function treeify(t)
    local refs = {}

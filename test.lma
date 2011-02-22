@@ -6,7 +6,7 @@
 (def giggity-of-life
   (+ meaning-of-life giggity-giggity))
 
-(prn "giggity-of-life + 9 =" (+ giggity-of-life 9))
+(prn "giggity-of-life + 9 =", (+ giggity-of-life 9))
 
 (def whee 0)
 (times 10
