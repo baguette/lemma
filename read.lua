@@ -37,13 +37,13 @@ function read_list(f)
    local list = {}
    
    while true do
-      local c = f:read()
+      local c = f:get()
       if not c then return 'eof' end
       
       if c == ')' then
          return {list, 'list'}
       else
-         f:unread(c)
+         f:unget(c)
          local form = read(f)
          if form == 'eof' then return 'eof' end
          table.insert(list, form)
@@ -56,14 +56,14 @@ function read_string(f)
    local escape = false
    
    while true do
-      local c = f:read()
+      local c = f:get()
       if not c then return 'eof' end
       
       if c == '"' and not escape then
          return {table.concat(str), 'string'}
       elseif c == '\\' then
          escape = true
-         c = f:read()
+         c = f:get()
          if not c then return 'eof' end
       else
          escape = false
@@ -76,7 +76,7 @@ end
 function read_comment(f)
    local c
    repeat
-      c = f:read()
+      c = f:get()
       if not c then return 'eof' end
    until c == '\n'
    return nil
@@ -110,11 +110,11 @@ function read(f)
    -- it's either a symbol or number.
    ---
    
-   local c = f:read()
+   local c = f:get()
    if not c then return 'eof' end
    
    while whitespace[c] do
-      c = f:read()
+      c = f:get()
       if not c then return 'eof' end
    end
    
@@ -126,11 +126,11 @@ function read(f)
       local str = {}
       while not delim[c] and not whitespace[c] do
          table.insert(str, c)
-         c = f:read()
+         c = f:get()
          if not c then return 'eof' end      -- is this the right spot for this?
       end
       
-      f:unread(c)
+      f:unget(c)
       str = table.concat(str)
       
       -- Do a pattern match on str to identify type of atom

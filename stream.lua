@@ -4,7 +4,7 @@ function stream(f)
    local lines = 1
    
    return {
-      read = function(self)
+      get = function(self)
          local c
          if #buffer > 0 then
             c = table.remove(buffer)
@@ -16,7 +16,7 @@ function stream(f)
          end
          return c
       end,
-      unread = function(self, c)
+      unget = function(self, c)
          if c == '\n' or c == '\r' then
             lines = lines - 1
          end
