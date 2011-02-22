@@ -1,5 +1,7 @@
 ;; Test of the Lemma interpreter
 
+(def prn print)
+
 (def meaning-of-life 42)
 (def giggity-giggity 69)
 
@@ -17,5 +19,18 @@
   (do
     (def whee (- whee 1))
     (prn whee)))
+
+(def hello
+  (fn (name)
+    (print "Hello," name "!")))
+(hello "Lemma")
+
+(def fact
+  (fn (n)
+    (if (= n 0)
+        1
+        (* n (fact (- n 1))))))
+
+(print (fact 6))
 
 (prn "\"End of test\"")

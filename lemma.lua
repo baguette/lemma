@@ -3,9 +3,9 @@
 --
 
 -- TODO: implement a writer
--- TODO: lexical scope
 -- TODO: more special forms
--- TODO: macros
+-- TODO: implement macros
+-- TODO: more refactoring? (particularly in env.lua)
 
 require 'stream'
 require 'read'

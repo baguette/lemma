@@ -5,14 +5,14 @@
 -- TODO: finish implementing reader macros
 
 
-local symbol =          -- this is perhaps a little permissive
-[[^([%a%-%?%*%+%%%$%^<>/\_=:&|!][%a%d%-%?%*%+%%%$%^<>/\_=:&|!@']*)]]
+local symbol =          -- this is perhaps a little too permissive
+[[^([%a%-%?%*%+%%%$%^<>/\_=:&|!][%a%d%-%?%*%+%%%$%^<>/\_=:&|!~@']*)]]
 
--- these are tried in undefined order (make specific!)
+-- these are tried in undefined order (make them specific!)
 local atoms = {
    ['^([%+%-]?%d+%.?%d+)']     = 'number',   -- with decimal point
-   ['^([%+%-]?%d+)']    = 'number',          -- without decimal point
-   [symbol]             = 'symbol'
+   ['^([%+%-]?%d+)']           = 'number',   -- without decimal point
+   [symbol]                    = 'symbol'
 }
 
 local number = {}
