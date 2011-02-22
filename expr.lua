@@ -27,29 +27,36 @@ local whitespace = '^([%s\n]+)'
 
 function treeify(t)
    local refs = {}
-   local ref = {{}, 'list'}
+   local ref
    local parens = 0
    
    for i, v in ipairs(t) do
       if v[2] == 'open' then
          local next = {{}, 'list'}
-         table.insert(ref, next)
-         table.insert(refs, ref)
-         ref = {{}, 'list'}
+         if ref then
+            table.insert(ref[1], next)
+            table.insert(refs, ref)
+         end
+         ref = next
          parens = parens + 1
       elseif v[2] == 'close' then
-         ref = table.remove(refs)
+         if #refs > 0 then            -- don't pop if the stack is empty
+            ref = table.remove(refs)
+         end
          parens = parens - 1
       else
-         if parens > 0 then
-            local ref = refs[#refs]
+         if parens > 0 then         -- BUG HERE?
             table.insert(ref[1], v)
          else
-            return v
+            return v    -- add quote handling here?
          end
       end
    end
-   
+--[[
+   for i, v in ipairs(ref[1]) do
+      print ('|', v[1])
+   end
+--]]
    return ref
 end
 
@@ -106,7 +113,9 @@ function expr(f)    -- read one expression from f, nil on error, 'eof' on eof
                  comments = comments - 1
               end
               
-              table.insert(t, {c, v})
+              if v ~= 'comment' then
+                 table.insert(t, {c, v})
+              end
               n = j + 1
            end
         end
@@ -119,5 +128,5 @@ function expr(f)    -- read one expression from f, nil on error, 'eof' on eof
      end
    until parens == 0
    
-   return treeify(t), lines
+   return treeify(t), lines, 'comment'
 end

@@ -1,17 +1,21 @@
+;; Test of the Lemma interpreter
+
 (def meaning-of-life 42)
+(def giggity-giggity 69)
 
-(def (hello name)
-  (prn "hello, " name))
+(def giggity-of-life
+  (+ meaning-of-life giggity-giggity))
 
-(hello "andre")
+(prn "giggity-of-life + 9 =" (+ giggity-of-life 9))
 
-(def (map f lst)
-   (if (empty? lst)
-       '()
-       (cons (f (car lst)) (map f (cdr lst)))))
+(def whee 0)
+(times 10
+  (def whee (+ 1 whee)))
+(prn whee)
 
-(def names '("cory" "andre" "patrick" "link"))
+(times 3
+  (do
+    (def whee (- whee 1))
+    (prn whee)))
 
-(map (fn (x) (hello x)) names)
-
-"string \"test\" smiles"
+(prn "\"End of test\"")
