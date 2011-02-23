@@ -33,4 +33,6 @@
 
 (print (fact 6))
 
+)
+
 (prn "\"End of test\"")

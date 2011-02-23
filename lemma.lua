@@ -41,5 +41,6 @@ while not done do
       end
    else
       print (f:lines() .. ': ' .. e)
+      done = true
    end
 end                                       -- loop!

@@ -5,8 +5,13 @@
 function eval(t, env)
    local val, typ
    
-   val = t[1]
-   typ = t[2]
+   val = t
+   typ = type(t)
+   
+   if typ == 'table' then
+      val = t[1]
+      typ = t[2]
+   end
    
    local switch = {
       number = function() return val end,

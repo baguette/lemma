@@ -6,7 +6,7 @@
 
 
 local symbol =          -- this is perhaps a little too permissive
-[[^([%a%-%?%*%+%%%$%^<>/\_=:&|!][%a%d%-%?%*%+%%%$%^<>/\_=:&|!~@']*)]]
+[[^([%a%-%?%*%+%%%$%^<>\\_=:&|!][%.%a%d%-%?%*%+%%%$%^<>/\\_=:&|!~@']*)]]
 
 -- these are tried in undefined order (make them specific!)
 local atoms = {
@@ -60,7 +60,7 @@ function read_string(f)
       if not c then return 'eof' end
       
       if c == '"' and not escape then
-         return {table.concat(str), 'string'}
+         return table.concat(str)
       elseif c == '\\' then
          escape = true
          c = f:get()
@@ -93,6 +93,8 @@ end
 local reader_macros = {
    ['(']            = read_list,
    ['"']             = read_string,
+   ['.']             = table_idx,
+   ['/']             = tabel_mtd,      -- like table_idx, but passes self
    ['\'']            = read_quote,
    ['`']             = 'quasiquote',
    ['~']             = 'unquote',
@@ -138,15 +140,15 @@ function read(f)
       for k, typ in pairs(atoms) do
           if string.find(str, k) then
              if typ == 'number' then
-                str = tonumber(str)
+                form = tonumber(str)
+             else
+                form = {str, typ}
              end
-             
-             form = {str, typ}
           end
       end
       
       if not form then
-         return nil, 'lexical error ('..str..')'
+         return nil, 'lexical error on token: '..f:get()..str
       end
    end
    
