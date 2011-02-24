@@ -5,7 +5,7 @@
 -- TODO: implement a writer
 -- TODO: more special forms
 -- TODO: implement macros
--- TODO: more refactoring? (particularly in env.lua)
+-- TODO: redo the internal representations of lists as ADTs? (c.f. seqs)
 
 require 'stream'
 require 'read'

@@ -63,13 +63,14 @@ function read_string(f)
          return table.concat(str)
       elseif c == '\\' then
          escape = true
-         c = f:get()
          if not c then return 'eof' end
       else
          escape = false
       end
       
-      table.insert(str, c)
+      if not escape then
+         table.insert(str, c)
+      end
    end
 end
 
