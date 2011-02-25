@@ -13,6 +13,12 @@ Seq.sig = {
 }
 
 
+for i, v in pairs(Seq.sig) do
+	_G[v] = function(x)
+		return x[v](x)
+	end
+end
+
 
 Seq.lib = {}
 

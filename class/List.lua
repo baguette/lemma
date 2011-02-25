@@ -5,7 +5,7 @@ require '../interface/Reversible'
 do
 
 local function __tostring(e)
-	local str = {'('}
+	local str = {}
 	local curr = e
 	
 	while not curr['empty?'](curr) do
@@ -15,8 +15,7 @@ local function __tostring(e)
 	end
 	
 	table.remove(str)
-	table.insert(str, ')')
-	return table.concat(str)
+	return '('..table.concat(str)..')'
 end
 
 local t = {}
