@@ -5,7 +5,7 @@
 -- TODO: more special forms
 -- TODO: redo the internal representations of lists as ADTs? (c.f. seqs)
 
-require 'stream'
+require 'class/FileStream'
 require 'read'
 require 'eval'
 require 'env'
@@ -16,30 +16,30 @@ require 'env'
 -- If prompt is not nil, f should be stdin; starts a REPL.
 ---
 function exec(f, prompt)
-   local done = false
-   local f = stream(f)
+	local done = false
+	local f = FileStream(f)
 
-   while not done do
-      if prompt then io.write(prompt) end
-   
-      local t, e = read(f)                   -- read an expression!
-   
-      if t then
-         if t == 'eof' then
-            done = true
-         else
-            local val = eval(t, env)         -- evaluate the expression!
-            if prompt then
-               write(val)                    -- print the value!
-               io.write('\n')
-            end
-         end
-      else
-         print (f:lines() .. ': ' .. e)
-         done = true
-         f:close()
-      end
-   end                                       -- loop!
+	while not done do
+		if prompt then io.write(prompt) end
+	
+		local t, e = read(f)                     -- read an expression!
+	
+		if t then
+			if t == 'eof' then
+				done = true
+			else
+--				print (f:lines())
+				local val = eval(t, env)           -- evaluate the expression!
+				if prompt then
+					write(val)                      -- print the value!
+				end
+			end
+		else
+			print (f:lines() .. ': ' .. e)
+			done = true
+			f:close()
+		end
+	end                                         -- loop!
 end
 
 ---
@@ -47,10 +47,10 @@ end
 ---
 local lib = io.open('lib.lma', 'r')
 if lib then
-   exec(lib)
+	exec(lib)
 else
-   print 'Error: unable to open standard library lib.lma'
-   os.exit(1)
+	print 'Error: unable to open standard library lib.lma'
+	os.exit(1)
 end
 
 ---
@@ -60,11 +60,11 @@ local fname = ...
 local f, prompt
 
 if fname then
-   f = io.open(fname, 'r')
-   prompt = nil
+	f = io.open(fname, 'r')
+	prompt = nil
 else
-   f = io.input()
-   prompt = '> '
+	f = io.input()
+	prompt = '> '
 end
 
 exec(f, prompt)
