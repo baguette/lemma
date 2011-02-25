@@ -1,4 +1,6 @@
+---
 -- A buffered stream of characters.
+---
 function stream(f)
    local buffer = {}
    local lines = 1

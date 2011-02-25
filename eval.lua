@@ -1,6 +1,6 @@
---
+---
 -- The Lemma Evaluator
---
+---
 
 function eval(t, env)
    local val, typ
@@ -20,9 +20,11 @@ function eval(t, env)
          return env:lookup(val)
       end,                                      -- todo: lexical scope
       list   = function()                       -- todo: type checking
-         local op = val[1][1]
+         local op = val[1]
          
-         op = env:lookup(op)
+         if type(op) == 'table' then
+            op = eval(op, env)
+         end
          
          local lst = {}
          local i = 2
@@ -50,6 +52,7 @@ function eval(t, env)
    local evaluator = switch[typ]
    if not evaluator then
       print ('Unknown type: '..typ)
+      return nil
    end
    return evaluator()
 end

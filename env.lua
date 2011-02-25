@@ -1,24 +1,18 @@
---
+---
 -- Lemma Environment
---
+---
 
--- find sym in this environment
-function lookup(env, sym)
-   while env do
-      local val = env.bindings[sym]
-      if val then
-         return val
-      end
-      env = env.parent
-   end
-end
+-- TODO: make quasiquotes nestable
 
+---
+-- fexprs
+---
 (function(t)
    for k, v in pairs(t) do
       _G[k] = {v, 'fexpr'}
    end
 end)({
-   def = function (env, ...)
+   def = function(env, ...)
       local args = {...}
       local i = 1
    
@@ -29,10 +23,6 @@ end)({
       end
    
       return nil
-   end,
-
-   quote = function(env, ...)
-      return ...
    end,
    
    ['if'] = function(env, ...)
@@ -60,6 +50,44 @@ end)({
       return val
    end,
    
+   quote = function(env, ...)
+      return ...
+   end,
+   
+   unquote = function(env, ...)
+      local exp = ...
+      return eval(exp, env)
+   end,
+   
+   quasiquote = function(env, ...)
+      local args = ...
+      local exp = {}
+      
+      for i, v in ipairs(args[1]) do
+         if  type(v) == 'table'
+         and v[2] == 'list'
+         then
+            if v[1][1][1] == 'unquote' then
+               local val = eval(v, env)
+               if val then
+                  table.insert(exp, val)
+               end
+            else
+               table.insert(exp, _G['quasiquote'][1](env, v))
+            end
+         else
+            table.insert(exp, v)
+         end
+      end
+      
+      return {exp, 'list'}
+   end,
+   
+   ev = function(env, ...)
+      local arg = ...
+      return eval(arg, env)
+   end,
+   
    fn = function(env, ...)
       local args = {...}
       local arglist = args[1][1]
@@ -80,6 +108,32 @@ end)({
          return val
       end
    end,
+   
+   macro = function(env, ...)
+      local args = {...}
+      local arglist = args[1][1]
+      
+      return {
+         function(env, ...)
+            local largs = {...}
+            local env = env:enter()
+            local val
+         
+            for i = 1, #arglist do
+               env:insert(arglist[i][1], largs[i])
+            end
+         
+            for i = 2, #args do
+               val = eval(args[i], env)
+            end
+            
+            env:leave()
+         
+            return eval(val, env)
+         end,
+         'fexpr'
+      }
+   end,
 
    times = function(env, n, expr)
       local val
@@ -92,6 +146,10 @@ end)({
    end
 })
 
+
+---
+-- "utility functions"
+---
 
 _G['+'] = function(...)
    local sum = 0
@@ -119,9 +177,29 @@ _G['*'] = function(...)
    return (a * b)
 end
 
+_G['/'] = function(...)
+   local a, b = ...
+   return (a / b)
+end
+
 _G['>'] = function(...)
    local a, b = ...
    return (a > b)
+end
+
+_G['<'] = function(...)
+   local a, b = ...
+   return (a < b)
+end
+
+_G['or'] = function(...)
+   local a, b = ...
+   return (a or b)
+end
+
+_G['and'] = function(...)
+   local a, b = ...
+   return (a and b)
 end
 
 _G['='] = function(...)
@@ -129,6 +207,22 @@ _G['='] = function(...)
    return (a == b)
 end
 
+function str(...)
+   local t = {...}
+   return table.concat(t)
+end
+
+function get(t, k)
+   return t[k]
+end
+
+function method(t, k, ...)
+   return t[k](t, ...)
+end
+
+---
+-- create an environment structure
+---
 function new_env(env)
    local b
    if env then b = {} else b = _G end
@@ -158,4 +252,7 @@ function new_env(env)
    }
 end
 
+---
+-- The global environment
+---
 env = new_env()

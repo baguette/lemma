@@ -1,36 +1,33 @@
 ;; Test of the Lemma interpreter
 
-(def prn print)
+(defn hello (name)
+  (print "hello," name))
+(hello "Lemma")
 
-(def meaning-of-life 42)
-(def giggity-giggity 69)
+(def meaning-of-life 42
+     giggity-giggity 69)
 
 (def giggity-of-life
   (+ meaning-of-life giggity-giggity))
 
-(prn "giggity-of-life + 9 =", (+ giggity-of-life 9))
+(print "giggity-of-life + 9 =", (+ giggity-of-life 9))
 
 (def whee 0)
 (times 10
   (def whee (+ 1 whee)))
-(prn whee)
+(print whee)
 
 (times 3
   (do
     (def whee (- whee 1))
-    (prn whee)))
-
-(def hello
-  (fn (name)
-    (print "Hello," name "!")))
-(hello "Lemma")
+    (print whee)))
 
 (def fact
   (fn (n)
     (if (= n 0)
         1
         (* n (fact (- n 1))))))
-
 (print (fact 6))
 
+(def prn print)
 (prn "\"End of test\"")

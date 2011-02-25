@@ -1,0 +1,6 @@
+(def defmacro
+  (macro (name arglist body)
+    `(def ~name (macro ~arglist ~body))))
+
+(defmacro defn (name arglist body)
+  `(def ~name (fn ~arglist ~body)))

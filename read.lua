@@ -1,9 +1,30 @@
---
+---
 -- The Lemma Reader
---
+---
 
--- TODO: finish implementing reader macros
+-- TODO: 'multidispatch' reader macro
 
+---
+-- Write an external representation of t to stdout
+---
+function write(t)
+   if type(t) == 'table' then
+      if t[2] == 'list' then
+         io.write('(')
+         for i, v in ipairs(t[1]) do
+            write(v)
+            if i < #t[1] then io.write(' ') end
+         end
+         io.write(')')
+      else
+         io.write(tostring(t[1]))
+      end
+   elseif type(t) == 'string' then
+      io.write('"'..tostring(t)..'"')
+   else
+      io.write(tostring(t))
+   end
+end
 
 local symbol =          -- this is perhaps a little too permissive
 [[^([%a%-%?%*%+%%%$%^<>\\_=:&|!][%.%a%d%-%?%*%+%%%$%^<>/\\_=:&|!~@']*)]]
@@ -83,28 +104,41 @@ function read_comment(f)
    return nil
 end
 
-function read_quote(f)
-   local q = {{}, 'list'}
-   table.insert(q[1], {'quote', 'symbol'})
-   table.insert(q[1], read(f))
-   return q
+function read_quote(sym)
+   return function(f)
+      local q = {{}, 'list'}
+      table.insert(q[1], {sym, 'symbol'})
+      table.insert(q[1], read(f))
+      return q
+   end
 end
 
--- TODO: replace the string values with handler functions
+function table_idx(func)
+   return function(f)
+      local idx = read(f)
+      local t = read(f)
+      return {{{func, 'symbol'}, t, idx[1]}, 'list'}
+   end
+end
+
+
 local reader_macros = {
-   ['(']            = read_list,
+   ['(']             = read_list,
    ['"']             = read_string,
-   ['.']             = table_idx,
-   ['/']             = tabel_mtd,      -- like table_idx, but passes self
-   ['\'']            = read_quote,
-   ['`']             = 'quasiquote',
-   ['~']             = 'unquote',
-   ['@']             = 'splice',
-   [';']          = read_comment,
-   ['#']            = 'multidispatch'
+   ['.']             = table_idx('get'),
+   [':']             = table_idx('method'),      -- like table_idx, but passes self
+   ['\'']            = read_quote('quote'),
+   ['`']             = read_quote('quasiquote'),
+   ['~']             = read_quote('unquote'),
+   ['@']             = read_quote('splice'),
+   [';']             = read_comment,
+   ['#']             = 'multidispatch'
 }
 
+
+---
 -- Read the next form from stream f
+---
 function read(f)
    local form = nil
    
