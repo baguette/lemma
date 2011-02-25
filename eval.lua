@@ -26,6 +26,7 @@ function eval(t, env)
             op = eval(op, env)
          end
          
+         
          local lst = {}
          local i = 2
          
@@ -40,6 +41,11 @@ function eval(t, env)
                table.insert(lst, v)
             end
             return op(unpack(lst))
+         elseif type(op) == 'table'
+         or (type(op) == 'userdata' and getmetatable(op).__index)
+         then
+            local key = eval(val[2], env)
+            return op[key]
          else
             print ('attempt to apply non-function: '..op)
          end

@@ -3,7 +3,6 @@
 ---
 
 -- TODO: more special forms
--- TODO: implement macros
 -- TODO: redo the internal representations of lists as ADTs? (c.f. seqs)
 
 require 'stream'

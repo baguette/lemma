@@ -95,6 +95,21 @@ function read_string(f)
    end
 end
 
+function read_keyword(f)
+   local str = {}
+   while true do
+      local c = f:get()
+      if not c then return 'eof' end
+      
+      if delim[c] or whitespace[c] then
+         f:unget(c)
+         return table.concat(str)
+      end
+      
+      table.insert(str, c)
+   end
+end
+
 function read_comment(f)
    local c
    repeat
@@ -125,8 +140,9 @@ end
 local reader_macros = {
    ['(']             = read_list,
    ['"']             = read_string,
-   ['.']             = table_idx('get'),
-   [':']             = table_idx('method'),      -- like table_idx, but passes self
+   ['\\']            = table_idx('get'),
+   ['.']             = table_idx('method'),
+   [':']             = read_keyword,
    ['\'']            = read_quote('quote'),
    ['`']             = read_quote('quasiquote'),
    ['~']             = read_quote('unquote'),

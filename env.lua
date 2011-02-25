@@ -213,11 +213,11 @@ function str(...)
 end
 
 function get(t, k)
-   return t[k]
+   return function(...) return t[k](...) end
 end
 
-function method(t, k, ...)
-   return t[k](t, ...)
+function method(t, k)
+   return function(...) return t[k](t, ...) end
 end
 
 ---
