@@ -1,0 +1,29 @@
+Lemma is a Lisp dialect inspired by Scheme and Clojure.  At the moment, Lemma
+is also highly experimental and in a constant state of change.
+Lemma is currently a work in progress and as such is incomplete and inefficient.
+
+The idea is to create a modern version of Lisp that integrates with the Lua
+programming language.  Currently, there is a slow, ugly interpreter that
+supports a handful of special forms, lexical scope, directly calling
+Lua functions, and macros.  There is also some preliminary syntactic sugar
+for dealing with Lua tables.
+
+While the interpreter supports a lot of features, it has even more limitations.
+As stated, it's a work in progress.  The code is also rather disorganized
+right now.  It's about to get a major overhaul.
+
+Any file with the .lma extension in this repository is a Lemma source file.
+Have a look if you're curious.  More documentation is on the way.
+
+To use the interpreter, you need to have Lua installed (http://lua.org/).
+It was developed with version 5.1 but might work with 5.2.
+First, cd to the directory containing the Lemma source files.  To start a
+REPL:
+
+   $ lua lemma.lua
+
+To interpret a file, e.g. file.lma:
+
+   $ lua lemma.lua file.lma
+
+That's all for now...
