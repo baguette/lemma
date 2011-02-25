@@ -1,6 +1,11 @@
+;; This will grow into part of Lemma's standard library.
+
+;; A macro to make defining macros nicer...
 (def defmacro
   (macro (name arglist body)
     `(def ~name (macro ~arglist ~body))))
 
+;; A macro to make defining functions nicer...
 (defmacro defn (name arglist body)
   `(def ~name (fn ~arglist ~body)))
+
