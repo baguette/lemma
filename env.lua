@@ -2,12 +2,11 @@
 -- Lemma Environment
 ---
 
--- TODO: make quasiquotes nestable
-
 require 'class/Fexpr'
 require 'class/List'
 require 'class/Symbol'
 require 'interface/Seq'
+require 'type'
 
 ---
 -- fexprs
@@ -73,11 +72,14 @@ stupid{
 		for i, v in ipairs{Seq.lib.unpack(args)} do
 			if  type(v) == 'List'
 			then
-				if v:first():string() == 'unquote' then
+				local car = v:first()
+				if type(car) == 'Symbol' and car:string() == 'unquote' then
 					local val = eval(v, env)
 					if val then
 						exp = exp:cons(val)
 					end
+				elseif type(car) == 'Symbol' and car:string() == 'quasiquote' then
+					exp = exp:cons(v)
 				else
 					exp = exp:cons(_G['quasiquote'](env, v))
 				end
