@@ -26,11 +26,11 @@ function exec(f, prompt)
 	local done = false
 	
 	if type(f) == 'string' then
-		f = io.open(fname, 'r')
+		f = io.open(f, 'r')
 		prompt = nil
 	end
 	
-	local f = FileStream(f)
+	f = FileStream(f)
 
 	while not done do
 		if prompt then io.write(prompt) end

@@ -10,12 +10,13 @@ require 'exec'
 ---
 -- Execute command line argument or start a REPL
 ---
-local fname = ...
-local f, prompt
+local f = ...
+local prompt
 
-if not fname then
+if not f then
 	f = io.input()
 	prompt = '> '
 end
 
+stdlib()
 exec(f, prompt)
