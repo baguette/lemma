@@ -1,5 +1,4 @@
 #!/usr/bin/env lua
-print (package.path)
 ---
 -- The Lemma REPL
 ---
