@@ -11,12 +11,16 @@ require 'class/Symbol'
 ---
 -- Write an external representation of t to stdout
 ---
-function write(t)
-	if type(t) == 'string' then
-		print(string.format('%q', t))
-	else
-		print(t)
+function write(...)
+	for i, t in ipairs{...} do
+		if type(t) == 'string' then
+			io.write(string.format('%q', t))
+		else
+			io.write(tostring(t))
+		end
+		io.write(' ')
 	end
+	io.write('\n')
 end
 
 local symbol =			 -- this is perhaps a little too permissive

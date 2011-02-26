@@ -14,9 +14,13 @@ Seq.sig = {
 
 
 for i, v in pairs(Seq.sig) do
-	_G[v] = function(x)
-		return x[v](x)
+	_G[v] = function(x, ...)
+		return x[v](x, ...)
 	end
+end
+
+_G.cons = function(x, xs)
+	return xs:cons(x)
 end
 
 
@@ -65,4 +69,15 @@ function Seq.lib.unpack(lst)
 	end
 	
 	return unpack(t)
+end
+
+function Seq.lib.pack(lst, ...)
+	local t = {...}
+	local q = lst:seq()
+	
+	for i = #t, 1, -1 do
+		q = q:cons(t[i])
+	end
+	
+	return q
 end

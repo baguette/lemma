@@ -26,9 +26,15 @@ local mt = {
 	__tostring = __tostring
 }
 
-function t:cons(x)
-	local new = { x, self }
-	setmetatable(new, mt)
+function t:cons(...)
+	local new = self
+	local args = {...}
+	
+	for i = #args, 1, -1 do
+		new = { args[i], new }
+		setmetatable(new, mt)
+	end
+	
 	return new
 end
 

@@ -24,8 +24,6 @@ function eval(t, env)
 			
 			if type(op) == 'Fexpr' then
 				return op(env, Seq.lib.unpack(lst))
-			elseif type(op) == 'Macro' then
-				return eval(op(env, Seq.lib.unpack(lst)), env)
 			elseif type(op) == 'function' then
 				lst = Seq.lib.map(function(x) return eval(x, env) end, lst)
 				return op(Seq.lib.unpack(lst))
@@ -34,11 +32,9 @@ function eval(t, env)
 			then
 				local key = eval(lst:first(), env)
 				return op[key]
-			else
-				print ('attempt to apply non-function: '..op)
 			end
 			
-			print ('undefined function: '..op)
+			print (tostring(val:first())..' is not a function')
 			return nil
 		end
 	}

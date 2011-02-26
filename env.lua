@@ -20,15 +20,27 @@ end
 stupid{
 	def = function(env, ...)
 		local args = {...}
-		local i = 1
 	
-		while i <= #args do
+		for i = 1, #args, 2 do
 			local v = args[i + 1]
 			env:insert(args[i]:string(), eval(v, env))
-			i = i + 2
 		end
 	
 		return nil
+	end,
+	
+	['set!'] = function(env, ...)
+		local args = {...}
+		local i = 1
+		local ret
+	
+		while i <= #args do
+			local v = args[i + 1]
+			ret = env:modify(args[i]:string(), eval(v, env))
+			i = i + 2
+		end
+	
+		return ret
 	end,
 	
 	['if'] = function(env, ...)
@@ -42,19 +54,6 @@ stupid{
 		
 		return eval(expr, env)
 	end,
-
-	['do'] = function(env, ...)	  -- this will eventually become let
-		local exps = {...}
-		local val
-	
-		local env = env:enter()
-		
-		for i = 1, #exps do
-			val = eval(exps[i], env)
-		end
-	
-		return val
-	end,
 	
 	quote = function(env, ...)
 		return ...
@@ -62,7 +61,9 @@ stupid{
 	
 	unquote = function(env, ...)
 		local exp = ...
-		return eval(exp, env)
+		local val = {eval(exp, env)}
+		
+		return unpack(val)
 	end,
 	
 	quasiquote = function(env, ...)
@@ -74,9 +75,9 @@ stupid{
 			then
 				local car = v:first()
 				if type(car) == 'Symbol' and car:string() == 'unquote' then
-					local val = eval(v, env)
-					if val then
-						exp = exp:cons(val)
+					local val = {eval(v, env)}
+					if val[1] then
+						exp = exp:cons(Seq.lib.unpack(List():cons(unpack(val)):reverse()))
 					end
 				elseif type(car) == 'Symbol' and car:string() == 'quasiquote' then
 					exp = exp:cons(v)
@@ -106,7 +107,20 @@ stupid{
 			local val
 			
 			for i = 1, #arglist do
-				env:insert(arglist[i]:string(), largs[i])
+				local a = arglist[i]
+				
+				if type(a) == 'Symbol' then
+					env:insert(a:string(), largs[i])
+				elseif type(a) == 'List' then
+					if a:first():string() == 'splice' then
+						local lst = List()
+						for k = #largs, i, -1 do
+							lst = lst:cons(largs[k])
+						end
+						env:insert(a:rest():first():string(), lst)
+						i = #arglist + 1
+					end
+				end
 			end
 			
 			for i = 2, #args do
@@ -126,9 +140,22 @@ stupid{
 				local largs = {...}
 				local env = env:enter()
 				local val
-			
+				
 				for i = 1, #arglist do
-					env:insert(arglist[i]:string(), largs[i])
+					local a = arglist[i]
+
+					if type(a) == 'Symbol' then
+						env:insert(a:string(), largs[i])
+					elseif type(a) == 'List' then
+						if a:first():string() == 'splice' then
+							local lst = List()
+							for k = #largs, i, -1 do
+								lst = lst:cons(largs[k])
+							end
+							env:insert(a:rest():first():string(), lst)
+							i = #arglist + 1
+						end
+					end
 				end
 			
 				for i = 2, #args do
@@ -153,6 +180,9 @@ stupid{
 	end
 }
 
+function splice(q)
+	return Seq.lib.unpack(q)
+end
 
 ---
 -- "utility functions"
@@ -187,6 +217,11 @@ end
 _G['/'] = function(...)
 	local a, b = ...
 	return (a / b)
+end
+
+_G['mod'] = function(...)
+	local a, b = ...
+	return (a % b)
 end
 
 _G['>'] = function(...)
@@ -245,6 +280,18 @@ function new_env(env)
 				end
 				curr = curr.parent
 			end
+		end,
+		modify = function(self, sym, val)
+			local curr = self
+			while curr do
+				local v = curr.bindings[sym]
+				if v then
+					curr.bindings[sym] = val
+					return val
+				end
+				curr = curr.parent
+			end
+			return nil
 		end,
 		insert = function(self, sym, val)
 			self.bindings[sym] = val

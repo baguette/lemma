@@ -29,9 +29,9 @@ function exec(f, prompt)
 				done = true
 			else
 --				print (f:lines())
-				local val = eval(t, env)           -- evaluate the expression!
+				local val = {eval(t, env)}           -- evaluate the expression!
 				if prompt then
-					write(val)                      -- print the value!
+					write(unpack(val))                      -- print the value!
 				end
 			end
 		else

@@ -2,10 +2,18 @@
 
 ;; A macro to make defining macros nicer...
 (def defmacro
-  (macro (name arglist body)
-    `(def ~name (macro ~arglist ~body))))
+  (macro (name arglist @body)
+    `(def ~name (macro ~arglist ~@body))))
 
 ;; A macro to make defining functions nicer...
-(defmacro defn (name arglist body)
-  `(def ~name (fn ~arglist ~body)))
+(defmacro defn (name arglist @body)
+  `(def ~name (fn ~arglist ~@body)))
+
+;; let
+(defmacro let (var val @body)
+  `((fn (~var) ~@body) ~val))
+
+;; do
+(defmacro do (@body)
+  `((fn () ~@body)))
 
