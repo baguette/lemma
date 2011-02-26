@@ -12,13 +12,19 @@ require 'class/Symbol'
 -- Write an external representation of t to stdout
 ---
 function write(...)
-	for i, t in ipairs{...} do
-		if type(t) == 'string' then
-			io.write(string.format('%q', t))
-		else
-			io.write(tostring(t))
+	local args = {...}
+	
+	if #args > 0 then
+		for i, t in ipairs(args) do
+			if type(t) == 'string' then
+				io.write(string.format('%q', t))
+			else
+				io.write(tostring(t))
+			end
+			io.write(' ')
 		end
-		io.write(' ')
+	else
+		io.write('nil')
 	end
 	io.write('\n')
 end

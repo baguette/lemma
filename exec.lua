@@ -9,7 +9,7 @@ require 'env'
 -- Load the standard library
 ---
 function stdlib()
-	local lib = io.open('lib.lma', 'r')
+	local lib = io.open('lib/std.lma', 'r')
 	if lib then
 		exec(lib)
 	else
@@ -39,7 +39,7 @@ function exec(f, prompt)
 	
 		if t then
 			if t == 'eof' then
-				print''
+				if prompt then print'' end
 				done = true
 				f:close()
 			else
