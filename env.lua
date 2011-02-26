@@ -5,6 +5,7 @@
 require 'class/Fexpr'
 require 'class/List'
 require 'class/Symbol'
+require 'class/Error'
 require 'interface/Seq'
 require 'type'
 
@@ -230,11 +231,43 @@ function str(...)
 end
 
 function get(t, k)
-	return function(...) return t[k](...) end
+	if not k then
+		return Error'attempt to index table with nil'
+	end
+	if not t then
+		return Error('attempt to index nil ['..k..']')
+	end
+	return t[k]
+end
+
+function memfn(t, k)
+	if not k then
+		return Error'attempt to index table with nil'
+	end
+	if not t then
+		return Error('attempt to index nil ['..k..']')
+	end
+	if not t[k] then
+		return Error('member function is nil ['..k..']')
+	end
+	return function(...)
+		return t[k](...)
+	end
 end
 
 function method(t, k)
-	return function(...) return t[k](t, ...) end
+	if not k then
+		return Error'attempt to index table with nil'
+	end
+	if not t then
+		return Error('attempt to index nil ['..k..']')
+	end
+	if not t[k] then
+		return Error('method is nil ['..k..']')
+	end
+	return function(...)
+		return t[k](t, ...)
+	end
 end
 
 ---

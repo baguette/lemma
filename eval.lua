@@ -12,6 +12,7 @@ function eval(t, env)
 	typ = type(t)
 	
 	local switch = {
+		Error = function() return val end,
 		number = function() return val end,
 		string = function() return val end,
 		Symbol = function()
@@ -22,7 +23,9 @@ function eval(t, env)
 			
 			local lst = val:rest()
 			
-			if type(op) == 'Fexpr' then
+			if type(op) == 'Error' then
+				return op
+			elseif type(op) == 'Fexpr' then
 				return op(env, Seq.lib.unpack(lst))
 			elseif type(op) == 'function' then
 				lst = Seq.lib.map(function(x) return eval(x, env) end, lst)
@@ -31,7 +34,7 @@ function eval(t, env)
 			or (type(op) == 'userdata' and getmetatable(op).__index)
 			then
 				local key = eval(lst:first(), env)
-				return op[key]
+				return get(op, key)
 			end
 			
 			print (tostring(val:first())..' is not a function')

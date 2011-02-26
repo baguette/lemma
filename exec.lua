@@ -3,6 +3,7 @@ require 'class/FileStream'
 require 'read'
 require 'eval'
 require 'env'
+require 'type'
 
 
 ---
@@ -48,8 +49,15 @@ function exec(f, prompt)
 			else
 --				print (f:lines())
 				local val = {eval(t, env)}           -- evaluate the expression!
-				if prompt then
-					write(unpack(val))                -- print the value!
+				
+				for i, v in ipairs(val) do
+					if type(v) == 'Error' then
+						print (f:lines() .. ': ' .. tostring(v))
+					else
+						if prompt then
+							write(unpack(val))          -- print the value!
+						end
+					end
 				end
 			end
 		else

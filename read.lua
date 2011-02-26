@@ -141,7 +141,7 @@ end
 local reader_macros = {
 	['(']    = read_list,
 	['"']    = read_string,
-	['\\']   = table_idx('get'),
+	['\\']   = table_idx('memfn'),
 	['.']    = table_idx('method'),
 	[':']    = read_keyword,
 	['\'']   = read_quote('quote'),
