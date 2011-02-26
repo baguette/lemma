@@ -9,11 +9,26 @@
 (defmacro defn (name arglist @body)
   `(def ~name (fn ~arglist ~@body)))
 
+
+
+;; Get a list containing the odd elements of xs
+(defn odds (xs)
+  (if (empty? xs)
+      '()
+      (cons (first xs) (odds (rest (rest xs))))))
+
+;; Get a list containing the even elements of xs
+(defn evens (xs)
+  (if (empty? xs)
+      '()
+      (cons (first (rest xs)) (evens (rest (rest xs))))))
+
+
+
 ;; let
-(defmacro let (var val @body)
-  `((fn (~var) ~@body) ~val))
+(defmacro let (bindings @body)
+  `((fn (~@(odds bindings)) ~@body) ~@(evens bindings)))
 
 ;; do
 (defmacro do (@body)
   `((fn () ~@body)))
-
