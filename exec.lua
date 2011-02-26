@@ -9,11 +9,14 @@ require 'env'
 -- Load the standard library
 ---
 function stdlib()
-	local lib = io.open('lib/std.lma', 'r')
+	local base = os.getenv('LEMMA_PATH') or '.'
+	local lib = io.open(base..'/lib/std.lma', 'r')
 	if lib then
 		exec(lib)
 	else
 		print 'Error: unable to open standard library lib.lma'
+		print 'Check that the LEMMA_PATH environment variable'
+		print 'is set to the base path of the lemma directory.'
 		os.exit(1)
 	end
 end

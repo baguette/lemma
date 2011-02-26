@@ -28,4 +28,13 @@ Then execute it:
    $ ./lemma                      # start a REPL
    $ ./lemma file.lma             # evaluate the contents of file.lma
 
-That's all for now...
+To be able to execute from other directories, some environment variables
+need to be set.  This depends on where lemma resides on your file system,
+but it will typically be something along these lines:
+
+   LEMMA_PATH=$HOME/Workspace/lemma
+   PATH=$PATH:$LEMMA_PATH
+   LUA_PATH="$LEMMA_PATH/?.lua;$LEMMA_PATH/?/?.lua;./?.lua;;"
+   export LEMMA_PATH PATH LUA_PATH
+
+That's all for now.
