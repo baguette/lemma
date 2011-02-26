@@ -32,3 +32,16 @@
 ;; do
 (defmacro do (@body)
   `((fn () ~@body)))
+
+
+;; This shouldn't be part of the core language, but some of
+;; the test code still relies on it.
+(defmacro times (n @body)
+  `(do
+     (defn once (i)
+       (if (= i 2)
+           (do ~@body)
+           (do
+             ~@body
+             (once (- i 1)))))
+     (once ~n)))

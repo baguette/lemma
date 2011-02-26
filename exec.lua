@@ -15,9 +15,12 @@ function stdlib()
 	if lib then
 		exec(lib)
 	else
-		print 'Error: unable to open standard library lib.lma'
-		print 'Check that the LEMMA_PATH environment variable'
-		print 'is set to the base path of the lemma directory.'
+		io.write
+[[
+Error: unable to open standard library lib.lma
+Check that the LEMMA_PATH environment variable
+print 'is set to the base path of the lemma directory.
+]]
 		os.exit(1)
 	end
 end
@@ -43,7 +46,7 @@ function exec(f, prompt)
 	
 		if t then
 			if t == 'eof' then
-				if prompt then print'' end
+				if prompt then io.write('\n') end
 				done = true
 				f:close()
 			else
@@ -52,16 +55,15 @@ function exec(f, prompt)
 				
 				for i, v in ipairs(val) do
 					if type(v) == 'Error' then
-						print (f:lines() .. ': ' .. tostring(v))
-					else
-						if prompt then
-							write(unpack(val))          -- print the value!
-						end
+						io.write (f:lines() .. ': ' .. tostring(v) .. '\n')
 					end
+				end
+				if prompt then
+					write(unpack(val))          -- print the value!
 				end
 			end
 		else
-			print (f:lines() .. ': ' .. e)
+			io.write (f:lines() .. ': ' .. e .. '\n')
 			done = true
 			f:close()
 		end

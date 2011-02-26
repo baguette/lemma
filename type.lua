@@ -19,3 +19,20 @@ type = (function()
 		return t
 	end
 end)()
+
+function implements(t, class)
+	local mt = getmetatable(t)
+	local val = false
+	
+	if not mt.implements then
+		return false
+	end
+	
+	for i, v in ipairs(mt.implements) do
+		if v == class then
+			val = true
+		end
+	end
+	
+	return val
+end

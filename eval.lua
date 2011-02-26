@@ -11,6 +11,10 @@ function eval(t, env)
 	val = t
 	typ = type(t)
 	
+	if not val then
+		return Error'attempt to eval nil'
+	end
+	
 	local switch = {
 		Error = function() return val end,
 		number = function() return val end,
@@ -37,15 +41,13 @@ function eval(t, env)
 				return get(op, key)
 			end
 			
-			print (tostring(val:first())..' is not a function')
-			return nil
+			return Error(tostring(val:first())..' is not a function\n')
 		end
 	}
 	
 	local evaluator = switch[typ]
 	if not evaluator then
-		print ('Unknown type: '..typ)
-		return nil
+		return Error('cannot evaluate unknown type: '..typ..'\n')
 	end
 	return evaluator()
 end

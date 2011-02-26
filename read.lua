@@ -8,6 +8,28 @@ require 'type'
 require 'class/List'
 require 'class/Symbol'
 
+
+tostring, print = (function()
+	local xtostring = tostring
+	return function(s)
+		if type(s) == 'string' then
+			return string.format('%q', s)
+		end
+	
+		return xtostring(s)
+	end,
+	function(...)
+		local args = {...}
+		
+		for i, v in ipairs(args) do
+			args[i] = xtostring(v)
+		end
+		
+		io.write(table.concat(args, '\t'))
+		io.write'\n'
+	end
+end)()
+
 ---
 -- Write an external representation of t to stdout
 ---
@@ -16,11 +38,7 @@ function write(...)
 	
 	if #args > 0 then
 		for i, t in ipairs(args) do
-			if type(t) == 'string' then
-				io.write(string.format('%q', t))
-			else
-				io.write(tostring(t))
-			end
+			io.write(tostring(t))
 			io.write(' ')
 		end
 	else
@@ -148,8 +166,8 @@ local reader_macros = {
 	['`']    = read_quote('quasiquote'),
 	['~']    = read_quote('unquote'),
 	['@']    = read_quote('splice'),
-	[';']    = read_comment,
-	['#']    = 'multidispatch'
+	[';']    = read_comment
+--	['#']    = 'multidispatch'
 }
 
 

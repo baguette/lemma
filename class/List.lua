@@ -21,7 +21,7 @@ end
 local t = {}
 local mt = {
 	class = 'List',
-	implements = { Seq, Reversible },
+	implements = { 'Seq', 'Reversible' },
 	__index = t,
 	__tostring = __tostring
 }

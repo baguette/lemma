@@ -22,7 +22,17 @@ end){
 	
 		for i = 1, #args, 2 do
 			local v = args[i + 1]
-			env:insert(args[i]:string(), eval(v, env))
+			
+			if type(args[i]) ~= 'Symbol' then
+				return Error('attempt to def a non-variable: '..tostring(args[i]))
+			end
+			
+			v = eval(v, env)
+			if type(v) == 'Error' then
+				return v
+			end
+			
+			env:insert(args[i]:string(), v)
 		end
 	
 		return nil
@@ -35,7 +45,17 @@ end){
 	
 		while i <= #args do
 			local v = args[i + 1]
-			ret = env:modify(args[i]:string(), eval(v, env))
+			
+			if type(args[i]) ~= 'Symbol' then
+				return Error'attempt to set! a non-variable'
+			end
+			
+			v = eval(v, env)
+			if type(v) == 'Error' then
+				return v
+			end
+			
+			ret = env:modify(args[i]:string(), v)
 			i = i + 2
 		end
 	
@@ -46,6 +66,10 @@ end){
 		local args = {...}
 		local test = eval(args[1], env)
 		local expr = args[3]
+		
+		if expr == nil then
+			return nil
+		end
 		
 		if test then
 			expr = args[2]
@@ -91,14 +115,22 @@ end){
 		return exp:reverse()
 	end,
 	
-	ev = function(env, ...)
-		local arg = ...
-		return eval(arg, env)
+	getenv = function(env, ...)
+		return env
 	end,
 	
 	fn = function(env, ...)
 		local args = {...}
 		local arglist = {Seq.lib.unpack(args[1])}
+		
+		for i, a in ipairs(arglist) do
+			if type(a) ~= 'Symbol'
+			and not (type(a) == 'List' and type(a:first()) == 'Symbol'
+			    and a:first():string() == 'splice')
+			then
+				return Error('invalid syntax in arglist ('..tostring(a)..')')
+			end
+		end
 		
 		return function(...)
 			local largs = {...}
@@ -134,6 +166,15 @@ end){
 		local args = {...}
 		local arglist = {Seq.lib.unpack(args[1])}
 		
+		for i, a in ipairs(arglist) do
+			if type(a) ~= 'Symbol'
+			and not (type(a) == 'List' and type(a:first()) == 'Symbol'
+			    and a:first():string() == 'splice')
+			then
+				return Error('invalid syntax in arglist ('..tostring(a)..')')
+			end
+		end
+		
 		return Fexpr(
 			function(env, ...)
 				local largs = {...}
@@ -166,16 +207,6 @@ end){
 				return eval(val, env)
 			end
 		)
-	end,
-
-	times = function(env, n, expr)
-		local val
-		local n = eval(n, env)
-	
-		for i = 1, n-1 do
-			val = eval(expr, env)
-		end
-		return val
 	end
 }
 

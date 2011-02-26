@@ -14,7 +14,7 @@
 
 (def whee 0)
 (times 10
-  (def whee (+ 1 whee)))
+  (set! whee (+ 1 whee)))
 (print whee)
 
 (times 3

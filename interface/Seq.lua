@@ -63,6 +63,10 @@ function Seq.lib.unpack(lst)
 	local t = {}
 	local curr = lst
 	
+	if not implements(lst, 'Seq') then
+		return Error'Seq expected'
+	end
+	
 	while not curr['empty?'](curr) do
 		table.insert(t, curr:first())
 		curr = curr:rest()
