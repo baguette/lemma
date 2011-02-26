@@ -1,21 +1,18 @@
 ;; A quine in Lemma, demonstrating the Lua integration
 
 ;; A leading \ is syntactic sugar for calling a function in a table
-;; A leading : is syntactic sugar for a string not containing delimeters
 ;; A leading . is syntactic sugar for calling a method in a table
-
+;; A leading : is syntactic sugar for a string not containing delimeters
 
 
 ;; Apply func to each line in file
 (defn do-lines (file func)
-  (do
-    (def line (.read file))
-    (if line
+  (def line (.read file))
+  (if line
       (do
         (func line)
         (do-lines file func))
-      nil)
-   nil))
+      nil))
 
 
 (def quine (\open io "example/quine.lma" :r))

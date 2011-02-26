@@ -10,20 +10,22 @@ for dealing with Lua tables.
 
 While the interpreter supports a lot of features, it has even more limitations.
 As stated, it's a work in progress.  The code is also rather disorganized
-right now.  It's about to get a major overhaul.
+right now.
 
 Any file with the .lma extension in this repository is a Lemma source file.
-Have a look if you're curious.  More documentation is on the way.
+There are quite a few located in the example/ directory, plus some macros
+in lib.lma. Have a look if you're curious.  More documentation is on the way.
 
 To use the interpreter, you need to have Lua installed (http://lua.org/).
 It was developed with version 5.1 but might work with 5.2.
-First, cd to the directory containing the Lemma source files.  To start a
-REPL:
+First, cd to the directory containing the Lemma source files.  Make sure
+the lemma script is executeable:
 
-   $ lua lemma.lua
+   $ chmod +x lemma
 
-To interpret a file, e.g. file.lma:
+Then execute it:
 
-   $ lua lemma.lua file.lma
+   $ ./lemma                      # start a REPL
+   $ ./lemma file.lma             # evaluate the contents of file.lma
 
 That's all for now...

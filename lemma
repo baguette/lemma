@@ -1,0 +1,21 @@
+#!/usr/bin/env lua
+---
+-- The Lemma REPL
+---
+
+-- TODO: more special forms?
+
+require 'exec'
+
+---
+-- Execute command line argument or start a REPL
+---
+local fname = ...
+local f, prompt
+
+if not fname then
+	f = io.input()
+	prompt = '> '
+end
+
+exec(f, prompt)

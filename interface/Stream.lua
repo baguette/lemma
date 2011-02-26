@@ -6,5 +6,6 @@ Stream = {
 	'get',
 	'unget',
 	'source',
-	'lines'
+	'lines',
+	'close'
 }

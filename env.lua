@@ -11,13 +11,11 @@ require 'type'
 ---
 -- fexprs
 ---
-function stupid(t)
+;(function(t)
 	for k, v in pairs(t) do
 		_G[k] = Fexpr(v)
 	end
-end
-
-stupid{
+end){
 	def = function(env, ...)
 		local args = {...}
 	
@@ -173,7 +171,7 @@ stupid{
 		local val
 		local n = eval(n, env)
 	
-		for i = 1, n do
+		for i = 1, n-1 do
 			val = eval(expr, env)
 		end
 		return val
@@ -188,66 +186,43 @@ end
 -- "utility functions"
 ---
 
-_G['+'] = function(...)
-	local sum = 0
+;(function(t)
+	for k, v in pairs(t) do
+		_G[k] = function(...)
+			local args = {...}
+			local diff = args[1] or 0
 	
-	for i, v in ipairs{...} do
-		sum = sum + v
+			for i = 2, #args do
+				diff = v(diff, args[i])
+			end
+	
+			return diff
+		end
 	end
-	
-	return sum
-end
+end){
+ ['+']   = function(a, b) return a + b end,
+ ['-']   = function(a, b) return a - b end,
+ ['*']   = function(a, b) return a * b end,
+ ['/']   = function(a, b) return a / b end,
+ ['mod'] = function(a, b) return a % b end
+}
 
-_G['-'] = function(...)
-	local args = {...}
-	local diff = args[1] or 0
-	
-	for i = 2, #args do
-		diff = diff - args[i]
+;(function(t)
+	for k, v in pairs(t) do
+		_G[k] = function(...)
+			local a, b = ...
+			return v(a, b)
+		end
 	end
-	
-	return diff
-end
-
-_G['*'] = function(...)
-	local a, b = ...
-	return (a * b)
-end
-
-_G['/'] = function(...)
-	local a, b = ...
-	return (a / b)
-end
-
-_G['mod'] = function(...)
-	local a, b = ...
-	return (a % b)
-end
-
-_G['>'] = function(...)
-	local a, b = ...
-	return (a > b)
-end
-
-_G['<'] = function(...)
-	local a, b = ...
-	return (a < b)
-end
-
-_G['or'] = function(...)
-	local a, b = ...
-	return (a or b)
-end
-
-_G['and'] = function(...)
-	local a, b = ...
-	return (a and b)
-end
-
-_G['='] = function(...)
-	local a, b = ...
-	return (a == b)
-end
+end){
+ ['=']   = function(a, b) return a == b end,
+ ['>']   = function(a, b) return a > b end,
+ ['<']   = function(a, b) return a < b end,
+ ['>=']  = function(a, b) return a >= b end,
+ ['<=']  = function(a, b) return a <= b end,
+ ['or']  = function(a, b) return a or b end,
+ ['and'] = function(a, b) return a and b end
+}
 
 function str(...)
 	local t = {...}

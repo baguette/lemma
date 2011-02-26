@@ -28,7 +28,8 @@ function FileStream(f)
 			table.insert(buffer, c)
 		end,
 		source = function(self) return f end,
-		lines = function(self) return lines end
+		lines = function(self) return lines end,
+		close = function(self) return self:source():close() end
 	}
 
 	local mt = {
