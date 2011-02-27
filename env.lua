@@ -67,12 +67,12 @@ end){
 		local test = eval(args[1], env)
 		local expr = args[3]
 		
-		if expr == nil then
-			return nil
-		end
-		
 		if test then
 			expr = args[2]
+		else
+			if expr == nil then
+				return nil
+			end
 		end
 		
 		return eval(expr, env)

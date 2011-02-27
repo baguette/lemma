@@ -103,9 +103,16 @@ function read_string(f)
 		
 		if c == '"' and not escape then
 			return table.concat(str)
+		elseif c == 'n' and escape then
+			c = '\n'
+			escape = false
 		elseif c == '\\' then
-			escape = true
-			if not c then return 'eof' end
+			if not escape then
+				escape = true
+			else
+				c = '\\'
+				escape = false
+			end
 		else
 			escape = false
 		end

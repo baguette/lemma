@@ -1,0 +1,21 @@
+;; This example requires luasocket
+;; It demonstrates the direct integration with Lua
+;; it is adapted from the luasocket documentation
+
+(def socket (require :socket)
+     server (assert (\bind socket "*" 0)))
+
+(let-values (ip port) (.getsockname server)
+  (print "Please telnet to localhost on port" port))
+(print "After connecting, you have 10s to enter a line to be echoed")
+
+(defn forever ()
+  (let (client (.accept server))
+    (.settimeout client 10)
+    (let-values (line err) (.receive client)
+      (if line
+          (.send client (str "> " line "\n"))))
+    (.close client))
+  (forever))
+
+(forever)
