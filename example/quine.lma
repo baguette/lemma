@@ -18,4 +18,3 @@
 (def quine (\open io "example/quine.lma" :r))
 (do-lines quine print)
 (.close quine)
-(\exit os)

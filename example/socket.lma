@@ -1,6 +1,7 @@
-;; This example requires luasocket
-;; It demonstrates the direct integration with Lua
-;; it is adapted from the luasocket documentation
+;; This example requires luasocket.
+;; It demonstrates the direct integration with Lua.
+;; It is adapted from the luasocket documentation:
+;; http://w3.impa.br/~diego/software/luasocket/introduction.html
 
 (def socket (require :socket)
      server (assert (\bind socket "*" 0)))
