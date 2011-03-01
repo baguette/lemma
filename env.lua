@@ -44,10 +44,18 @@ end){
 		local ret
 	
 		while i <= #args do
+			local s = args[i]
 			local v = args[i + 1]
 			
-			if type(args[i]) ~= 'Symbol' then
-				return Error'attempt to set! a non-variable'
+			if type(s) ~= 'Symbol' then
+				return Error('in set!: '..tostring(s)..' is not a variable')
+			end
+			
+			s = s:string()
+			ret = env:lookup(s)
+			
+			if not ret then
+				return Error('in set!: '..s..' is undefined')
 			end
 			
 			v = eval(v, env)
@@ -55,7 +63,7 @@ end){
 				return v
 			end
 			
-			ret = env:modify(args[i]:string(), v)
+			ret = env:modify(s, v)
 			i = i + 2
 		end
 	

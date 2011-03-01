@@ -17,7 +17,7 @@ function stdlib()
 	else
 		io.write
 [[
-Error: unable to open standard library lib.lma
+Error: unable to open standard library std.lma
 Check that the LEMMA_PATH environment variable
 print 'is set to the base path of the lemma directory.
 ]]
@@ -52,14 +52,16 @@ function exec(f, prompt)
 			else
 --				print (f:lines())
 				local val = {eval(t, env)}           -- evaluate the expression!
+				local err = false
 				
 				for i, v in ipairs(val) do
 					if type(v) == 'Error' then
 						io.write (f:lines() .. ': ' .. tostring(v) .. '\n')
+						err = true
 					end
 				end
-				if prompt then
-					write(unpack(val))          -- print the value!
+				if prompt and not err then
+					write(unpack(val))                -- print the value!
 				end
 			end
 		else
