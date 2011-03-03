@@ -2,8 +2,6 @@
 -- The Lemma Reader
 ---
 
--- TODO: 'multidispatch' reader macro
-
 require 'type'
 require 'class/List'
 require 'class/Symbol'
@@ -147,6 +145,27 @@ function read_comment(f)
 	return nil
 end
 
+function read_multicomment(f)
+	local last, c
+	
+	while true do
+		last = c
+		c = f:get()
+		if not c then return 'eof' end
+		
+		if last == '#' and c == '|' then
+			read_multicomment(f)
+		elseif last == '|' and c == '#' then
+			return nil
+		end
+	end
+end
+
+function read_datumcomment(f)
+	read(f)
+	return nil
+end
+
 function read_quote(sym)
 	return function(f)
 		local q = List()
@@ -173,8 +192,11 @@ local reader_macros = {
 	['`']    = read_quote('quasiquote'),
 	['~']    = read_quote('unquote'),
 	['@']    = read_quote('splice'),
-	[';']    = read_comment
---	['#']    = 'multidispatch'
+	[';']    = read_comment,
+	['#']    = {
+		['|'] = read_multicomment,
+		[';'] = read_datumcomment
+	}
 }
 
 
@@ -198,8 +220,13 @@ function read(f)
 	end
 	
 	local macro = reader_macros[c]
+	while type(macro) == 'table' do
+		c = f:get()
+		if c == 'eof' then return 'eof' end
+		macro = macro[c]
+	end
 	
-	if macro then
+	if type(macro) == 'function' then
 		form = macro(f)
 	else
 		local str = {}

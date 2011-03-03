@@ -6,6 +6,7 @@
 -- TODO: more special forms?
 
 require 'exec'
+LEMMA_VERSION = 0.1
 
 ---
 -- Execute command line argument or start a REPL
@@ -16,6 +17,7 @@ local prompt
 if not f then
 	f = io.input()
 	prompt = '> '
+	print('Lemma '..LEMMA_VERSION..' (on '.. _VERSION..')')
 end
 
 stdlib()
