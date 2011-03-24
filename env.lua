@@ -86,6 +86,20 @@ end){
 		return eval(expr, env)
 	end,
 	
+	['cond'] = function(env, ...)
+		local args = {...}
+		
+		for i = 1, #args, 2 do
+			local test = eval(args[i], env)
+			
+			if test then
+				return eval(args[i+1], env)
+			end
+		end
+		
+		return nil
+	end,
+	
 	quote = function(env, ...)
 		return ...
 	end,

@@ -19,6 +19,7 @@ function eval(t, env)
 		Error = function() return val end,
 		number = function() return val end,
 		string = function() return val end,
+		boolean = function() return val end,
 		Symbol = function()
 			return env:lookup(val:string())
 		end,

@@ -195,7 +195,9 @@ local reader_macros = {
 	[';']    = read_comment,
 	['#']    = {
 		['|'] = read_multicomment,
-		[';'] = read_datumcomment
+		[';'] = read_datumcomment,
+		['t'] = function(f) return true end,
+		['f'] = function(f) return false end
 	}
 }
 
