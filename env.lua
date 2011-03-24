@@ -70,22 +70,6 @@ end){
 		return ret
 	end,
 	
-	['if'] = function(env, ...)
-		local args = {...}
-		local test = eval(args[1], env)
-		local expr = args[3]
-		
-		if test then
-			expr = args[2]
-		else
-			if expr == nil then
-				return nil
-			end
-		end
-		
-		return eval(expr, env)
-	end,
-	
 	['cond'] = function(env, ...)
 		local args = {...}
 		

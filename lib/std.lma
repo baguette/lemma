@@ -10,6 +10,10 @@
   `(def ~name (fn ~arglist ~@body)))
 
 
+;; Implement the usual if expression
+(defmacro if (p? a b)
+  `(cond ~p? ~a #t ~b))
+
 
 ;; Get a list containing the elements of xs with odd-numbered indices
 (defn odds (xs)
