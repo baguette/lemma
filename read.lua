@@ -46,13 +46,13 @@ function write(...)
 end
 
 local symbol =			 -- this is perhaps a little too permissive
-[[^([%a%-%?%*%+%%%$%^<>\\_=:&|!][%.%a%d%-%?%*%+%%%$%^<>/\\_=:&|!~@']*)]]
+[[^([%a%-%?%*%+%%%$%^<>\\_=:&!][%.%a%d%-%?%*%+%%%$%^<>/\\_=:&|!~@']*)]]
 
 -- these are tried in undefined order (make them specific!)
 local atoms = {
-	['^([%+%-]?%d+%.?%d+)']	  = tonumber,	-- with decimal point
-	['^([%+%-]?%d+)']			  = tonumber,	-- without decimal point
-	[symbol]						  = Symbol
+	['^([%+%-]?%d+%.?%d+)']		= tonumber,	-- with decimal point
+	['^([%+%-]?%d+)']			= tonumber,	-- without decimal point
+	[symbol]					= Symbol
 }
 
 local number = {}
@@ -91,32 +91,40 @@ function read_list(f)
 	end
 end
 
-function read_string(f)
-	local str = {}
-	local escape = false
-	
-	while true do
-		local c = f:get()
-		if not c then return 'eof' end
+function read_delimed(delim, constr)
+	return function(f)
+		local str = {}
+		local escape = false
 		
-		if c == '"' and not escape then
-			return table.concat(str)
-		elseif c == 'n' and escape then
-			c = '\n'
-			escape = false
-		elseif c == '\\' then
-			if not escape then
-				escape = true
+		while true do
+			local c = f:get()
+			if not c then return 'eof' end
+			
+			if c == delim and not escape then
+				local str = table.concat(str)
+				
+				if constr then
+					return constr(str)
+				else
+					return str
+				end
+			elseif c == 'n' and escape then
+				c = '\n'
+				escape = false
+			elseif c == '\\' then
+				if not escape then
+					escape = true
+				else
+					c = '\\'
+					escape = false
+				end
 			else
-				c = '\\'
 				escape = false
 			end
-		else
-			escape = false
-		end
-		
-		if not escape then
-			table.insert(str, c)
+			
+			if not escape then
+				table.insert(str, c)
+			end
 		end
 	end
 end
@@ -184,11 +192,12 @@ end
 
 local reader_macros = {
 	['(']    = read_list,
-	['"']    = read_string,
+	['"']    = read_delimed('"'),
+	['|']    = read_delimed('|', Symbol),
 	['\\']   = table_idx('memfn'),
 	['.']    = table_idx('method'),
 	[':']    = read_keyword,
-	['\'']   = read_quote('quote'),
+	["'"]    = read_quote('quote'),
 	['`']    = read_quote('quasiquote'),
 	['~']    = read_quote('unquote'),
 	['@']    = read_quote('splice'),
