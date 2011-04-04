@@ -46,13 +46,15 @@ function write(...)
 end
 
 local symbol =			 -- this is perhaps a little too permissive
-[[^([%a%-%?%*%+%%%$%^<>\\_=:&!][%.%a%d%-%?%*%+%%%$%^<>/\\_=:&|!~@']*)]]
+[[([%a%-%?%*%+%%%$%^<>\\_=:&!][%a%d%-%?%*%+%%%$%^<>/\\_=:&|!~@']*)]]
+
+function symbol_pattern() return symbol end
 
 -- these are tried in undefined order (make them specific!)
 local atoms = {
 	['^([%+%-]?%d+%.?%d+)']		= tonumber,	-- with decimal point
 	['^([%+%-]?%d+)']			= tonumber,	-- without decimal point
-	[symbol]					= Symbol
+	['^'..symbol]				= Symbol
 }
 
 local number = {}

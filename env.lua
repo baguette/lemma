@@ -287,7 +287,7 @@ function lemma.assoc(t, ...)
 end
 
 function lemma.hashmap(...)
-	return assoc({}, ...)
+	return lemma.assoc({}, ...)
 end
 
 function lemma.keys(t)
@@ -361,6 +361,14 @@ lemma.print = print
 lemma.map = Seq.lib.map
 
 
+function string.split(s, p)
+	local strs = {}
+	for k in string.gmatch(s, p) do
+		table.insert(strs, k)
+	end
+	return (#strs > 0) and strs or nil
+end
+
 ---
 -- create an environment structure
 ---
@@ -372,9 +380,15 @@ function new_env(env)
 		parent = env,		-- for implementing lexical scope
 		lookup = function(self, sym)
 			local curr = self
+			local path = sym:split(symbol_pattern()..'%.?') or {sym}
 			while curr do
-				local val = curr.bindings[sym]
+				local val = curr.bindings[path[1]]
 				if val then
+					local i = 2
+					while path[i] do
+						val = val[path[i]]
+						i = i + 1
+					end
 					return val
 				end
 				curr = curr.parent
