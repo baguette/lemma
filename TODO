@@ -1,0 +1,11 @@
+Besides the TODOs listed in comments:
+
+- case macro
+- namespaces (along with syntactic sugar)
+- make Lemma's global namespace distinct from Lua's (but allow importing)
+- (auto?) gensym
+- make vectors and hashmaps into Seqs
+- LemmaDoc
+
+Future:
+- Self-hosting compiler!
