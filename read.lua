@@ -222,7 +222,6 @@ local reader_macros = {
 	['{']    = read_seq('}', 'hashmap'),
 	['"']    = read_delimed('"'),
 	['|']    = read_delimed('|', Symbol),
-	['\\']   = table_idx('memfn'),
 	['.']    = table_idx('method'),
 	[':']    = read_keyword,
 	["'"]    = read_quote('quote'),
