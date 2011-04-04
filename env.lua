@@ -271,15 +271,18 @@ function vector(...)
 	return {...}
 end
 
-function hashmap(...)
-	local t = {...}
-	local u = {}
+function assoc(t, ...)
+	local args = {...}
 	
-	for i = 1, #t, 2 do
-		u[t[i]] = t[i+1]
+	for i = 1, #args, 2 do
+		t[args[i]] = args[i+1]
 	end
 	
-	return u
+	return t
+end
+
+function hashmap(...)
+	return assoc({}, ...)
 end
 
 function get(t, k)
