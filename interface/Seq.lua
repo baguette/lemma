@@ -9,18 +9,28 @@ Seq.sig = {
 	'rest',
 	'cons',
 	'empty?',
+	'length',
 	'seq'
 }
 
 
 for i, v in pairs(Seq.sig) do
-	_G[v] = function(x, ...)
-		return x[v](x, ...)
+	lemma[v] = function(x, ...)
+		if x and x[v] then
+			return x[v](x, ...)
+		else
+			return Error(tostring(x)..' has type '..type(x)..', not a Seq')
+		end
 	end
 end
 
-_G.cons = function(x, xs)
-	return xs:cons(x)
+-- overwrite cons so it has the usual argument order
+lemma.cons = function(x, xs)
+	if xs and xs.cons then
+		return xs:cons(x)
+	else
+		return Error('Attempt to cons to '..type(xs))
+	end
 end
 
 

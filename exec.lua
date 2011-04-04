@@ -1,4 +1,6 @@
 
+lemma = {}
+
 require 'class/FileStream'
 require 'read'
 require 'eval'

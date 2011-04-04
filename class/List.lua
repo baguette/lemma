@@ -31,11 +31,17 @@ function t:cons(...)
 	local args = {...}
 	
 	for i = #args, 1, -1 do
-		new = { args[i], new }
+		local last = new
+		new = { args[i], last }
+		new['_length'] = last:length() + 1
 		setmetatable(new, mt)
 	end
 	
 	return new
+end
+
+function t:length()
+	return self['_length'] or 0
 end
 
 function t:first()

@@ -77,7 +77,7 @@ local delim = {
 }
 
 -- TODO: would probably be beneficial to make this tail-recursive
-function read_list(f)
+local function read_list(f)
 	local list = List()
 	
 	while true do
@@ -95,7 +95,7 @@ function read_list(f)
 	end
 end
 
-function read_seq(delim, func)
+local function read_seq(delim, func)
 	return function(f)
 		local seq = List()
 		
@@ -115,7 +115,7 @@ function read_seq(delim, func)
 	end
 end
 
-function read_delimed(delim, constr)
+local function read_delimed(delim, constr)
 	return function(f)
 		local str = {}
 		local escape = false
@@ -153,7 +153,7 @@ function read_delimed(delim, constr)
 	end
 end
 
-function read_keyword(f)
+local function read_keyword(f)
 	local str = {}
 	while true do
 		local c = f:get()
@@ -168,7 +168,7 @@ function read_keyword(f)
 	end
 end
 
-function read_comment(f)
+local function read_comment(f)
 	local c
 	repeat
 		c = f:get()
@@ -177,7 +177,7 @@ function read_comment(f)
 	return nil
 end
 
-function read_multicomment(f)
+local function read_multicomment(f)
 	local last, c
 	
 	while true do
@@ -193,19 +193,19 @@ function read_multicomment(f)
 	end
 end
 
-function read_datumcomment(f)
+local function read_datumcomment(f)
 	read(f)
 	return nil
 end
 
-function read_quote(sym)
+local function read_quote(sym)
 	return function(f)
 		local q = List()
 		return q:cons(read(f)):cons(Symbol(sym))
 	end
 end
 
-function table_idx(func)
+local function table_idx(func)
 	return function(f)
 		local k = read(f):string()
 		local t = read(f)

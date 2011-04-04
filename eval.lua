@@ -40,7 +40,7 @@ function eval(t, env)
 			or (type(op) == 'userdata' and getmetatable(op).__index)
 			then
 				local key = eval(lst:first(), env)
-				return get(op, key)
+				return lemma.get(op, key)
 			end
 			
 			return Error(tostring(val:first())..' is not a function\n')

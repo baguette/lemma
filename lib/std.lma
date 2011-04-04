@@ -23,7 +23,7 @@
 
 ;; Get a list containing the elements of xs with even-numbered indices
 (defn evens (xs)
-  (if (empty? xs)
+  (if (or (empty? xs) (= 1 (length xs)))
       '()
       (cons (first (rest xs)) (evens (rest (rest xs))))))
 

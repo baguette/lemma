@@ -19,7 +19,7 @@ setfenv(0, _G)
 ---
 ;(function(t)
 	for k, v in pairs(t) do
-		_G[k] = Fexpr(v)
+		lemma[k] = Fexpr(v)
 	end
 end){
 	def = function(env, ...)
@@ -116,7 +116,7 @@ end){
 				elseif type(car) == 'Symbol' and car:string() == 'quasiquote' then
 					exp = exp:cons(v)
 				else
-					exp = exp:cons(_G['quasiquote'](env, v))
+					exp = exp:cons(lemma['quasiquote'](env, v))
 				end
 			else
 				exp = exp:cons(v)
@@ -221,7 +221,7 @@ end){
 	end
 }
 
-function splice(q)
+function lemma.splice(q)
 	return Seq.lib.unpack(q)
 end
 
@@ -231,7 +231,7 @@ end
 
 ;(function(t)
 	for k, v in pairs(t) do
-		_G[k] = function(...)
+		lemma[k] = function(...)
 			local args = {...}
 			local diff = args[1] or 0
 	
@@ -252,7 +252,7 @@ end){
 
 ;(function(t)
 	for k, v in pairs(t) do
-		_G[k] = function(...)
+		lemma[k] = function(...)
 			local a, b = ...
 			return v(a, b)
 		end
@@ -267,16 +267,16 @@ end){
  ['and'] = function(a, b) return a and b end
 }
 
-function str(...)
+function lemma.str(...)
 	local t = {...}
 	return table.concat(t)
 end
 
-function vector(...)
+function lemma.vector(...)
 	return {...}
 end
 
-function assoc(t, ...)
+function lemma.assoc(t, ...)
 	local args = {...}
 	
 	for i = 1, #args, 2 do
@@ -286,11 +286,11 @@ function assoc(t, ...)
 	return t
 end
 
-function hashmap(...)
+function lemma.hashmap(...)
 	return assoc({}, ...)
 end
 
-function keys(t)
+function lemma.keys(t)
 	local list = List()
 	
 	for k in pairs(t) do
@@ -300,7 +300,7 @@ function keys(t)
 	return list:reverse()
 end
 
-function values(t)
+function lemma.values(t)
 	local list = List()
 	
 	for _, v in pairs(t) do
@@ -310,7 +310,7 @@ function values(t)
 	return list:reverse()
 end
 
-function get(t, k)
+function lemma.get(t, k)
 	if not k then
 		return Error'attempt to index table with nil'
 	end
@@ -320,7 +320,7 @@ function get(t, k)
 	return t[k]
 end
 
-function memfn(t, k)
+function lemma.memfn(t, k)
 	if not k then
 		return Error'attempt to index table with nil'
 	end
@@ -335,7 +335,7 @@ function memfn(t, k)
 	end
 end
 
-function method(t, k)
+function lemma.method(t, k)
 	if not k then
 		return Error'attempt to index table with nil'
 	end
@@ -351,11 +351,22 @@ function method(t, k)
 end
 
 ---
+-- Copy some stuff from lua
+---
+lemma.lua = _G
+lemma.eval = eval
+lemma.read = read
+lemma.write = write
+lemma.print = print
+lemma.map = Seq.lib.map
+
+
+---
 -- create an environment structure
 ---
 function new_env(env)
 	local b
-	if env then b = {} else b = _G end
+	if env then b = {} else b = lemma end
 	return {
 		bindings = b,
 		parent = env,		-- for implementing lexical scope
