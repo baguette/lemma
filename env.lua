@@ -9,6 +9,11 @@ require 'class/Error'
 require 'interface/Seq'
 require 'type'
 
+--[[-- failed experiment?
+_G = { lua = _G }
+setfenv(0, _G)
+--]]--
+
 ---
 -- fexprs
 ---
@@ -283,6 +288,26 @@ end
 
 function hashmap(...)
 	return assoc({}, ...)
+end
+
+function keys(t)
+	local list = List()
+	
+	for k in pairs(t) do
+		list = list:cons(k)
+	end
+	
+	return list:reverse()
+end
+
+function values(t)
+	local list = List()
+	
+	for _, v in pairs(t) do
+		list = list:cons(v)
+	end
+	
+	return list:reverse()
 end
 
 function get(t, k)
