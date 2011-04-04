@@ -69,7 +69,11 @@ local whitespace = {
 
 local delim = {
 	['('] = true,
-	[')'] = true
+	[')'] = true,
+	['['] = true,
+	[']'] = true,
+	['{'] = true,
+	['}'] = true
 }
 
 -- TODO: would probably be beneficial to make this tail-recursive
@@ -87,6 +91,26 @@ function read_list(f)
 			local form = read(f)
 			if form == 'eof' then return 'eof' end
 			list = list:cons(form)
+		end
+	end
+end
+
+function read_seq(delim, func)
+	return function(f)
+		local seq = List()
+		
+		while true do
+			local c = f:get()
+			if not c then return 'eof' end
+			
+			if c == delim then
+				return seq:reverse():cons(Symbol(func))
+			else
+				f:unget(c)
+				local form = read(f)
+				if form == 'eof' then return 'eof' end
+				seq = seq:cons(form)
+			end
 		end
 	end
 end
@@ -192,6 +216,8 @@ end
 
 local reader_macros = {
 	['(']    = read_list,
+	['[']    = read_seq(']', 'vector'),
+	['{']    = read_seq('}', 'hashmap'),
 	['"']    = read_delimed('"'),
 	['|']    = read_delimed('|', Symbol),
 	['\\']   = table_idx('memfn'),

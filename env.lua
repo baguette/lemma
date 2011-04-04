@@ -267,6 +267,21 @@ function str(...)
 	return table.concat(t)
 end
 
+function vector(...)
+	return {...}
+end
+
+function hashmap(...)
+	local t = {...}
+	local u = {}
+	
+	for i = 1, #t, 2 do
+		u[t[i]] = t[i+1]
+	end
+	
+	return u
+end
+
 function get(t, k)
 	if not k then
 		return Error'attempt to index table with nil'

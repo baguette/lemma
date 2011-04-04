@@ -20,6 +20,7 @@ function eval(t, env)
 		number = function() return val end,
 		string = function() return val end,
 		boolean = function() return val end,
+		table = function() return val end,
 		Symbol = function()
 			return env:lookup(val:string())
 		end,

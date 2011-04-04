@@ -56,18 +56,20 @@ function exec(f, prompt)
 				
 				for i, v in ipairs(val) do
 					if type(v) == 'Error' then
-						io.write (f:lines() .. ': ' .. tostring(v) .. '\n')
+						io.stderr:write (f:lines() .. ': ' .. tostring(v) .. '\n')
 						err = true
 					end
 				end
 				if prompt and not err then
-					write(unpack(val))                -- print the value!
+					io.write';=> ' ; write(unpack(val))                -- print the value!
 				end
 			end
 		else
-			io.write (f:lines() .. ': ' .. e .. '\n')
-			done = true
-			f:close()
+			io.stderr:write (f:lines() .. ': ' .. e .. '\n')
+			if not prompt then
+				done = true
+				f:close()
+			end
 		end
 	end                                           -- loop!
 end
