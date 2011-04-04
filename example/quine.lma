@@ -14,7 +14,7 @@
       nil))
 
 
-(def quine (lua.io.open (lua.arg 1) :r))
+(def quine (lua/io.open (lua/arg 1) :r))
 (if quine
   (do
     (do-lines quine print)

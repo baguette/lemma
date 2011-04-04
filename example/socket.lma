@@ -3,8 +3,8 @@
 ;; It is adapted from the luasocket documentation:
 ;; http://w3.impa.br/~diego/software/luasocket/introduction.html
 
-(def socket (lua.require :socket)
-     server (lua.assert (socket.bind "*" 0)))
+(def socket (lua/require :socket)
+     server (lua/assert (socket.bind "*" 0)))
 
 (let-values (ip port) (.getsockname server)
   (print "Please telnet to localhost on port" port))

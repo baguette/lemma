@@ -320,21 +320,6 @@ function lemma.get(t, k)
 	return t[k]
 end
 
-function lemma.memfn(t, k)
-	if not k then
-		return Error'attempt to index table with nil'
-	end
-	if not t then
-		return Error('attempt to index nil ['..k..']')
-	end
-	if not t[k] then
-		return Error('member function is nil ['..k..']')
-	end
-	return function(...)
-		return t[k](...)
-	end
-end
-
 function lemma.method(t, k)
 	if not k then
 		return Error'attempt to index table with nil'
@@ -353,7 +338,8 @@ end
 ---
 -- Copy some stuff from lua
 ---
-lemma.lua = _G
+lemma.namespaces = {lua = _G, lemma = lemma}
+lemma['*ns*'] = 'lemma'
 lemma.eval = eval
 lemma.read = read
 lemma.write = write
@@ -362,11 +348,8 @@ lemma.map = Seq.lib.map
 
 
 function string.split(s, p)
-	local strs = {}
-	for k in string.gmatch(s, p) do
-		table.insert(strs, k)
-	end
-	return (#strs > 0) and strs or nil
+	f, s, k = s:gmatch(p)
+	return f(s, k)
 end
 
 ---
@@ -374,40 +357,57 @@ end
 ---
 function new_env(env)
 	local b
-	if env then b = {} else b = lemma end
+	if env then b = {} else b = lemma.namespaces[lemma['*ns*']] end
 	return {
 		bindings = b,
 		parent = env,		-- for implementing lexical scope
-		lookup = function(self, sym)
+		lookup = function(self, sym, mod, insert)
+			local patt = symbol_patterns()
 			local curr = self
-			local path = sym:split(symbol_pattern()..'%.?') or {sym}
+			local ns, rest = sym:split(patt.ns..'/'..patt.ns)
+			
+			if ns and rest then
+				curr = { bindings = lemma.namespaces[ns] }
+				sym = rest
+			end
+			local path = {}
+			for k in sym:gmatch(patt.table..'%.?') do
+				table.insert(path, k)
+			end
+			if #path == 0 then
+				table.insert(path, sym)
+			end
 			while curr do
-				local val = curr.bindings[path[1]]
+				local old = curr.bindings
+				local val = old[path[1]]
 				if val then
 					local i = 2
 					while path[i] do
+						old = val
 						val = val[path[i]]
 						i = i + 1
 					end
-					return val
+					if mod then
+						old[path[i-1]] = mod
+						return mod
+					else
+						return val
+					end
+				else
+					if insert then
+						old[path[1]] = mod
+						return mod
+					end
 				end
+				
 				curr = curr.parent
 			end
 		end,
 		modify = function(self, sym, val)
-			local curr = self
-			while curr do
-				local v = curr.bindings[sym]
-				if v then
-					curr.bindings[sym] = val
-					return val
-				end
-				curr = curr.parent
-			end
-			return nil
+			return self:lookup(sym, val)
 		end,
 		insert = function(self, sym, val)
-			self.bindings[sym] = val
+			return self:lookup(sym, val, true)
 		end,
 		enter = new_env,
 		leave = function(self)

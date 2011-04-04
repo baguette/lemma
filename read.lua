@@ -46,9 +46,15 @@ function write(...)
 end
 
 local symbol =			 -- this is perhaps a little too permissive
-[[([%a%-%?%*%+%%%$%^<>\\_=:&!][%a%d%-%?%*%+%%%$%^<>/\\_=:&|!~@']*)]]
+[[([%a%-%?%*%+%%%$%^<>/\\_=:&!][%.%a%d%-%?%*%+%%%$%^<>/\\_=:&|!~@']*)]]
 
-function symbol_pattern() return symbol end
+function symbol_patterns()
+	return {
+		full = symbol,
+		table = [[([%a%-%?%*%+%%%$%^<>/\\_=:&!][%a%d%-%?%*%+%%%$%^<>/\\_=:&|!~@']*)]],
+		ns = [[([%a%-%?%*%+%%%$%^<>/\\_=:&!][%.%a%d%-%?%*%+%%%$%^<>\\_=:&|!~@']*)]]
+	}
+end
 
 -- these are tried in undefined order (make them specific!)
 local atoms = {
