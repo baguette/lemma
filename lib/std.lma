@@ -12,7 +12,7 @@
 
 ;; Implement the usual if expression
 (defmacro if (p? a b)
-  `(cond ~p? ~a #t ~b))
+  `(cond ~p? ~a true ~b))
 
 
 ;; Get a list containing the elements of xs with odd-numbered indices
