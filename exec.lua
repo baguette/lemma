@@ -46,7 +46,7 @@ function exec(f, prompt)
 	
 		local t, e = read(f)                       -- read an expression!
 	
-		if t then
+		if not e then
 			if t == 'eof' then
 				if prompt then io.write('\n') end
 				done = true

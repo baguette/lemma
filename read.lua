@@ -56,11 +56,19 @@ function symbol_patterns()
 	}
 end
 
--- these are tried in undefined order (make them specific!)
+local function tovalue(x)
+	local t = {['true'] = true, ['false'] = false}
+	return t[x]
+end
+
+-- these are tried in order (make them specific!)
 local atoms = {
-	['^([%+%-]?%d+%.?%d+)']		= tonumber,	-- with decimal point
-	['^([%+%-]?%d+)']			= tonumber,	-- without decimal point
-	['^'..symbol]				= Symbol
+	'^([%+%-]?%d+%.?%d+)',		tonumber,	-- with decimal point
+	'^([%+%-]?%d+)',			tonumber,	-- without decimal point
+	'^(true)',					tovalue,
+	'^(false)',					tovalue,
+	'^(nil)',					tovalue,
+	'^'..symbol,				Symbol
 }
 
 local number = {}
@@ -238,8 +246,6 @@ local reader_macros = {
 	['#']    = {
 		['|'] = read_multicomment,
 		[';'] = read_datumcomment,
-		['t'] = function(f) return true end,
-		['f'] = function(f) return false end
 	}
 }
 
@@ -285,10 +291,11 @@ function read(f)
 		
 		-- Do a pattern match on str to identify type of atom
 		-- if no matches, lexical error
-		for k, v in pairs(atoms) do
-			 if string.find(str, k) then
-				 form = v(str)
-			 end
+		for i = 1, #atoms, 2 do
+			if string.find(str, atoms[i]) then
+				 form = atoms[i+1](str)
+				 return form
+			end
 		end
 		
 		if not form then

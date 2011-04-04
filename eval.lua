@@ -12,7 +12,7 @@ function eval(t, env)
 	typ = type(t)
 	
 	if not val then
-		return Error'attempt to eval nil'
+		return val
 	end
 	
 	local switch = {
