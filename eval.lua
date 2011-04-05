@@ -3,6 +3,7 @@
 ---
 
 require 'class/List'
+require 'class/Vector'
 require 'interface/Seq'
 
 function eval(t, env)
@@ -21,6 +22,7 @@ function eval(t, env)
 		string = function() return val end,
 		boolean = function() return val end,
 		table = function() return val end,
+		Vector = function() return val end,
 		Symbol = function()
 			return env:lookup(val:string())
 		end,

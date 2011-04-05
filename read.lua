@@ -4,6 +4,7 @@
 
 require 'type'
 require 'class/List'
+require 'class/Vector'
 require 'class/Symbol'
 
 

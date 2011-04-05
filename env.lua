@@ -4,6 +4,7 @@
 
 require 'class/Fexpr'
 require 'class/List'
+require 'class/Vector'
 require 'class/Symbol'
 require 'class/Error'
 require 'interface/Seq'
@@ -272,9 +273,7 @@ function lemma.str(...)
 	return table.concat(t)
 end
 
-function lemma.vector(...)
-	return {...}
-end
+lemma.vector = Vector
 
 function lemma.assoc(t, ...)
 	local args = {...}
