@@ -6,15 +6,15 @@
 do
 
 local function __eq(a, b)
-	return (a:func() == b:func())
+	return (a.func == b.func)
 end
 
 local function __tostring(e)
-	return 'macro: '..tostring(e:func())
+	return 'macro: '..tostring(e.func)
 end
 
-local function __call(e)
-	return e:func()
+local function __call(e, ...)
+	return e.func(...)
 end
 
 local t = {}

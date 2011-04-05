@@ -5,7 +5,7 @@
 do
 
 local function __eq(a, b)
-	return (tostring(a) == tostring(b))
+	return (type(a) == type(b)) and (tostring(a) == tostring(b))
 end
 
 local function __tostring(e)

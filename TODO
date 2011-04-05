@@ -1,9 +1,14 @@
 Besides the TODOs listed in comments:
 
-- case macro
 - ns macro
+- fix Seqs -> only need first, rest, and seq
+  (seq should return a Seq, not an empty whatever)
 - (auto?) gensym
+- destructuring
+- multimethods
+- protocols
 - LemmaDoc
+- Better error handling
 
 Future:
 - Self-hosting compiler!

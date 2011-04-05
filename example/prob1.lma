@@ -1,9 +1,9 @@
 ;; A solution for Problem 1 from Project Euler:
 ;; "Find the sum of all the multiples of 3 or 5 below 1000."
 
-(defn prob1 (n)
-  (let (sum 0
-        x   0)
+(defn prob1 [n]
+  (let [sum 0
+        x   0]
        (times n
          (set! x (+ x 1)
                sum (+ sum (if (or (= 0 (mod x 3))

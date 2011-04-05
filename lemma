@@ -14,9 +14,13 @@ LEMMA_VERSION = 0.1
 local f = ...
 local prompt
 
+function update_prompt()
+	prompt = lemma['*ns*']..'> '
+end
+
 if not f then
 	f = io.input()
-	prompt = '> '
+	update_prompt()
 	print('Lemma '..LEMMA_VERSION..' (on '.. _VERSION..')')
 end
 

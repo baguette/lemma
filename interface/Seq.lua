@@ -31,7 +31,7 @@ lemma.cons = function(x, xs, xss)
 	elseif xs and xs.cons then
 		return xs:cons(x)
 	else
-		return Error('Attempt to cons to '..type(xs))
+		return Error('Attempt to cons to '..tostring(xs)..', not a Seq')
 	end
 end
 

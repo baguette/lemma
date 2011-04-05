@@ -1,6 +1,6 @@
 ;; Test of the Lemma interpreter
 
-(defn hello (name)
+(defn hello [name]
   (print "hello," name))
 (hello "Lemma")
 
@@ -23,7 +23,7 @@
     (print whee)))
 
 (def fact
-  (fn (n)
+  (fn [n]
     (if (= n 0)
         1
         (* n (fact (- n 1))))))

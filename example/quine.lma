@@ -5,7 +5,7 @@
 
 
 ;; Apply func to each line in file
-(defn do-lines (file func)
+(defn do-lines [file func]
   (def line (.read file))
   (if line
       (do

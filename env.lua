@@ -3,6 +3,7 @@
 ---
 
 require 'class/Fexpr'
+require 'class/Macro'
 require 'class/List'
 require 'class/Vector'
 require 'class/HashMap'
@@ -15,6 +16,15 @@ require 'type'
 _G = { lua = _G }
 setfenv(0, _G)
 --]]--
+
+local function vectorize(arglist)
+	if  type(arglist) == 'List'
+	and arglist:first() == Symbol'vec'
+	then
+		arglist = Vector(Seq.lib.unpack(arglist:rest()))
+	end
+	return arglist
+end
 
 ---
 -- fexprs
@@ -110,12 +120,10 @@ end){
 			if  type(v) == 'List'
 			then
 				local car = v:first()
-				if type(car) == 'Symbol' and car:string() == 'unquote' then
+				if car == Symbol'unquote' then
 					local val = {eval(v, env)}
-					if val[1] then
-						exp = exp:cons(Seq.lib.unpack(List():cons(unpack(val)):reverse()))
-					end
-				elseif type(car) == 'Symbol' and car:string() == 'quasiquote' then
+					exp = exp:cons(Seq.lib.unpack(List():cons(unpack(val)):reverse()))
+				elseif car == Symbol'quasiquote' then
 					exp = exp:cons(v)
 				else
 					exp = exp:cons(lemma['quasiquote'](env, v))
@@ -134,12 +142,17 @@ end){
 	
 	fn = function(env, ...)
 		local args = {...}
-		local arglist = {Seq.lib.unpack(args[1])}
+		local arglist = args[1]
+		
+		arglist = vectorize(arglist)
+		if type(arglist) ~= 'Vector' then
+			return Error('Expected vector, got '..tostring(arglist))
+		end
 		
 		for i, a in ipairs(arglist) do
-			if type(a) ~= 'Symbol'
-			and not (type(a) == 'List' and type(a:first()) == 'Symbol'
-			    and a:first():string() == 'splice')
+			if  type(a) ~= 'Symbol'
+			and not (type(a) == 'List'
+			    and a:first() == Symbol'splice')
 			then
 				return Error('invalid syntax in arglist ('..tostring(a)..')')
 			end
@@ -177,19 +190,24 @@ end){
 	
 	macro = function(env, ...)
 		local args = {...}
-		local arglist = {Seq.lib.unpack(args[1])}
+		local arglist = args[1]
+		
+		local arglist = vectorize(arglist)
+		if type(arglist) ~= 'Vector' then
+			return Error('Expected vector, got '..tostring(arglist))
+		end
 		
 		for i, a in ipairs(arglist) do
 			if type(a) ~= 'Symbol'
-			and not (type(a) == 'List' and type(a:first()) == 'Symbol'
-			    and a:first():string() == 'splice')
+			and not (type(a) == 'List'
+			    and a:first() == Symbol'splice')
 			then
 				return Error('invalid syntax in arglist ('..tostring(a)..')')
 			end
 		end
 		
-		return Fexpr(
-			function(env, ...)
+		return Macro(
+			function(...)
 				local largs = {...}
 				local env = env:enter()
 				local val
@@ -216,10 +234,22 @@ end){
 				end
 				
 				env:leave()
-			
-				return eval(val, env)
+				return val
 			end
 		)
+	end,
+	
+	expand = function(env, ...)
+		local form = ...
+		
+		if type(form) == 'List' then
+			local head = eval(form:first(), env)
+			if type(head) == 'Macro' then
+				return head(Seq.lib.unpack(form:rest()))
+			end
+			return Error'Cannot expand non-macro.'
+		end
+		return Error'Cannot expand non-macro (list).'
 	end
 }
 
@@ -274,8 +304,8 @@ function lemma.str(...)
 	return table.concat(t)
 end
 
-lemma.vector = Vector
-lemma.hashmap = HashMap
+lemma.vec = Vector
+lemma['hash-map'] = HashMap
 
 function lemma.keys(t)
 	local list = List()
@@ -367,7 +397,7 @@ function new_env(env)
 			while curr do
 				local old = curr.bindings
 				local val = old[path[1]]
-				if val then
+				if val ~= nil then
 					local i = 2
 					while path[i] do
 						old = val

@@ -49,7 +49,7 @@ function t:first()
 end
 
 function t:rest()
-	return self[2]
+	return self[2] or List()
 end
 
 t['empty?'] = function(self)

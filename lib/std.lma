@@ -2,39 +2,41 @@
 
 ;; A macro to make defining macros nicer...
 (def defmacro
-  (macro (name arglist @body)
+  (macro [name arglist @body]
     `(def ~name (macro ~arglist ~@body))))
 
 ;; A macro to make defining functions nicer...
-(defmacro defn (name arglist @body)
+(defmacro defn [name arglist @body]
   `(def ~name (fn ~arglist ~@body)))
 
 
 ;; Implement the usual if expression
-(defmacro if (p? a b)
+(defmacro if [p? a b]
   `(cond ~p? ~a true ~b))
 
 
 ;; Get a list containing the elements of xs with odd-numbered indices
-(defn odds (xs)
+(defn odds [xs]
   (if (empty? xs)
-      '()
+      (seq xs)
       (cons (first xs) (odds (rest (rest xs))))))
 
 ;; Get a list containing the elements of xs with even-numbered indices
-(defn evens (xs)
+(defn evens [xs]
   (if (or (empty? xs) (= 1 (length xs)))
-      '()
+      (seq xs)
       (cons (first (rest xs)) (evens (rest (rest xs))))))
 
 
 ;; let
-(defmacro let (bindings @body)
-  `((fn (~@(odds bindings)) ~@body) ~@(evens bindings)))
+;; TODO: figure out why the fuck this wasn't working right yet now seems
+;;       to work despite reason
+(defmacro let [bindings @body]
+  `((fn [~@(evens bindings)] ~@body) ~@(rest (odds bindings))))
 
 ;; do
-(defmacro do (@body)
-  `((fn () ~@body)))
+(defmacro do [@body]
+  `((fn [] ~@body)))
 
 
 
@@ -42,15 +44,15 @@
 ;; the first expression in body
 ;; WARNING: you will get garbage values if not enough
 ;;          values are produced to bind all the variables
-(defmacro let-values (bindings @body)
-  `((fn (~@bindings) ~@(rest body)) ~(first body)))
+(defmacro let-values [bindings @body]
+  `((fn ~bindings ~@(rest body)) ~(first body)))
 
 
 ;; This shouldn't be part of the core language, but some of
 ;; the test code still relies on it.
-(defmacro times (n @body)
+(defmacro times [n @body]
   `(do
-     (defn once (i)
+     (defn once [i]
        (if (= i 2)
            (do ~@body)
            (do

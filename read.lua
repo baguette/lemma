@@ -14,6 +14,8 @@ tostring, print = (function()
 	return function(s)
 		if type(s) == 'string' then
 			return string.format('%q', s)
+		elseif s == false then
+			return "false"
 		end
 	
 		return xtostring(s)
@@ -234,8 +236,8 @@ end
 
 local reader_macros = {
 	['(']    = read_list,
-	['[']    = read_seq(']', 'vector'),
-	['{']    = read_seq('}', 'hashmap'),
+	['[']    = read_seq(']', 'vec'),
+	['{']    = read_seq('}', 'hash-map'),
 	['"']    = read_delimed('"'),
 	['|']    = read_delimed('|', Symbol),
 	['.']    = table_idx('method'),
@@ -305,9 +307,5 @@ function read(f)
 		end
 	end
 	
-	if form then
-		return form
-	end
-	
-	return read(f)
+	return form
 end

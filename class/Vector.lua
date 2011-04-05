@@ -55,6 +55,8 @@ function t:rest()
 		table.insert(new, self[i])
 	end
 	
+	new._length = #new
+	
 	return new
 end
 
@@ -81,6 +83,7 @@ end
 
 function t:seq()
 	local o = {}
+	o._length = 0
 	setmetatable(o, mt)
 	return o
 end
