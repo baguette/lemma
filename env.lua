@@ -5,6 +5,7 @@
 require 'class/Fexpr'
 require 'class/List'
 require 'class/Vector'
+require 'class/HashMap'
 require 'class/Symbol'
 require 'class/Error'
 require 'interface/Seq'
@@ -274,20 +275,7 @@ function lemma.str(...)
 end
 
 lemma.vector = Vector
-
-function lemma.assoc(t, ...)
-	local args = {...}
-	
-	for i = 1, #args, 2 do
-		t[args[i]] = args[i+1]
-	end
-	
-	return t
-end
-
-function lemma.hashmap(...)
-	return lemma.assoc({}, ...)
-end
+lemma.hashmap = HashMap
 
 function lemma.keys(t)
 	local list = List()

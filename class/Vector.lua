@@ -6,12 +6,10 @@ do
 
 local function __tostring(e)
 	local str = {}
-	local curr = e
 	
-	while not curr['empty?'](curr) do
-		table.insert(str, tostring(curr:first()))
+	for _, v in ipairs(e) do
+		table.insert(str, tostring(v))
 		table.insert(str, ' ')
-		curr = curr:rest()
 	end
 	
 	table.remove(str)
@@ -76,6 +74,7 @@ end
 
 function Vector(...)
 	local o = {...}
+	o._length = #o
 	setmetatable(o, mt)
 	return o
 end

@@ -4,6 +4,7 @@
 
 require 'class/List'
 require 'class/Vector'
+require 'class/HashMap'
 require 'interface/Seq'
 
 function eval(t, env)

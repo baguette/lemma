@@ -1,6 +1,5 @@
 Besides the TODOs listed in comments:
 
-- make vectors and hashmaps into Seqs
 - case macro
 - ns macro
 - (auto?) gensym

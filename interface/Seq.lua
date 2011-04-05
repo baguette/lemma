@@ -25,8 +25,10 @@ for i, v in pairs(Seq.sig) do
 end
 
 -- overwrite cons so it has the usual argument order
-lemma.cons = function(x, xs)
-	if xs and xs.cons then
+lemma.cons = function(x, xs, xss)
+	if xs and xss and xss.cons then		-- for HashMaps
+		return xss:cons(x, xs)
+	elseif xs and xs.cons then
 		return xs:cons(x)
 	else
 		return Error('Attempt to cons to '..type(xs))
