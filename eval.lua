@@ -4,6 +4,7 @@
 
 require 'class/List'
 require 'class/Vector'
+require 'class/PreHashMap'
 require 'class/HashMap'
 require 'interface/Seq'
 
@@ -19,14 +20,32 @@ function eval(t, env)
 		return val
 	end
 	
+	local function pass()
+		return val
+	end
+	
+	local function dovec()
+		return Seq.lib.map(
+			function(f)
+				return eval(f, env)
+			end, val
+		)
+	end
+	
+	local function dohash()
+		return HashMap(Seq.lib.unpack(dovec()))
+	end
+	
 	local switch = {
-		Error = function() return val end,
-		number = function() return val end,
-		string = function() return val end,
-		boolean = function() return val end,
-		table = function() return val end,
-		Vector = function() return val end,
-		Symbol = function()
+		Error   = pass,
+		number  = pass,
+		string  = pass,
+		boolean = pass,
+		table   = pass,
+		Vector  = dovec,
+		PreHashMap = dohash,
+		HashMap = pass,
+		Symbol  = function()
 			return env:lookup(val:string())
 		end,
 		List	= function()
@@ -44,6 +63,8 @@ function eval(t, env)
 				lst = Seq.lib.map(function(x) return eval(x, env) end, lst)
 				return op(Seq.lib.unpack(lst))
 			elseif type(op) == 'table'
+			or type(op) == 'HashMap'
+			or type(op) == 'Vector'
 			or (type(op) == 'userdata' and getmetatable(op).__index)
 			then
 				local key = eval(lst:first(), env)

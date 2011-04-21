@@ -43,7 +43,7 @@ function Seq.lib.map(f, ...)
 	local firsts = {}
 	local rests = {}
 	
-	if lsts[1]:first() then
+	if #lsts > 0 and lsts[1]:first() then
 		for i, v in ipairs(lsts) do
 			table.insert(firsts, v:first())
 			table.insert(rests, v:rest())

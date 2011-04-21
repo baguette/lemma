@@ -12,20 +12,6 @@ require 'class/Error'
 require 'interface/Seq'
 require 'type'
 
---[[-- failed experiment?
-_G = { lua = _G }
-setfenv(0, _G)
---]]--
-
-local function vectorize(arglist)
-	if  type(arglist) == 'List'
-	and arglist:first() == Symbol'vec'
-	then
-		arglist = Vector(Seq.lib.unpack(arglist:rest()))
-	end
-	return arglist
-end
-
 ---
 -- fexprs
 ---
@@ -144,7 +130,6 @@ end){
 		local args = {...}
 		local arglist = args[1]
 		
-		arglist = vectorize(arglist)
 		if type(arglist) ~= 'Vector' then
 			return Error('Expected vector, got '..tostring(arglist))
 		end
@@ -154,7 +139,7 @@ end){
 			and not (type(a) == 'List'
 			    and a:first() == Symbol'splice')
 			then
-				return Error('invalid syntax in arglist ('..tostring(a)..')')
+				return Error('invalid syntax in function arglist: '..tostring(a)..')')
 			end
 		end
 		
@@ -192,7 +177,6 @@ end){
 		local args = {...}
 		local arglist = args[1]
 		
-		local arglist = vectorize(arglist)
 		if type(arglist) ~= 'Vector' then
 			return Error('Expected vector, got '..tostring(arglist))
 		end
@@ -202,7 +186,7 @@ end){
 			and not (type(a) == 'List'
 			    and a:first() == Symbol'splice')
 			then
-				return Error('invalid syntax in arglist ('..tostring(a)..')')
+				return Error('invalid syntax in macro arglist: '..tostring(a))
 			end
 		end
 		

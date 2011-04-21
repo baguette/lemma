@@ -97,39 +97,26 @@ local delim = {
 }
 
 -- TODO: would probably be beneficial to make this tail-recursive
-local function read_list(f)
-	local list = List()
-	
-	while true do
-		local c = f:get()
-		if not c then return 'eof' end
-		
-		if c == ')' then
-			return list:reverse()
-		else
-			f:unget(c)
-			local form = read(f)
-			if form == 'eof' then return 'eof' end
-			list = list:cons(form)
-		end
-	end
-end
-
-local function read_seq(delim, func)
+local function read_seq(eos, func)
 	return function(f)
-		local seq = List()
+		local list = {}
 		
 		while true do
 			local c = f:get()
 			if not c then return 'eof' end
 			
-			if c == delim then
-				return seq:reverse():cons(Symbol(func))
+			while whitespace[c] do
+				c = f:get()
+				if not c then return 'eof' end
+			end
+			
+			if c == eos then
+				return func(unpack(list))
 			else
 				f:unget(c)
 				local form = read(f)
 				if form == 'eof' then return 'eof' end
-				seq = seq:cons(form)
+				table.insert(list, form)
 			end
 		end
 	end
@@ -235,9 +222,9 @@ end
 
 
 local reader_macros = {
-	['(']    = read_list,
-	['[']    = read_seq(']', 'vec'),
-	['{']    = read_seq('}', 'hash-map'),
+	['(']    = read_seq(')', List),
+	['[']    = read_seq(']', Vector),
+	['{']    = read_seq('}', HashMap),
 	['"']    = read_delimed('"'),
 	['|']    = read_delimed('|', Symbol),
 	['.']    = table_idx('method'),

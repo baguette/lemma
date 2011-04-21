@@ -50,7 +50,9 @@ end
 
 function t:first()
 	for k, v in pairs(self) do
-		return k, v
+		if k ~= '_length' then
+			return Vector(k, v)
+		end
 	end
 end
 
@@ -61,10 +63,12 @@ function t:rest()
 	for k, v in pairs(self) do
 		if skip then
 			new[k] = v
-		else
+		elseif k ~= '_length' then
 			skip = true
 		end
 	end
+	
+	new['_length'] = self:length() - 2
 	
 	return new
 end

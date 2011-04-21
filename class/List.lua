@@ -68,12 +68,20 @@ function t:reverse()
 	return new
 end
 
-function List()
+function List(...)
 	local o = {}
+	setmetatable(o, mt)
+	
+	local args = {...}
+	
+	return o:cons(...)
+end
+
+function t:seq()
+	local o = {}
+	o._length = 0
 	setmetatable(o, mt)
 	return o
 end
-
-t.seq = List
 
 end
