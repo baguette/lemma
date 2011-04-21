@@ -14,6 +14,10 @@
 (defmacro if [p? a b]
   `(cond ~p? ~a true ~b))
 
+;; And if's little sister, when
+(defmacro when [p? a]
+  `(cond ~p? ~a true nil))
+
 
 ;; Get a list containing the elements of xs with odd-numbered indices
 (defn odds [xs]
@@ -30,7 +34,7 @@
 
 ;; let
 (defmacro let [bindings @body]
-  `((fn ~[@(odds bindings)] ~@body) ~@(evens bindings)))
+  `((fn [~@(odds bindings)] ~@body) ~@(evens bindings)))
 
 ;; do
 (defmacro do [@body]
@@ -57,3 +61,13 @@
              ~@body
              (once (- i 1)))))
      (once ~n)))
+     
+
+(defn vector? [a]
+  (= (lua/type a) "Vector"))
+
+;; A convenience macro for Lua interop
+(defmacro defmethod [t-dot-f args @body]
+  (if (not (vector? args))
+    (lua/Error (str "defmethod: expected vector, got " (lua/tostring args) " : " (lua/type args)))
+    `(defn ~t-dot-f [self ~@args] ~@body)))

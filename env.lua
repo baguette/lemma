@@ -100,15 +100,14 @@ end){
 	
 	quasiquote = function(env, ...)
 		local args = ...
-		local exp = List()
+		local exp = args:seq()
 		
 		for i, v in ipairs{Seq.lib.unpack(args)} do
-			if  type(v) == 'List'
-			then
+			if implements(v, 'Seq') then
 				local car = v:first()
 				if car == Symbol'unquote' then
 					local val = {eval(v, env)}
-					exp = exp:cons(Seq.lib.unpack(List():cons(unpack(val)):reverse()))
+					exp = exp:cons(Seq.lib.unpack(v:seq():cons(unpack(val)):reverse()))
 				elseif car == Symbol'quasiquote' then
 					exp = exp:cons(v)
 				else
@@ -282,6 +281,10 @@ end){
  ['or']  = function(a, b) return a or b end,
  ['and'] = function(a, b) return a and b end
 }
+
+lemma['not'] = function(a)
+	return not a
+end
 
 function lemma.str(...)
 	local t = {...}

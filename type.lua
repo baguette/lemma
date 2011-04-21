@@ -24,7 +24,7 @@ function implements(t, class)
 	local mt = getmetatable(t)
 	local val = false
 	
-	if not mt.implements then
+	if not mt or not mt.implements then
 		return false
 	end
 	
