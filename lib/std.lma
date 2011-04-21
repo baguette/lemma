@@ -29,8 +29,6 @@
 
 
 ;; let
-;; TODO: figure out why the fuck this wasn't working right yet now seems
-;;       to work despite reason
 (defmacro let [bindings @body]
   `((fn ~[@(odds bindings)] ~@body) ~@(evens bindings)))
 
