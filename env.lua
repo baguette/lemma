@@ -349,6 +349,7 @@ lemma.read = read
 lemma.write = write
 lemma.print = print
 lemma.map = Seq.lib.map
+lemma['for-each'] = Seq.lib.foreach
 
 
 function string.split(s, p)
@@ -427,3 +428,17 @@ end
 -- The global environment
 ---
 env = new_env()
+
+---
+-- Switch environments
+---
+function ns(name)
+	if not lemma.namespaces[name] then
+		lemma.namespaces[name] = {}
+	end
+	
+	lemma['*ns*'] = name
+	
+	env = new_env()
+end
+	

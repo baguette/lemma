@@ -1,6 +1,6 @@
 Besides the TODOs listed in comments:
 
-- ns macro
+- Add :use for ns macro
 - fix Seqs -> only need first, rest, and seq
   (seq should return a Seq, not an empty whatever)
 - (auto?) gensym

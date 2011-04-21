@@ -59,7 +59,7 @@ function Seq.lib.foreach(f, ...)
 	local firsts = {}
 	local rests = {}
 	
-	if lsts[1]:first() then
+	if #lsts > 0 and lsts[1]:first() then
 		for i, v in ipairs(lsts) do
 			table.insert(firsts, v:first())
 			table.insert(rests, v:rest())
@@ -67,7 +67,7 @@ function Seq.lib.foreach(f, ...)
 		f(unpack(firsts))
 		return Seq.lib.foreach(f, unpack(rests))
 	else
-		return lsts[1]:seq()
+		return nil
 	end
 end
 
