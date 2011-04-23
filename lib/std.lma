@@ -20,6 +20,7 @@
   `(cond ~p? ~a true nil))
 
 
+
 ;; Just to save typing.
 (defn second [s]
   (first (rest s)))

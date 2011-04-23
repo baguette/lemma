@@ -6,12 +6,9 @@
 
 ;; Apply func to each line in file
 (defn do-lines [file func]
-  (def line (.read file))
-  (if line
-      (do
-        (func line)
-        (do-lines file func))
-      nil))
+  (let-if [line (.read file)]
+    (func line)
+    (do-lines file func)))
 
 
 (let-if [quine (lua/io.open (lua/arg 1) :r)]
