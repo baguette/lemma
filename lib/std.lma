@@ -10,6 +10,7 @@
   `(def ~name (fn ~arglist ~@body)))
 
 
+
 ;; Implement the usual if expression
 (defmacro if [p? a b]
   `(cond ~p? ~a true ~b))
@@ -18,6 +19,10 @@
 (defmacro when [p? a]
   `(cond ~p? ~a true nil))
 
+
+;; Just to save typing.
+(defn second [s]
+  (first (rest s)))
 
 ;; Get a list containing the elements of xs with odd-numbered indices
 (defn odds [xs]
@@ -32,6 +37,7 @@
       (cons (first (rest xs)) (evens (rest (rest xs))))))
 
 
+
 ;; let
 (defmacro let [bindings @body]
   `((fn [~@(odds bindings)] ~@body) ~@(evens bindings)))
@@ -40,7 +46,12 @@
 (defmacro do [@body]
   `((fn [] ~@body)))
 
-
+;; it's a mix of if and let
+;; creates a binding and evaluates the body if the binding is truthy
+(defmacro let-if [binding @body]
+  (let [var (first binding)
+        val (second binding)]
+    `((fn [~var] (when ~var ~@body)) ~val)))
 
 ;; like let, but sets all bindings to the result(s) of
 ;; the first expression in body
@@ -50,8 +61,8 @@
   `((fn ~bindings ~@(rest body)) ~(first body)))
 
 
-;; This shouldn't be part of the core language, but some of
-;; the test code still relies on it.
+
+;; Evaluate body n times
 (defmacro times [n @body]
   `(do
      (defn once [i]
@@ -61,6 +72,7 @@
              ~@body
              (once (- i 1)))))
      (once ~n)))
+
 
 
 ;; Generate predicates to test for each type
@@ -74,11 +86,14 @@
           lua/env)))
     types))
 
+
+
 ;; A convenience macro for Lua interop
 (defmacro defmethod [t-dot-f args @body]
   (if (not (vector? args))
     (lua/Error (str "defmethod: expected vector, got " (lua/tostring args) " : " (lua/type args)))
     `(defn ~t-dot-f [self ~@args] ~@body)))
+
 
 
 ;; Change namespaces

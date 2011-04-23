@@ -269,6 +269,7 @@ end){
 	for k, v in pairs(t) do
 		lemma[k] = function(...)
 			local a, b = ...
+			
 			return v(a, b)
 		end
 	end
