@@ -31,7 +31,7 @@ end
 -- Execute file f in the global environment.
 -- If prompt is not nil, f should be stdin; starts a REPL.
 ---
-function exec(f, prompt)
+function exec(f)
 	local done = false
 	
 	if type(f) == 'string' then

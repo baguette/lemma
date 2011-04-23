@@ -10,13 +10,11 @@
   (print "Please telnet to localhost on port" port))
 (print "After connecting, you have 10s to enter a line to be echoed")
 
-(defn forever []
+(loop []
   (let [client (.accept server)]
     (.settimeout client 10)
     (let-values [line err] (.receive client)
-      (if line
+      (when line
           (.send client (str "> " line "\n"))))
     (.close client))
-  (forever))
-
-(forever)
+  (recur))

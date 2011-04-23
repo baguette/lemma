@@ -441,5 +441,6 @@ function ns(name)
 	lemma['*ns*'] = name
 	
 	env = new_env()
+	update_prompt()
 end
 	

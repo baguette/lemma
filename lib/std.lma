@@ -10,14 +10,18 @@
   `(def ~name (fn ~arglist ~@body)))
 
 
+;; do
+(defmacro do [@body]
+  `((fn [] ~@body)))
+
 
 ;; Implement the usual if expression
 (defmacro if [p? a b]
   `(cond ~p? ~a true ~b))
 
 ;; And if's little sister, when
-(defmacro when [p? a]
-  `(cond ~p? ~a true nil))
+(defmacro when [p? @body]
+  `(cond ~p? (do ~@body) true nil))
 
 
 
@@ -41,11 +45,13 @@
 
 ;; let
 (defmacro let [bindings @body]
-  `((fn [~@(odds bindings)] ~@body) ~@(evens bindings)))
+  `((fn ~(odds bindings) ~@body) ~@(evens bindings)))
 
-;; do
-(defmacro do [@body]
-  `((fn [] ~@body)))
+;; like let, but allows recursion using recur
+(defmacro loop [bindings @body]
+  `(do
+     (defn recur ~(odds bindings) ~@body)
+     (recur ~@(evens bindings))))
 
 ;; it's a mix of if and let
 ;; creates a binding and evaluates the body if the binding is truthy

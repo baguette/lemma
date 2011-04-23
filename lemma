@@ -12,11 +12,12 @@ LEMMA_VERSION = 0.1
 -- Execute command line argument or start a REPL
 ---
 local f = ...
-local prompt
 
 function update_prompt()
 	prompt = lemma['*ns*']..'> '
 end
+
+stdlib()
 
 if not f then
 	f = io.input()
@@ -24,5 +25,4 @@ if not f then
 	print('Lemma '..LEMMA_VERSION..' (on '.. _VERSION..')')
 end
 
-stdlib()
-exec(f, prompt)
+exec(f)
