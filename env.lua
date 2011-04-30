@@ -13,6 +13,63 @@ require 'interface/Seq'
 require 'type'
 
 ---
+-- Create a function that's been wrapped with wrap.
+-- If wrap is nil, the function is not wrapped.
+--
+-- Currently, its only use is to reduce copypasta in the fn and macro
+-- implementations.
+---
+local function genfunc(wrap)
+	wrap = wrap or function(f) return f end
+	return function(env, ...)
+		local args = {...}
+		local arglist = args[1]
+		
+		if type(arglist) ~= 'Vector' then
+			return Error('Expected vector, got '..tostring(arglist))
+		end
+		
+		for i, a in ipairs(arglist) do
+			if  type(a) ~= 'Symbol'
+			and not (type(a) == 'List'
+				and a:first() == Symbol'splice')
+			then
+				return Error('invalid syntax in arglist: '..tostring(a)..')')
+			end
+		end
+		
+		return wrap(function(...)
+			local largs = {...}
+			local env = env:enter()
+			local val
+			
+			for i = 1, #arglist do
+				local a = arglist[i]
+				
+				if type(a) == 'Symbol' then
+					env:insert(a:string(), largs[i])
+				elseif type(a) == 'List' then
+					if a:first():string() == 'splice' then
+						local lst = List()
+						for k = #largs, i, -1 do
+							lst = lst:cons(largs[k])
+						end
+						env:insert(a:rest():first():string(), lst)
+						i = #arglist + 1
+					end
+				end
+			end
+			
+			for i = 2, #args do
+				val = eval(args[i], env)
+			end
+			
+			return val
+		end)
+	end
+end
+
+---
 -- fexprs
 ---
 ;(function(t)
@@ -125,102 +182,9 @@ end){
 		return env
 	end,
 	
-	fn = function(env, ...)
-		local args = {...}
-		local arglist = args[1]
-		
-		if type(arglist) ~= 'Vector' then
-			return Error('Expected vector, got '..tostring(arglist))
-		end
-		
-		for i, a in ipairs(arglist) do
-			if  type(a) ~= 'Symbol'
-			and not (type(a) == 'List'
-			    and a:first() == Symbol'splice')
-			then
-				return Error('invalid syntax in function arglist: '..tostring(a)..')')
-			end
-		end
-		
-		return function(...)
-			local largs = {...}
-			local env = env:enter()
-			local val
-			
-			for i = 1, #arglist do
-				local a = arglist[i]
-				
-				if type(a) == 'Symbol' then
-					env:insert(a:string(), largs[i])
-				elseif type(a) == 'List' then
-					if a:first():string() == 'splice' then
-						local lst = List()
-						for k = #largs, i, -1 do
-							lst = lst:cons(largs[k])
-						end
-						env:insert(a:rest():first():string(), lst)
-						i = #arglist + 1
-					end
-				end
-			end
-			
-			for i = 2, #args do
-				val = eval(args[i], env)
-			end
-			
-			return val
-		end
-	end,
+	fn = genfunc(),
 	
-	macro = function(env, ...)
-		local args = {...}
-		local arglist = args[1]
-		
-		if type(arglist) ~= 'Vector' then
-			return Error('Expected vector, got '..tostring(arglist))
-		end
-		
-		for i, a in ipairs(arglist) do
-			if type(a) ~= 'Symbol'
-			and not (type(a) == 'List'
-			    and a:first() == Symbol'splice')
-			then
-				return Error('invalid syntax in macro arglist: '..tostring(a))
-			end
-		end
-		
-		return Macro(
-			function(...)
-				local largs = {...}
-				local env = env:enter()
-				local val
-				
-				for i = 1, #arglist do
-					local a = arglist[i]
-
-					if type(a) == 'Symbol' then
-						env:insert(a:string(), largs[i])
-					elseif type(a) == 'List' then
-						if a:first():string() == 'splice' then
-							local lst = List()
-							for k = #largs, i, -1 do
-								lst = lst:cons(largs[k])
-							end
-							env:insert(a:rest():first():string(), lst)
-							i = #arglist + 1
-						end
-					end
-				end
-			
-				for i = 2, #args do
-					val = eval(args[i], env)
-				end
-				
-				env:leave()
-				return val
-			end
-		)
-	end,
+	macro = genfunc(Macro),
 	
 	expand = function(env, ...)
 		local form = ...
