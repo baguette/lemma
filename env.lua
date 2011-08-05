@@ -13,6 +13,50 @@ require 'interface/Seq'
 require 'type'
 
 ---
+-- Some Lua functions that could really use customizing.
+---
+tostring, print = (function()
+	local xtostring = tostring
+	return function(s)
+		if type(s) == 'string' then
+			return string.format('%q', s)
+		elseif s == false then
+			return "false"
+		end
+	
+		return xtostring(s)
+	end,
+	function(...)
+		local args = {...}
+		
+		for i, v in ipairs(args) do
+			args[i] = xtostring(v)
+		end
+		
+		io.write(table.concat(args, '\t'))
+		io.write'\n'
+	end
+end)()
+
+---
+-- Write an external representation of t to stdout
+---
+function write(...)
+	local args = {...}
+	
+	if #args > 0 then
+		for i, t in ipairs(args) do
+			io.write(tostring(t))
+			io.write(' ')
+		end
+	else
+		io.write('nil')
+	end
+	io.write('\n')
+end
+
+
+---
 -- Create a function that's been wrapped with wrap.
 -- If wrap is nil, the function is not wrapped.
 --
