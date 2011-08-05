@@ -1,6 +1,7 @@
+---
 -- An association vector to store the items of a hash map before they are
 -- evaluated. The evaluated pairs should then be placed into a proper HashMap
-
+---
 require '../interface/Seq'
 require '../interface/Reversible'
 
@@ -15,77 +16,19 @@ local function __tostring(e)
 	end
 	
 	table.remove(str)
-	return '['..table.concat(str)..']'
+	return '%['..table.concat(str)..']'
 end
 
 local t = {}
 local mt = {
 	class = 'PreHashMap',
 	implements = { 'Seq', 'Reversible' },
-	__index = t,
+	__index = getmetatable(Vector()).__index,
 	__tostring = __tostring
 }
 
-function t:cons(...)
-	local new = Vector()
-	local args = {...}
-	
-	for i = 1, #args do
-		table.insert(new, args[i])
-	end
-	
-	for i = 1, #self do
-		table.insert(new, self[i])
-	end
-	
-	new['_length'] = self:length() + #args
-	return new
-end
-
-function t:length()
-	return self['_length'] or 0
-end
-
-function t:first()
-	return self[1]
-end
-
-function t:rest()
-	local new = Vector()
-	
-	for i = 2, #self do
-		table.insert(new, self[i])
-	end
-	
-	new._length = #new
-	
-	return new
-end
-
-t['empty?'] = function(self)
-	return (#self == 0)
-end
-
-function t:reverse()
-	local new = Vector()
-	
-	for i = #self, 1, -1 do
-		table.insert(new, self[i])
-	end
-	
-	return new
-end
-
 function PreHashMap(...)
-	local o = {...}
-	o._length = #o
-	setmetatable(o, mt)
-	return o
-end
-
-function t:seq()
-	local o = {}
-	o._length = 0
+	local o = Vector(...)
 	setmetatable(o, mt)
 	return o
 end

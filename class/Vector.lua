@@ -36,12 +36,12 @@ function t:cons(...)
 		table.insert(new, self[i])
 	end
 	
-	new['_length'] = self:length() + #args
+	lemma['assoc-meta'](new, 'length', self:length() + #args)
 	return new
 end
 
 function t:length()
-	return self['_length'] or 0
+	return lemma['get-meta'](self, 'length') or 0
 end
 
 function t:first()
@@ -55,7 +55,7 @@ function t:rest()
 		table.insert(new, self[i])
 	end
 	
-	new._length = #new
+	lemma['assoc-meta'](new, 'length', #new)
 	
 	return new
 end
@@ -76,14 +76,14 @@ end
 
 function Vector(...)
 	local o = {...}
-	o._length = #o
+	lemma['assoc-meta'](o, 'length', #o)
 	setmetatable(o, mt)
 	return o
 end
 
 function t:seq()
 	local o = {}
-	o._length = 0
+	lemma['assoc-meta'](o, 'length', 0)
 	setmetatable(o, mt)
 	return o
 end

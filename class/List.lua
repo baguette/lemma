@@ -33,7 +33,7 @@ function t:cons(...)
 	for i = #args, 1, -1 do
 		local last = new
 		new = { args[i], last }
-		new['_length'] = last:length() + 1
+		lemma['assoc-meta'](new, 'length', last:length() + 1)
 		setmetatable(new, mt)
 	end
 	
@@ -41,7 +41,7 @@ function t:cons(...)
 end
 
 function t:length()
-	return self['_length'] or 0
+	return lemma['get-meta'](self, 'length') or 0
 end
 
 function t:first()
@@ -79,7 +79,7 @@ end
 
 function t:seq()
 	local o = {}
-	o._length = 0
+	lemma['assoc-meta'](o, 'length', 0)
 	setmetatable(o, mt)
 	return o
 end

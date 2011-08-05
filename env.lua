@@ -305,10 +305,23 @@ function lemma.method(t, k)
 end
 
 ---
+-- This table stores any metadata associated with a particular object.
+-- It uses weak keys so that the metadata will be garbage collected if
+-- the associated object is garbage collected.
+---
+lemma['*metadata*'] = {}
+setmetatable(lemma['*metadata*'], { __mode = 'k' })
+
+---
+-- Set up the namespaces. All of the usual global stuff in Lua is moved
+-- into a lua namespace, and the lemma namespace becomes the default.
+---
+lemma['*namespaces*'] = {lua = _G, lemma = lemma}
+lemma['*ns*'] = 'lemma'
+
+---
 -- Copy some stuff from lua
 ---
-lemma.namespaces = {lua = _G, lemma = lemma}
-lemma['*ns*'] = 'lemma'
 lemma.eval = eval
 lemma.read = read
 lemma.write = write
@@ -327,7 +340,7 @@ end
 ---
 function new_env(env)
 	local b
-	if env then b = {} else b = lemma.namespaces[lemma['*ns*']] end
+	if env then b = {} else b = lemma['*namespaces*'][lemma['*ns*']] end
 	return {
 		bindings = b,
 		parent = env,		-- for implementing lexical scope
@@ -337,7 +350,7 @@ function new_env(env)
 			local ns, rest = sym:split(patt.ns..'/'..patt.ns)
 			
 			if ns and rest then
-				curr = { bindings = lemma.namespaces[ns] }
+				curr = { bindings = lemma['*namespaces*'][ns] }
 				sym = rest
 			end
 			local path = {}
@@ -397,14 +410,32 @@ env = new_env()
 ---
 -- Switch environments
 ---
-function ns(name)
-	if not lemma.namespaces[name] then
-		lemma.namespaces[name] = {}
+function lemma.ns(name)
+	if type(name) ~= 'string' then
+		return Error('ns: Expected string, got '..type(name))
 	end
 	
-	lemma['*ns*'] = name
+	-- Create an empty namespace if the specified name doesn't exist
+	if not lemma['*namespaces*'][name] then
+		lemma['*namespaces*'][name] = {}
+	end
 	
+	-- Do the switch, then update
+	lemma['*ns*'] = name
 	env = new_env()
 	update_prompt()
 end
-	
+
+lemma['assoc-meta'] = function(t, k, v)
+	if not lemma['*metadata*'][t] then
+		lemma['*metadata*'][t] = { [k] = v }
+	else
+		lemma['*metadata*'][t][k] = v
+	end
+end
+
+lemma['get-meta'] = function(t, k)
+	if lemma['*metadata*'][t] then
+		return lemma['*metadata*'][t][k]
+	end
+end

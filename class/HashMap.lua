@@ -8,15 +8,13 @@ local function __tostring(e)
 	local str = {}
 	
 	for k, v in pairs(e) do
-		if k ~= '_length' then
-			table.insert(str, tostring(k))
-			table.insert(str, ' ')
-			table.insert(str, tostring(v))
-			table.insert(str, ', ')
-		end
+		table.insert(str, tostring(k))
+		table.insert(str, ' ')
+		table.insert(str, tostring(v))
+		table.insert(str, ', ')
 	end
 	
-	table.remove(str)
+	table.remove(str)		-- get rid of the extraneous comma
 	return '{'..table.concat(str)..'}'
 end
 
@@ -40,19 +38,17 @@ function t:cons(...)
 		new[args[i]] = args[i+1]
 	end
 	
-	new['_length'] = self:length() + #args / 2
+	lemma['assoc-meta'](new, 'length', self:length() + #args / 2)
 	return new
 end
 
 function t:length()
-	return self['_length'] or 0
+	return lemma['get-meta'](self, 'length') or 0
 end
 
 function t:first()
 	for k, v in pairs(self) do
-		if k ~= '_length' then
-			return Vector(k, v)
-		end
+		return Vector(k, v)
 	end
 end
 
@@ -63,12 +59,12 @@ function t:rest()
 	for k, v in pairs(self) do
 		if skip then
 			new[k] = v
-		elseif k ~= '_length' then
+		else
 			skip = true
 		end
 	end
 	
-	new['_length'] = self:length() - 2
+	lemma['assoc-meta'](new, 'length', self:length() - 2)
 	
 	return new
 end
@@ -81,13 +77,14 @@ function HashMap(...)
 	local args = {...}
 	local o = {}
 	
-	o._length = 0
+	local len = 0
 	
 	for i = 1, #args, 2 do
 		o[args[i]] = args[i+1]
-		o._length = o._length + 1
+		len = len + 1
 	end
 	
+	lemma['assoc-meta'](o, 'length', len)
 	setmetatable(o, mt)
 	return o
 end

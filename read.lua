@@ -3,9 +3,10 @@
 ---
 
 require 'type'
+require 'env'
 require 'class/List'
 require 'class/Vector'
-require 'class/HashMap'
+require 'class/PreHashMap'
 require 'class/Symbol'
 
 
@@ -224,7 +225,7 @@ end
 local reader_macros = {
 	['(']    = read_seq(')', List),
 	['[']    = read_seq(']', Vector),
-	['{']    = read_seq('}', HashMap),
+	['{']    = read_seq('}', PreHashMap),
 	['"']    = read_delimed('"'),
 	['|']    = read_delimed('|', Symbol),
 	['.']    = table_idx('method'),

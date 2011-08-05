@@ -2,6 +2,7 @@
 -- The Lemma Evaluator
 ---
 
+require 'env'
 require 'class/List'
 require 'class/Vector'
 require 'class/PreHashMap'

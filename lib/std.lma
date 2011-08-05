@@ -100,11 +100,3 @@
   (if (not (vector? args))
     (lua/Error (str "defmethod: expected vector, got " (lua/tostring args) " : " (lua/type args)))
     `(defn ~t-dot-f [self ~@args] ~@body)))
-
-
-
-;; Change namespaces
-(defmacro ns [name]
-  (if (symbol? name)
-      `(lua/ns ~(.string name))
-      (lua/Error (str "ns: expected symbol, got " (lua/tostring name) " : " (lua/type args)))))
