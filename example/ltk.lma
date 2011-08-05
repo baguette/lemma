@@ -1,0 +1,14 @@
+;; This example makes use of ltcltk. It can be installed with luarocks, or
+;; from the website: http://tset.de/ltcltk/
+;; It's another example of Lua interoperability.
+
+(lua/require :ltk)
+
+(defn on-click []
+  (lua/print "Okay, bye!")
+  (lua/ltk.exit))
+
+(let [msg (lua/ltk.label  {:text "Hello, world!"})
+      btn (lua/ltk.button {:text "Hi!", :command on-click})]
+  (lua/ltk.pack [msg btn])
+  (lua/ltk.mainloop))
