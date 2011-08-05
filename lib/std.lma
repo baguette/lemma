@@ -100,3 +100,14 @@
   (if (not (vector? args))
     (lua/Error (str "defmethod: expected vector, got " (lua/tostring args) " : " (lua/type args)))
     `(defn ~t-dot-f [self ~@args] ~@body)))
+
+;; Temporarily here for debugging purposes
+;; Dumps the *metadata* info
+(defn dump-meta []
+  ((lua/loadstring "
+    for k, v in pairs(lemma['*metadata*']) do
+      for m, w in pairs(v) do
+        io.write(tostring(k)..': '..m..' =  '..w..'\\n')
+      end
+    end
+  ")))

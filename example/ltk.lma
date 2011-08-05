@@ -4,11 +4,16 @@
 
 (lua/require :ltk)
 
-(defn on-click []
-  (lua/print "Okay, bye!")
-  (lua/ltk.exit))
+;; Copy the ltk table from the lua namespace to save some typing.
+;; Soon, this won't be necessary.
+(def ltk lua/ltk)
 
-(let [msg (lua/ltk.label  {:text "Hello, world!"})
-      btn (lua/ltk.button {:text "Hi!", :command on-click})]
-  (lua/ltk.pack [msg btn])
-  (lua/ltk.mainloop))
+(defn on-click []
+  (print "Okay, bye!")
+  (ltk.exit))
+
+(let [msg (ltk.label  {:text "Hello, world!"})
+      btn (ltk.button {:text "Hi!", :command on-click})]
+  (ltk.pack [msg btn])
+  (ltk.mainloop))
+
