@@ -1,5 +1,8 @@
 Besides the TODOs listed in comments:
 
+- Fix bug where reader disregards nil and false literals.
+  (Use lemma/del to set variables to nil as a workaround for that
+   case. Seqs with holes are still not possible...).
 - Add :use for ns macro
 - fix Seqs -> only need first, rest, and seq
   (seq should return a Seq, not an empty whatever)

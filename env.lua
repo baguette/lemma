@@ -142,6 +142,20 @@ end){
 		return nil
 	end,
 	
+	del = function(env, ...)
+		local args = {...}
+		
+		for i = 1, #args do
+			if type(args[i]) ~= 'Symbol' then
+				return Error('attempt to del a non-variable: '..tostring(args[i]))
+			end
+			
+			env:delete(args[i]:string())
+		end
+		
+		return nil
+	end,
+	
 	['set!'] = function(env, ...)
 		local args = {...}
 		local i = 1
@@ -388,7 +402,7 @@ function new_env(env)
 	return {
 		bindings = b,
 		parent = env,		-- for implementing lexical scope
-		lookup = function(self, sym, mod, insert)
+		lookup = function(self, sym, mod, insert, nillyvanilly)
 			local patt = symbol_patterns()
 			local curr = self
 			local ns, rest = sym:split(patt.ns..'/'..patt.ns)
@@ -415,8 +429,13 @@ function new_env(env)
 						i = i + 1
 					end
 					if mod then
-						old[path[i-1]] = mod
-						return mod
+						if nillyvanilly then
+							old[path[i-1]] = nil
+							return nil
+						else
+							old[path[i-1]] = mod
+							return mod
+						end
 					else
 						return val
 					end
@@ -432,6 +451,9 @@ function new_env(env)
 		end,
 		modify = function(self, sym, val)
 			return self:lookup(sym, val)
+		end,
+		delete = function(self, sym)
+			return self:lookup(sym, true, nil, true)
 		end,
 		insert = function(self, sym, val)
 			return self:lookup(sym, val, true)

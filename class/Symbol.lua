@@ -31,4 +31,3 @@ function Symbol(str)
 end
 
 end
-	
