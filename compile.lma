@@ -51,14 +51,16 @@
                                   x)
                           "} "))
          ;; TODO: Ideally, we'd be getting a PreHashMap from read()
-         ;; ... which is good because this shit ain't working
-         ;; (I think the problem is in cons for HashMaps)
+         ;; (I think there's a problem in cons for HashMap... thus the
+         ;;  set!)
          :HashMap  (fn [x]
+                     (def t [])
+                     (for-each (fn [y]
+                                 (lua/table.insert t (str "[" (compile (first y)) "] = "
+                                      (compile (second y)) ", ")))
+                                x)
                      (str "{ "
-                          (print (map (fn [y]
-                                    (str "[" (compile (first y)) "] = "
-                                         (compile (second y)) ", "))
-                                  x))
+                          (unpack t)
                           "} "))
          ;; TODO: List needs to handle function calls in addition to specials
          :List     (fn [x]
