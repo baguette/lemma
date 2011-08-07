@@ -56,8 +56,11 @@
          :HashMap  (fn [x]
                      (def t [])
                      (for-each (fn [y]
-                                 (lua/table.insert t (str "[" (compile (first y)) "] = "
-                                      (compile (second y)) ", ")))
+                                 (lua/table.insert t (str "["
+                                                          (compile (first y))
+                                                          "] = "
+                                                          (compile (second y))
+                                                          ", ")))
                                 x)
                      (str "{ "
                           (unpack t)
