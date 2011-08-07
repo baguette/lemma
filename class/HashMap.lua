@@ -64,7 +64,7 @@ function t:rest()
 		end
 	end
 	
-	lemma['assoc-meta'](new, 'length', self:length() - 2)
+	lemma['assoc-meta'](new, 'length', self:length() - 1)
 	
 	return new
 end

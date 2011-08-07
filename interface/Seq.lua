@@ -43,6 +43,10 @@ function Seq.lib.map(f, ...)
 	local firsts = {}
 	local rests = {}
 	
+	if #lsts > 0 and not implements(lsts[1], 'Seq') then
+		return Error'Seq expected'
+	end
+	
 	if #lsts > 0 and lsts[1]:first() then
 		for i, v in ipairs(lsts) do
 			table.insert(firsts, v:first())
@@ -58,6 +62,10 @@ function Seq.lib.foreach(f, ...)
 	local lsts = {...}
 	local firsts = {}
 	local rests = {}
+	
+	if #lsts > 0 and not implements(lsts[1], 'Seq') then
+		return Error'Seq expected'
+	end
 	
 	if #lsts > 0 and lsts[1]:first() then
 		for i, v in ipairs(lsts) do

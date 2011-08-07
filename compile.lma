@@ -21,7 +21,6 @@
                       (format "local %s = %s\n" (compile k) (compile v)))
                     ks
                     vs)))
-     
      :fn  (fn [xs]
             (let [args (first xs)
                   body (rest  xs)]
@@ -44,12 +43,23 @@
          :string   (fn [x] (format "%q " x))
          :Symbol   (fn [x] (.string x))
          :boolean  (fn [x] (if x :true :false))
-         ;:False    (fn [x] :false)
          :Nil      (fn [x] :nil)
-         ;; TODO: Vector needs to be Luified
-         :Vector   (fn [x] (tostring x))
-         ;; TODO: HashMap needs to be Luified (and/or PreHashMap?)
-         :HashMap  (fn [x] (tostring x))
+         :Vector   (fn [x]
+                     (str "{ "
+                          (mapcat (fn [y]
+                                    (str (compile y) ", "))
+                                  x)
+                          "} "))
+         ;; TODO: Ideally, we'd be getting a PreHashMap from read()
+         ;; ... which is good because this shit ain't working
+         ;; (I think the problem is in cons for HashMaps)
+         :HashMap  (fn [x]
+                     (str "{ "
+                          (print (map (fn [y]
+                                    (str "[" (compile (first y)) "] = "
+                                         (compile (second y)) ", "))
+                                  x))
+                          "} "))
          ;; TODO: List needs to handle function calls in addition to specials
          :List     (fn [x]
                      ;(print (lua/tostring (first x)))
@@ -57,7 +67,8 @@
                        (if f (f (rest x)))))
        }]
      (if (switch (type exp))
-         ((switch (type exp)) exp))))
+         ((switch (type exp)) exp)
+         :nil)))
 
 (print (compile '(def f (fn [x] (def y 42) y))))
 (print (compile [:hi :there :buddy!]))
