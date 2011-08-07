@@ -85,4 +85,5 @@
          ((switch (type exp)) exp)
          :nil)))
 
+(lua/io.write "> ")
 (print (compile (lua/read (lua/FileStream (lua/io.input)))))
