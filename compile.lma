@@ -17,6 +17,7 @@
                       (format "local %s = %s\n" (compile k) (compile v)))
                     ks
                     vs)))))
+     ;; TODO: add 'return ' before last expression in `body`
      :fn  (fn [xs]
             (let [args (first xs)
                   body (rest  xs)]
