@@ -43,6 +43,8 @@ function eval(t, env)
 		string  = pass,
 		boolean = pass,
 		table   = pass,
+		Nil     = function() return nil end,
+		False   = function() return false end,
 		Vector  = dovec,
 		PreHashMap = dohash,
 		HashMap = pass,

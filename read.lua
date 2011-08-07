@@ -8,6 +8,8 @@ require 'class/List'
 require 'class/Vector'
 require 'class/PreHashMap'
 require 'class/Symbol'
+require 'class/Nil'
+require 'class/False'
 
 local symbol =			 -- this is perhaps a little too permissive
 [[([%a%-%?%*%+%%%$%^<>/\\_=:&!][%.%a%d%-%?%*%+%%%$%^<>/\\_=:&|!~@']*)]]
@@ -23,7 +25,7 @@ end
 -- TODO: false and nil don't mean anything in lists... so basically nowhere in
 --       lemma... use lemma/del as a workaround for nilifying variables
 local function tovalue(x)
-	local t = {['true'] = true, ['false'] = false, ['nil'] = nil}
+	local t = {['true'] = true, ['false'] = False, ['nil'] = Nil}
 	return t[x]
 end
 

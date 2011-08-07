@@ -1,0 +1,58 @@
+
+;; TODO: Macros, etc.
+
+(def format lua/string.format)
+(def concat lua/table.concat)
+(def unpack lua/Seq.lib.unpack)
+(def tostring lua/tostring)
+(def type   lua/type)
+
+;; TODO: More specials?
+(def specials {
+    :def (fn [xs]
+           (let [ks (odds  xs)
+                 vs (evens xs)]
+             (str (unpack
+               (map (fn [k v]
+                      (format "local %s = %s\n" (compile k) (compile v)))
+                    ks
+                    vs)))))
+     :fn  (fn [xs]
+            (let [args (first xs)
+                  body (rest  xs)]
+              (str "function("
+                   (lua/string.sub (str (unpack (map (fn [arg]
+                                                    (format "%s, "
+                                                      (compile arg)))
+                                                  args)))
+                                   1
+                                   -3)
+                   ")\n"
+                   (str (unpack (map compile body)))
+                   "\nend")))
+  })
+
+(defn compile [exp]
+  (let [switch {
+         :number   (fn [x] (format "%d" x))
+         :string   (fn [x] (format "%q" x))
+         :Symbol   (fn [x] (.string x))
+         :boolean  (fn [x] (if x :true :false))
+         ;:False    (fn [x] :false)
+         :Nil      (fn [x] :nil)
+         ;; TODO: Vector needs to be Luified
+         :Vector   (fn [x] (tostring x))
+         ;; TODO: HashMap needs to be Luified (and/or PreHashMap?)
+         :HashMap  (fn [x] (tostring x))
+         ;; TODO: List needs to handle function calls in addition to specials
+         :List     (fn [x]
+                     (print (lua/tostring (first x)))
+                     (let [f (specials (lua/tostring (first x)))]
+                       (if f (f (rest x)))))
+       }]
+     (if (switch (type exp))
+         ((switch (type exp)) exp))))
+
+(print (compile '(def f (fn [x] 42))))
+(print (compile [:hi :there :buddy!]))
+(print (compile {:x 42, :y 69}))
