@@ -62,12 +62,13 @@ function eval(t, env)
 				return op(env, Seq.lib.unpack(lst))
 			elseif type(op) == 'Macro' then
 				return eval(op(Seq.lib.unpack(lst)), env)
-			elseif type(op) == 'function' then
+			elseif type(op) == 'function'
+			or     type(op) == 'HashMap'
+			or     type(op) == 'Vector'
+			then
 				lst = Seq.lib.map(function(x) return eval(x, env) end, lst)
 				return op(Seq.lib.unpack(lst))
 			elseif type(op) == 'table'
-			or type(op) == 'HashMap'
-			or type(op) == 'Vector'
 			or (type(op) == 'userdata' and getmetatable(op).__index)
 			then
 				local key = eval(lst:first(), env)

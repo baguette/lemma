@@ -18,12 +18,22 @@ local function __tostring(e)
 	return '{'..table.concat(str)..'}'
 end
 
+local function __call(t, k, v)
+	if v then
+		t[k] = v
+		return v
+	else
+		return t[k]
+	end
+end
+
 local t = {}
 local mt = {
 	class = 'HashMap',
 	implements = { 'Seq' },
 	__index = t,
-	__tostring = __tostring
+	__tostring = __tostring,
+	__call = __call
 }
 
 function t:cons(...)
