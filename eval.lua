@@ -59,9 +59,9 @@ function eval(t, env)
 			if type(op) == 'Error' then
 				return op
 			elseif type(op) == 'Fexpr' then
-				return op(env, Seq.lib.unpack(lst))
+				return op.func(env, Seq.lib.unpack(lst))
 			elseif type(op) == 'Macro' then
-				return eval(op(Seq.lib.unpack(lst)), env)
+				return eval(op.func(Seq.lib.unpack(lst)), env)
 			elseif type(op) == 'function'
 			or     type(op) == 'HashMap'
 			or     type(op) == 'Vector'

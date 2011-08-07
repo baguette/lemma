@@ -84,11 +84,15 @@ function t:reverse()
 	return new
 end
 
-function Vector(...)
-	local o = {...}
+function Vectorize(o)
 	lemma['assoc-meta'](o, 'length', #o)
 	setmetatable(o, mt)
 	return o
+end
+
+function Vector(...)
+	local o = {...}
+	return Vectorize(o)
 end
 
 function t:seq()

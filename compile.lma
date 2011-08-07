@@ -14,44 +14,60 @@
 ;; Not exactly Clojure's mapcat, since this concat isn't exactly Clojure's
 ;; concat... return the string concatenation of a mapped seq
 (defn mapcat [f @xs]
-  (str (unpack (map f ,@xs))))
+  (str (unpack (map f ~@xs))))
 
 ;; TODO: More specials: cond, macro
 (def specials {
-    :def (fn [xs]
-           (let [ks (odds  xs)
-                 vs (evens xs)]
-             (mapcat (fn [k v]
-                      (format "local %s = %s\n" (compile k) (compile v)))
-                    ks
-                    vs)))
-     :fn  (fn [xs]
-            (let [args (first xs)
-                  body (rest  xs)]
-              (let [funstuff ["function("
-                              (lua/string.sub (mapcat
-                                                (fn [arg]
-                                                  (str (compile arg) ", "))
-                                                args)
-                                              1
-                                              -3)
-                              ")\n"
-                              (unpack (map compile body))
-                              "\nend"]]
-                (lua/table.insert funstuff (- (length funstuff) 1) "return ")
-                (concat funstuff))))})
-
+    ;; TODO: Make cond output work as an expression rather than a statement
+    :cond (fn [xs]
+            (let [ks (odds  xs)
+                  vs (evens xs)]
+              (str "if (" (compile (first ks)) ") then\n"
+                     (compile (first vs))
+                (mapcat (fn [k v]
+                          (str "\nelseif (" (compile k) ") then\n"
+                            (compile v)))
+                        (rest ks)
+                        (rest vs))
+                "\nend\n")))
+    :def  (fn [xs]
+            (let [ks (odds  xs)
+                  vs (evens xs)]
+              (mapcat (fn [k v]
+                       (format "local %s = %s\n" (compile k) (compile v)))
+                     ks
+                     vs)))
+     :fn   (fn [xs]
+             (let [args (first xs)
+                   body (rest  xs)]
+               (let [funstuff ["function("
+                               (lua/string.sub (mapcat
+                                                 (fn [arg]
+                                                   (str (compile arg) ", "))
+                                                 args)
+                                               1
+                                               -3)
+                               ")\n"
+                               (unpack (map compile body))
+                               "\nend"]]
+                 (lua/table.insert funstuff (- (length funstuff) 1) "return ")
+                 (concat funstuff))))})
+;;;
 ;; Take an internal representation (e.g., from read()) and output Lua code
+;;;
 (defn compile [exp]
   (let [switch {
          :number     (fn [x] (format "%d " x))
          :string     (fn [x] (format "%q " x))
-         :Symbol     (fn [x] (.string x))
+         ;; TODO: Handle namespaces and table members
+         :Symbol     (fn [x] (str "getfenv()[\""
+                                  (.string x)
+                                  "\"]"))
          :boolean    (fn [x] (if x :true :false))
          :False      (fn [x] :false)
          :Nil        (fn [x] :nil)
          :Vector     (fn [x]
-                       (str "Vector{ "
+                       (str "Vectorize{ "
                             (mapcat (fn [y]
                                       (str (compile y) ", "))
                                     x)
@@ -66,14 +82,15 @@
                                                             (compile (second y))
                                                             ", ")))
                                   x)
-                       (str "HashMap{ "
+                       (str "Mapify{ "
                             (unpack t)
                             "} "))
          ;; Could preserve order here if we don't defer to HashMap compilation
          :PreHashMap (fn [x]
                        (compile (lua/HashMap (unpack x))))
-         ;; Needs to handle table lookups if first is not a special or function
-         ;; -> add __call metamethods to all Lemma-generated tables
+         ;;; TODO
+         ;; Needs to check if the head is a macro, and not compile arguments
+         ;; if so, then call the macro to insert compiled code...
          :List       (fn [x]
                        ;(print (lua/tostring (first x)))
                        (let [f (specials (lua/tostring (first x)))]
@@ -93,4 +110,7 @@
 
 ;; Compile one expression for testing
 (lua/io.write "> ")
-(print (compile (lua/read (lua/FileStream (lua/io.input)))))
+(let [code (compile (lua/read (lua/FileStream (lua/io.input))))]
+	(print code)
+	(lua/io.write ";=> ")
+	((lua/loadstring code)))

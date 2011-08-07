@@ -83,20 +83,25 @@ t['empty?'] = function(self)
 	return (self:length() == 0)
 end
 
+function Mapify(o)
+	local len = 0
+	for k, v in pairs(o) do
+		len = len + 1
+	end
+	lemma['assoc-meta'](o, 'length', len)
+	setmetatable(o, mt)
+	return o
+end
+
 function HashMap(...)
 	local args = {...}
 	local o = {}
 	
-	local len = 0
-	
 	for i = 1, #args, 2 do
 		o[args[i]] = args[i+1]
-		len = len + 1
 	end
 	
-	lemma['assoc-meta'](o, 'length', len)
-	setmetatable(o, mt)
-	return o
+	return Mapify(o)
 end
 
 function t:seq()
