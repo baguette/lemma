@@ -7,29 +7,33 @@
 (def tostring lua/tostring)
 (def type   lua/type)
 
+;; Not exactly Clojure's mapcat, since this concat isn't exactly Clojure's
+;; concat... return the string concatenation of a mapped seq
+(defn mapcat [f @xs]
+  (str (unpack (map f ,@xs))))
+
 ;; TODO: More specials?
 (def specials {
     :def (fn [xs]
            (let [ks (odds  xs)
                  vs (evens xs)]
-             (str (unpack
-               (map (fn [k v]
+             (mapcat (fn [k v]
                       (format "local %s = %s\n" (compile k) (compile v)))
                     ks
-                    vs)))))
+                    vs)))
      ;; TODO: add 'return ' before last expression in `body`
      :fn  (fn [xs]
             (let [args (first xs)
                   body (rest  xs)]
               (str "function("
-                   (lua/string.sub (str (unpack (map (fn [arg]
+                   (lua/string.sub (mapcat (fn [arg]
                                                     (format "%s, "
                                                       (compile arg)))
-                                                  args)))
+                                                  args)
                                    1
                                    -3)
                    ")\n"
-                   (str (unpack (map compile body)))
+                   (mapcat compile body)
                    "\nend")))
   })
 
