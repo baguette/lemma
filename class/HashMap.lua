@@ -83,6 +83,7 @@ t['empty?'] = function(self)
 	return (self:length() == 0)
 end
 
+-- TODO: This should preserve any potential metatable of o, if possible
 function Mapify(o)
 	local len = 0
 	for k, v in pairs(o) do

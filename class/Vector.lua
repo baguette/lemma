@@ -84,6 +84,7 @@ function t:reverse()
 	return new
 end
 
+-- TODO: This should preserve any potential metatable of o, if possible
 function Vectorize(o)
 	lemma['assoc-meta'](o, 'length', #o)
 	setmetatable(o, mt)
