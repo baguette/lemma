@@ -16,6 +16,9 @@
 (defn mapcat [f @xs]
   (str (unpack (map f ~@xs))))
 
+(defn c-eval [exp]
+  ((lua/assert (lua/loadstring (str "local _env = lemma\n" (compile exp))))))
+
 ;; TODO: More specials: macro, ...
 (def specials {
     :cond (fn [xs]
@@ -94,8 +97,11 @@
          :List       (fn [x]
                        ;(print (lua/tostring (first x)))
                        (let [f (specials (lua/tostring (first x)))]
-                         (if f (f (rest x))
-                               (str (compile (first x))
+                         (if f (f h)
+                           (let [head (lua/eval (first x) (getenv))]
+                               (if (= :Macro (type head))
+                                 (compile ((get head :func) (unpack (rest x))))
+                                 (str (compile (first x))
                                     "("
                                     (lua/string.sub
                                       (mapcat (fn [y]
@@ -103,15 +109,15 @@
                                               (rest x))
                                       1
                                       -3)
-                                    ")"))))}]
+                                    ")"))))))}]
      (if (switch (type exp))
          ((switch (type exp)) exp)
-         :nil)))
+         :ERROR)))
 
 (def lua/str str)
 ;; Compile one expression for testing
 (lua/io.write "> ")
-(let [code (compile (lua/read (lua/FileStream (lua/io.input))))]
+(let [code (str "local _env = lemma\n" (compile (lua/read (lua/FileStream (lua/io.input)))))]
 	(print code)
 	(lua/io.write ";=> ")
 	((lua/assert (lua/loadstring code))))

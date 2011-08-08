@@ -14,7 +14,7 @@ local function __tostring(e)
 end
 
 local function __call(e, ...)
-	return print(lemma.compile(e.func(...)))
+	return e.func(...)
 end
 
 local t = {}
