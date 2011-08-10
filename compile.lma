@@ -1,0 +1,75 @@
+;;;
+;; Work-in-progress compiler for Lemma
+;; Still needs:
+;;  - More special forms
+;;  - Macro support
+;;  - Working compilation for (Pre)HashMaps
+;;  - Probably other stuff I'm not thinking of right now...
+;;;
+
+(def format lua/string.format)
+
+(def specials {
+  :def     (fn [xs]
+             (let [k (first  xs)
+                   v (second xs)]
+               (let [local (if (= 0 (sym-len)) "" "local ")]
+                 (print (str local (sym-new k) " = " (compile v) ";\n")))))
+  :fn      (fn [xs]
+             (let [args (first xs)
+                   body (rest  xs)]
+               (sym-push)
+               (let [vars (map (fn [x] (str (sym-new x) ", ")) args)]
+                 (let [hyperbanana ["(function("
+                                    (lua/string.sub (str @vars) 1 -3)
+                                    ")\n"
+                                    @(map compile body)]]
+                   (lua/table.insert hyperbanana (length hyperbanana) "return ")
+                   (sym-pop)
+                   (str (lua/table.concat hyperbanana) " end)")))))
+  })
+
+(defn compile [exp]
+  (let [types {
+    :number     (fn [x] (format "%d" x))
+    :string     (fn [x] (format "%q" x))
+    :boolean    (fn [x] (if x :true :false))
+    :Nil        (fn [x] :nil)
+    :False      (fn [x] :false)
+    :Vector     (fn [x]
+                  (let [mems (map (fn [a] (str (compile a) ", ")) x)]
+                    (str "Vectorize{"  @mems "}")))
+    :HashMap    (fn [x]
+                  (let [mems (map (fn [a]
+                                    (str "["
+                                         (compile (first a))
+                                         "] = "
+                                         (compile (second a))
+                                         ", "))
+                                     x)]
+                    (str "Mapify{" @mems "}")))
+    :PreHashMap (fn [x] (compile (lua/HashMap @x)))
+    :Symbol     (fn [x] (sym-find x))
+    :List       (fn [x]
+                  (let [head (first x)]
+                    (if (specials (.string head))
+                        ((specials (.string head)) (rest x))
+                        (let [args (map (fn [a]
+                                          (str (compile a)
+                                               ", "))
+                                        (rest x))]
+                          (str (compile head) "("
+                               (lua/string.sub (str @args) 1 -3) ");\n")))))
+  }]
+    (if (types (type exp))
+      ((types (type exp)) exp)
+      "-- Whoops!\n")))
+
+
+(lua/io.write "> ")
+(let [code (compile (lua/read (lua/FileStream (lua/io.input))))]
+  (print "-------")
+  (print code)
+  (print "-------")
+  (lua/io.write ";=> ")
+  ((lua/assert (lua/loadstring code))))

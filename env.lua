@@ -10,6 +10,7 @@ require 'class/HashMap'
 require 'class/Symbol'
 require 'class/Error'
 require 'interface/Seq'
+require 'symtab'
 require 'type'
 
 ---
@@ -376,6 +377,7 @@ setmetatable(lemma['*metadata*'], { __mode = 'k' })
 ---
 lemma['*namespaces*'] = {lua = _G, lemma = lemma}
 lemma['*ns*'] = 'lemma'
+lemma['*ns-val*'] = lemma['*namespaces*']['lemma']
 
 ---
 -- Copy some stuff from lua
@@ -384,6 +386,7 @@ lemma.eval = eval
 lemma.read = read
 lemma.write = write
 lemma.print = print
+lemma.type = type
 lemma.map = Seq.lib.map
 lemma['for-each'] = Seq.lib.foreach
 
@@ -488,6 +491,7 @@ function lemma.ns(name)
 	
 	-- Do the switch, then update
 	lemma['*ns*'] = name
+	lemma['*ns-val*'] = lemma['*namespaces*'][name]
 	env = new_env()
 	update_prompt()
 end
@@ -537,4 +541,16 @@ lemma['local-env'] = function()
 		i = i + 1
 	end
 	return vars
+end
+
+function lemma.length(t)
+	if implements(t, 'Seq') then
+		return t:length()
+	elseif type(t) == 'table' then
+		return #t
+	elseif type(t) == 'string' then
+		return string.len(t)
+	else
+		return Error("Don't know how to get length of "..type(t))
+	end
 end
