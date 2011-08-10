@@ -387,6 +387,7 @@ lemma.read = read
 lemma.write = write
 lemma.print = print
 lemma.type = type
+lemma.tostring = tostring
 lemma.map = Seq.lib.map
 lemma['for-each'] = Seq.lib.foreach
 

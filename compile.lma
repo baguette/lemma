@@ -4,6 +4,9 @@
 ;;  - More special forms
 ;;  - Macro support
 ;;  - Working compilation for (Pre)HashMaps
+;;  - There's a bug (probably in Seq.lib somewhere) that causes
+;;    functions to be applied to sequences in reverse order. This
+;;    needs fixin'.
 ;;  - Probably other stuff I'm not thinking of right now...
 ;;;
 
@@ -14,7 +17,7 @@
              (let [k (first  xs)
                    v (second xs)]
                (let [local (if (= 0 (sym-len)) "" "local ")]
-                 (print (str local (sym-new k) " = " (compile v) ";\n")))))
+                 (str local (sym-new k) " = " (compile v) ";\n"))))
   :fn      (fn [xs]
              (let [args (first xs)
                    body (rest  xs)]
@@ -26,7 +29,7 @@
                                     @(map compile body)]]
                    (lua/table.insert hyperbanana (length hyperbanana) "return ")
                    (sym-pop)
-                   (str (lua/table.concat hyperbanana) " end)")))))
+                   (str (lua/table.concat hyperbanana) "\nend)")))))
   })
 
 (defn compile [exp]
