@@ -29,6 +29,18 @@
                    (lua/table.insert hyperbanana (length hyperbanana) "return ")
                    (sym-pop)
                    (str (lua/table.concat hyperbanana) "\nend)")))))
+  :cond (fn [xs]
+          (let [ks (odds  xs)
+                vs (evens xs)]
+            (str "(function()\n"
+              "if (" (compile (first ks)) ") then\nreturn "
+                   (compile (first vs))
+              @(map (fn [k v]
+                      (str "\nelseif (" (compile k) ") then\nreturn "
+                        (compile v)))
+                      (rest ks)
+                      (rest vs))
+              "\nend\nend)()\n")))
   })
 
 (defn compile [exp]
