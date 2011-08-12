@@ -259,9 +259,7 @@ end){
 	end
 }
 
-function lemma.splice(q)
-	return Seq.lib.unpack(q)
-end
+lemma.splice = Seq.lib.unpack
 
 ---
 -- "utility functions"
@@ -312,6 +310,11 @@ end
 
 function lemma.str(...)
 	local t = {...}
+	for i, v in ipairs(t) do
+		if type(v) ~= 'string' then
+			t[i] = tostring(v)
+		end
+	end
 	return table.concat(t)
 end
 

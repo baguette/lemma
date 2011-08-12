@@ -3,10 +3,9 @@
 ;; Still needs:
 ;;  - More special forms
 ;;  - Macro support
-;;  - Working compilation for (Pre)HashMaps
-;;  - There's a bug (probably in Seq.lib somewhere) that causes
-;;    functions to be applied to sequences in reverse order. This
-;;    needs fixin'.
+;;  - The reader at compile time can store certain objects (such as numbers)
+;;    as strings. This will reduce the amount of conversion that needs to
+;;    be done, and also make some of the generated code better.
 ;;  - Probably other stuff I'm not thinking of right now...
 ;;;
 
@@ -43,13 +42,17 @@
                   (let [mems (map (fn [a] (str (compile a) ", ")) x)]
                     (str "Vectorize{"  @mems "}")))
     :HashMap    (fn [x]
-                  (let [mems (map (fn [a]
-                                    (str "["
-                                         (compile (first a))
-                                         "] = "
-                                         (compile (second a))
-                                         ", "))
-                                     x)]
+                  (let [mems []]
+                  ;; In the imperative style because map produces another hash
+                  ;; but we want something we can concat.
+                    (for-each (fn [a]
+                                (lua/table.insert mems
+                                                  (str "["
+                                                       (compile (first a))
+                                                       "] = "
+                                                       (compile (second a))
+                                                       ", ")))
+                              x)
                     (str "Mapify{" @mems "}")))
     :PreHashMap (fn [x] (compile (lua/HashMap @x)))
     :Symbol     (fn [x] (sym-find x))

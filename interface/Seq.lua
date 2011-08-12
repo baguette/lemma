@@ -52,7 +52,8 @@ function Seq.lib.map(f, ...)
 			table.insert(firsts, v:first())
 			table.insert(rests, v:rest())
 		end
-		return Seq.lib.map(f, unpack(rests)):cons(f(unpack(firsts)))
+		local h = {f(unpack(firsts))}
+		return Seq.lib.map(f, unpack(rests)):cons(unpack(h))
 	else
 		return lsts[1]:seq()
 	end
