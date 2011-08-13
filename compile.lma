@@ -56,15 +56,14 @@
              (let [args (first xs)
                    body (rest  xs)]
                (sym-push)
-               (let [vars (map (fn [x] (str (sym-new x) ", ")) args)]
                  (let [hyperbanana ["(function("
-                                    (lua/string.sub (str @vars) 1 -3)
+                                    (comma-map sym-new args)
                                     ")\n"
                                     @(map compile body)]]
                    (lua/table.insert hyperbanana (length hyperbanana) "return ")
                    (sym-pop)
-                   (str "\n-- function(" @(map (fn [x] (str x ", ")) args) ")\n"
-                        (lua/table.concat hyperbanana) "\nend)")))))
+                   (str "\n-- function(" (comma-map (fn[x]x) args) ")\n"
+                        (lua/table.concat hyperbanana) "\nend)"))))
   :cond (fn [xs]
           (let [ks (odds  xs)
                 vs (evens xs)]
@@ -86,9 +85,7 @@
     :boolean    (fn [x] (if x :true :false))
     :Nil        (fn [x] :nil)
     :False      (fn [x] :false)
-    :Vector     (fn [x]
-                  (let [mems (map (fn [a] (str (compile a) ", ")) x)]
-                    (str "Vectorize{"  @mems "}")))
+    :Vector     (fn [x] (str "Vectorize{"  (comma-map compile x) "}"))
     :HashMap    (fn [x]
                   (let [mems []]
                   ;; In the imperative style because map produces another hash
@@ -108,11 +105,8 @@
                   (let [head (first x)]
                     (if (specials (.string head))
                         ((specials (.string head)) (rest x))
-                        (let [args (map (fn [a]
-                                          (str (compile a) ", "))
-                                        (rest x))]
-                          (str (compile head) "("
-                               (lua/string.sub (str @args) 1 -3) ")\n")))))
+                        (str (compile head) "("
+                             (comma-map compile (rest x)) ")\n"))))
   }]
     (if (types (type exp))
       ((types (type exp)) exp)
