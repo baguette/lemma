@@ -1,8 +1,9 @@
 ;;;
 ;; Work-in-progress compiler for Lemma
 ;; Still needs:
-;;  - More special forms:  quasiquote, unquote, splice, macro, expand
-;;  - Support for compiling macro expansions
+;;  - More special forms:  quasiquote, unquote, macro, expand
+;;  - Support for metadata
+;;  - Better error handling
 ;;  - Probably other stuff I'm not thinking of right now...
 ;;;
 
@@ -38,7 +39,7 @@
   :ns      (fn [xs]
              (let [ns (first xs)]
                (if (not (string? ns))
-                 (Error (str "Argument to ns must be string. (Got " (type ns) ")"))
+                 (lua/Error (str "ns: string expected (Got " (type ns) ")"))
                  (do
                    (set! cur-ns ns)
                    (str "lemma[\"*ns*\"] = " ns ";\n")))))
@@ -103,8 +104,13 @@
     :Symbol     (fn [x] (sym-find x))
     :List       (fn [x]
                   (let [head (first x)]
-                    (if (specials (.string head))
+                    (cond
+                      (specials (.string head))
                         ((specials (.string head)) (rest x))
+                      (= :Macro (type (lua/eval head (getenv))))
+                        (let [f (get (lua/eval head (getenv)) :func)]
+                          (compile (f @(rest x))))
+                      :else
                         (str (compile head) "("
                              (comma-map compile (rest x)) ")\n"))))
   }]

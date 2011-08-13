@@ -21,7 +21,7 @@ local function namespace(str)
 		end
 		
 		-- TODO: make a vector of namespaces that are currently referred to
-		--       and lookup symbols in them first
+		--       and lookup symbols in them if no symbols is found
 		if ns == '*ns*' then
 			ns = lemma['cur-ns']
 		end
