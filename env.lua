@@ -380,7 +380,6 @@ setmetatable(lemma['*metadata*'], { __mode = 'k' })
 ---
 lemma['*namespaces*'] = {lua = _G, lemma = lemma}
 lemma['*ns*'] = 'lemma'
-lemma['*ns-val*'] = lemma['*namespaces*']['lemma']
 
 ---
 -- Copy some stuff from lua
@@ -495,7 +494,6 @@ function lemma.ns(name)
 	
 	-- Do the switch, then update
 	lemma['*ns*'] = name
-	lemma['*ns-val*'] = lemma['*namespaces*'][name]
 	env = new_env()
 	update_prompt()
 end
@@ -512,39 +510,6 @@ lemma['get-meta'] = function(t, k)
 	if lemma['*metadata*'][t] then
 		return lemma['*metadata*'][t][k]
 	end
-end
-
----
--- The need for this should disappear when the compiler
--- starts to maintain a symbol table.
----
-lemma['local-env'] = function()
-	local vars = {}
-	local i = 1
-	local f = debug.getinfo(2, 'f').func
-	for k, v in pairs(getfenv(2)) do
-		vars[k] = v
-	end
-	while true do
-		local k, v = debug.getupvalue(f, i)
-		if k ~= nil then
-			vars[k] = v
-		else
-			break
-		end
-		i = i + 1
-	end
-	i = 1
-	while true do
-		local k, v = debug.getlocal(2, i)
-		if k ~= nil then
-			vars[k] = v
-		else
-			break
-		end
-		i = i + 1
-	end
-	return vars
 end
 
 function lemma.length(t)

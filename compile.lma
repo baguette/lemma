@@ -73,11 +73,10 @@
                     (if (specials (.string head))
                         ((specials (.string head)) (rest x))
                         (let [args (map (fn [a]
-                                          (str (compile a)
-                                               ", "))
+                                          (str (compile a) ", "))
                                         (rest x))]
                           (str (compile head) "("
-                               (lua/string.sub (str @args) 1 -3) ");\n")))))
+                               (lua/string.sub (str @args) 1 -3) ")\n")))))
   }]
     (if (types (type exp))
       ((types (type exp)) exp)
