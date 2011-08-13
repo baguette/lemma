@@ -10,6 +10,7 @@ require 'class/PreHashMap'
 require 'class/Symbol'
 require 'class/Nil'
 require 'class/False'
+require 'class/Number'
 
 local symbol =			 -- this is perhaps a little too permissive
 [[([%a%-%?%*%+%%%$%^<>/\\_=:&!][%.%a%d%-%?%*%+%%%$%^<>/\\_=:&|!~@']*)]]
@@ -29,10 +30,12 @@ local function tovalue(x)
 	return t[x]
 end
 
+local handle_number = {}
+
 -- these are tried in order (make them specific!)
 local atoms = {
-	'^([%+%-]?%d+%.?%d+)',		tonumber,	-- with decimal point
-	'^([%+%-]?%d+)',			tonumber,	-- without decimal point
+	'^([%+%-]?%d+%.?%d+)',		handle_number,	-- with decimal point
+	'^([%+%-]?%d+)',			handle_number,	-- without decimal point
 	'^(true)',					tovalue,
 	'^(false)',					tovalue,
 	'^(nil)',					tovalue,
@@ -62,7 +65,7 @@ local delim = {
 
 -- TODO: would probably be beneficial to make this tail-recursive
 local function read_seq(eos, func)
-	return function(f)
+	return function(f, co)
 		local list = {}
 		
 		while true do
@@ -78,7 +81,7 @@ local function read_seq(eos, func)
 				return func(unpack(list))
 			else
 				f:unget(c)
-				local form = read(f)
+				local form = read(f, co)
 				if form == 'eof' then return 'eof' end
 				table.insert(list, form)
 			end
@@ -87,7 +90,7 @@ local function read_seq(eos, func)
 end
 
 local function read_delimed(delim, constr)
-	return function(f)
+	return function(f, co)
 		local str = {}
 		local escape = false
 		
@@ -124,7 +127,7 @@ local function read_delimed(delim, constr)
 	end
 end
 
-local function read_keyword(f)
+local function read_keyword(f, co)
 	local str = {}
 	while true do
 		local c = f:get()
@@ -139,7 +142,7 @@ local function read_keyword(f)
 	end
 end
 
-local function read_comment(f)
+local function read_comment(f, co)
 	local c
 	repeat
 		c = f:get()
@@ -148,7 +151,7 @@ local function read_comment(f)
 	return nil
 end
 
-local function read_multicomment(f)
+local function read_multicomment(f, co)
 	local last, c
 	
 	while true do
@@ -164,22 +167,22 @@ local function read_multicomment(f)
 	end
 end
 
-local function read_datumcomment(f)
-	read(f)
+local function read_datumcomment(f, c)
+	read(f, c)
 	return nil
 end
 
 local function read_quote(sym)
-	return function(f)
+	return function(f, c)
 		local q = List()
-		return q:cons(read(f)):cons(Symbol(sym))
+		return q:cons(read(f, c)):cons(Symbol(sym))
 	end
 end
 
 local function table_idx(func)
-	return function(f)
-		local k = read(f):string()
-		local t = read(f)
+	return function(f, c)
+		local k = read(f, c):string()
+		local t = read(f, c)
 		return List():cons(k):cons(t):cons(Symbol(func))
 	end
 end
@@ -206,10 +209,18 @@ local reader_macros = {
 
 
 ---
--- Read the next form from stream f
+-- Read the next form from stream f. (Set compiling when... compiling.)
 ---
-function read(f)
+function read(f, compiling)
 	local form = nil
+	
+	if compiling then
+		local mt = { __call = function(x, n) return Number(n) end }
+		setmetatable(handle_number, mt)
+	else
+		local mt = { __call = function(x, n) return tonumber(n) end }
+		setmetatable(handle_number, mt)
+	end
 	
 	---
 	-- If it's not whitespace, and it's not a reader macro, then
@@ -232,7 +243,7 @@ function read(f)
 	end
 	
 	if type(macro) == 'function' then
-		form = macro(f)
+		form = macro(f, compiling)
 	else
 		local str = {}
 		while not delim[c] and not whitespace[c] do

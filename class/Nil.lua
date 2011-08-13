@@ -24,7 +24,7 @@ local mt = {
 Nil = {}
 
 function Nil:string()
-	return str
+	return 'Nil'
 end
 
 setmetatable(Nil, mt)

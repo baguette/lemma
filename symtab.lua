@@ -28,7 +28,7 @@ local function namespace(str)
 			ns = '"'..ns..'"'
 		end
 		
-		local v = {'lemma["*namespaces*"][', ns, ']'}
+		local v = {'_NS[', ns, ']'}
 		for m in string.gmatch(mem, '([^%.]+)') do
 			table.insert(v, '["')
 			table.insert(v, m)

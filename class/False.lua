@@ -24,7 +24,7 @@ local mt = {
 False = {}
 
 function False:string()
-	return str
+	return 'False'
 end
 
 setmetatable(False, mt)

@@ -3,9 +3,6 @@
 ;; Still needs:
 ;;  - More special forms
 ;;  - Macro support
-;;  - The reader at compile time can store certain objects (such as numbers)
-;;    as strings. This will reduce the amount of conversion that needs to
-;;    be done, and also make some of the generated code better.
 ;;  - Probably other stuff I'm not thinking of right now...
 ;;;
 
@@ -45,7 +42,7 @@
 
 (defn compile [exp]
   (let [types {
-    :number     (fn [x] (format "%d" x))
+    :Number     (fn [x] (.string x))
     :string     (fn [x] (format "%q" x))
     :boolean    (fn [x] (if x :true :false))
     :Nil        (fn [x] :nil)
@@ -80,11 +77,11 @@
   }]
     (if (types (type exp))
       ((types (type exp)) exp)
-      "-- Whoops!\n")))
+      (str "-- Whoops! " exp` "\n"))))
 
 
 (lua/io.write "> ")
-(let [code (compile (lua/read (lua/FileStream (lua/io.input))))]
+(let [code (compile (lua/read (lua/FileStream (lua/io.input)) true))]
   (print "-------")
   (print code)
   (print "-------")
