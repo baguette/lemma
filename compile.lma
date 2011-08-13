@@ -8,7 +8,41 @@
 
 (def format lua/string.format)
 
+(def cur-ns :lemma)
+
+;; Map f over xs, then return the concatenated results separated by commas
+(defn comma-map [f xs]
+  (let [strs (map (fn [a] (str (f a) ", ")) xs)]
+    (lua/string.sub (str @strs) 1 -3)))  ; remove the trailing comma
+
+(defn gen-quote [t]
+  (fn [x] (str t "(" (comma-map quote x) ")")))
+
+;; Quote is like compile, but it follows a different evaluation strategy.
+;; For self-evaluating forms, it delegates the work to compile.
+(defn quote [xs]
+  (let [types {
+    :Symbol   (fn [x] (str "Symbol(\"" (.string x) "\")"))
+    :List     (gen-quote :List)
+    :Vector   (gen-quote :Vector)
+    }]
+    (if (= :List (type xs))
+      (def x (first xs))
+      (def x xs))
+    (let [t (type x)]
+      (if (types t)
+          ((types t) x)
+          (compile xs)))))
+
 (def specials {
+  :ns      (fn [xs]
+             (let [ns (first xs)]
+               (if (not (string? ns))
+                 (Error (str "Argument to ns must be string. (Got " (type ns) ")"))
+                 (do
+                   (set! cur-ns ns)
+                   (str "lemma[\"*ns*\"] = " ns ";\n")))))
+  :quote   quote
   :def     (fn [xs]
              (let [k (first  xs)
                    v (second xs)]
@@ -25,7 +59,8 @@
                                     @(map compile body)]]
                    (lua/table.insert hyperbanana (length hyperbanana) "return ")
                    (sym-pop)
-                   (str (lua/table.concat hyperbanana) "\nend)")))))
+                   (str "\n-- function(" @(map (fn [x] (str x ", ")) args) ")\n"
+                        (lua/table.concat hyperbanana) "\nend)")))))
   :cond (fn [xs]
           (let [ks (odds  xs)
                 vs (evens xs)]

@@ -20,15 +20,13 @@ local function namespace(str)
 			return Error"This should not be a Symbol."
 		end
 		
-		-- TODO: current namespace can be known at compile time
-		-- ALSO: find other ways to make this less ugly
+		-- TODO: make a vector of namespaces that are currently referred to
+		--       and lookup symbols in them first
 		if ns == '*ns*' then
-			ns = 'lemma["*ns*"]'
-		else
-			ns = '"'..ns..'"'
+			ns = lemma['cur-ns']
 		end
 		
-		local v = {'_NS[', ns, ']'}
+		local v = {'_NS["', ns, '"]'}
 		for m in string.gmatch(mem, '([^%.]+)') do
 			table.insert(v, '["')
 			table.insert(v, m)
