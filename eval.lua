@@ -7,6 +7,7 @@ require 'class/List'
 require 'class/Vector'
 require 'class/PreHashMap'
 require 'class/HashMap'
+require 'class/Iter'
 require 'interface/Seq'
 
 stacktrace={}

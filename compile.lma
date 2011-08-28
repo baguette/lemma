@@ -1,7 +1,7 @@
 ;;;
 ;; Work-in-progress compiler for Lemma
 ;; Still needs:
-;;  - More special forms:  quasiquote, unquote, macro, expand
+;;  - More special forms:  quasiquote, unquote, expand
 ;;  - Support for metadata
 ;;  - Better error handling
 ;;  - Probably other stuff I'm not thinking of right now...
@@ -17,11 +17,11 @@
     (lua/string.sub (str @strs) 1 -3)))  ; remove the trailing comma
 
 (defn gen-quote [t]
-  (fn [x] (str t "(" (comma-map quote x) ")")))
+  (fn [x] (str t "(" (comma-map handle-quote x) ")")))
 
 ;; Quote is like compile, but it follows a different evaluation strategy.
 ;; For self-evaluating forms, it delegates the work to compile.
-(defn quote [xs]
+(defn handle-quote [xs]
   (let [types {
     :Symbol   (fn [x] (str "Symbol(\"" (.string x) "\")"))
     :List     (gen-quote :List)
@@ -35,6 +35,22 @@
           ((types t) x)
           (compile xs)))))
 
+(defn handle-quasiquote [xs]
+  
+
+(defn handle-fn [xs]
+  (let [args (first xs)
+        body (rest  xs)]
+    (sym-push)
+      (let [hyperbanana ["(function("
+                         (comma-map sym-new args)
+                         ")\n"
+                         @(map compile body)]]
+        (lua/table.insert hyperbanana (length hyperbanana) "return ")
+        (sym-pop)
+        ; "\n-- function(" (comma-map (fn[x]x) args) ")\n"
+        (str (lua/table.concat hyperbanana) "\nend)"))))
+
 (def specials {
   :ns      (fn [xs]
              (let [ns (first xs)]
@@ -43,7 +59,8 @@
                  (do
                    (set! cur-ns ns)
                    (str "lemma[\"*ns*\"] = " ns ";\n")))))
-  :quote   quote
+  :quote   handle-quote
+  :quasiquote handle-quasiquote
   :def     (fn [xs]
              (let [k (first  xs)
                    v (second xs)]
@@ -53,30 +70,20 @@
              (let [k (first  xs)
                    v (second xs)]
                (str (sym-find k) " = " (compile v) ";\n")))
-  :fn      (fn [xs]
-             (let [args (first xs)
-                   body (rest  xs)]
-               (sym-push)
-                 (let [hyperbanana ["(function("
-                                    (comma-map sym-new args)
-                                    ")\n"
-                                    @(map compile body)]]
-                   (lua/table.insert hyperbanana (length hyperbanana) "return ")
-                   (sym-pop)
-                   (str "\n-- function(" (comma-map (fn[x]x) args) ")\n"
-                        (lua/table.concat hyperbanana) "\nend)"))))
-  :cond (fn [xs]
-          (let [ks (odds  xs)
-                vs (evens xs)]
-            (str "(function()\n"
-              "if (" (compile (first ks)) ") then\nreturn "
-                   (compile (first vs))
-              @(map (fn [k v]
-                      (str "\nelseif (" (compile k) ") then\nreturn "
-                        (compile v)))
-                      (rest ks)
-                      (rest vs))
-              "\nend\nend)()\n")))
+  :fn      handle-fn
+  :macro   (fn [xs] (str "Macro" (handle-fn xs)))
+  :cond    (fn [xs]
+             (let [ks (odds  xs)
+                   vs (evens xs)]
+               (str "(function()\n"
+                 "if (" (compile (first ks)) ") then\nreturn "
+                      (compile (first vs))
+                 @(map (fn [k v]
+                         (str "\nelseif (" (compile k) ") then\nreturn "
+                           (compile v)))
+                         (rest ks)
+                         (rest vs))
+                 "\nend\nend)()\n")))
   })
 
 (defn compile [exp]
