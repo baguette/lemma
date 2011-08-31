@@ -1,8 +1,9 @@
 ;;;
 ;; Work-in-progress compiler for Lemma
 ;; Still needs:
-;;  - More special forms:  quasiquote, unquote, expand
-;;  - Support for metadata
+;;  - Unsplice support in fn parameter vectors
+;;  - More special forms:  expand
+;;  - Support for metadata (and subsequently doc-strings)
 ;;  - Better error handling
 ;;  - Probably other stuff I'm not thinking of right now...
 ;;;
@@ -47,6 +48,7 @@
 (defn handle-quasiquote [xs]
   (compile (second (invert-quasiquote xs))))
 
+;; This needs to handle @args in the parameter vector
 (defn handle-fn [xs]
   (let [args (first xs)
         body (rest  xs)]
@@ -123,8 +125,9 @@
                     (cond
                       (specials (.string head))
                         ((specials (.string head)) (rest x))
-                      (= :Macro (type (lua/eval head (getenv))))
-                        (let [f (get (lua/eval head (getenv)) :func)]
+                      ;; Currently, macros only work if defined at top level
+                      (= :Macro (type (lua/eval head lua/env)))
+                        (let [f (get (lua/eval head lua/env) :func)]
                           (compile (f @(rest x))))
                       :else
                         (str (compile head) "("
@@ -135,7 +138,7 @@
       (str "-- Whoops! " exp` "\n"))))
 
 (loop []
-(lua/io.write "> ")
+(lua/io.write "\n> ")
 (let [code (compile (lua/read (lua/FileStream (lua/io.input)) true))]
   (print "-------")
   (print code)
