@@ -5,6 +5,7 @@
 ;;  - More special forms:  expand
 ;;  - Support for metadata (and subsequently doc-strings)
 ;;  - Better error handling
+;;  - Support for aliasing the builtins?  e.g.: (def lambda fn)
 ;;  - Probably other stuff I'm not thinking of right now...
 ;;;
 
@@ -138,15 +139,15 @@
       (str "-- Whoops! " exp` "\n"))))
 
 (loop []
-(lua/io.write "\n> ")
-(let [code (compile (lua/read (lua/FileStream (lua/io.input)) true))]
-  (print "-------")
-  (print code)
-  (print "-------")
-  (let [f (lua/assert (lua/loadstring code))]
-    (if (= :function (type f))
-        (do
-          (lua/io.write ";=> ")
-          (f))
-        (print f))))
-(recur))
+  (lua/io.write "\n> ")
+  (let [code (compile (lua/read (lua/FileStream (lua/io.input)) true))]
+    (print "-------")
+    (print code)
+    (print "-------")
+    (let [f (lua/assert (lua/loadstring code))]
+      (if (= :function (type f))
+          (do
+            (lua/io.write ";=> ")
+            (f))
+          (print f))))
+  (recur))
