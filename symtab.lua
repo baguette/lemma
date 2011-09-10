@@ -18,25 +18,33 @@ local symtab = {}
 local uses   = {'lemma'}
 local vararg = false
 
+local function splitns(str)
+	local _, _, ns, mem = string.find(str, "(.+)/(.+)")
+	return ns, mem
+end
+
 ---
 -- Maybe this function should be provided/exported so that quasiquote
 -- can qualify symbols...
 ---
 local function resolve(str)
-	-- TODO: make a vector of namespaces that are currently referred to
-	--       and lookup symbols in them if no symbol is found
+	local ns, mem = splitns(str)
+	if ns then
+		return ns, mem
+	end
 	ns = lemma['cur-ns']
+	mem = str
 	for i = #uses, 1, -1 do
-		if _NS[uses[i]][str] then
+		if _NS[uses[i]][mem] then
 			ns = uses[i]
 			break
 		end
 	end
-	return ns
+	return ns, mem
 end
 
 local function namespace(str)
-	local _, _, ns, mem = string.find(str, "(.+)/(.+)")
+	local ns, mem = splitns(str)
 	if ns then
 		if not mem then
 			return Error"This should not be a Symbol."
@@ -99,8 +107,6 @@ lemma['sym-new'] = function(s)
 	local str = s:string()
 	local n = #symtab
 	
-	-- Problem here with uses lookup... maybe divide ns lookups
-	-- from ns insertions.
 	if n == 0 then
 		return namespace('*ns*/'..str)
 	end
@@ -117,7 +123,7 @@ lemma['sym-find'] = function(s)
 	local str = s:string()
 	local n = #symtab
 	
-	local ns = resolve(str)
+	local ns, str = resolve(str)
 	
 	local v = {}
 	for m in string.gmatch(str, '([^%.]+)') do
