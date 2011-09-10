@@ -9,15 +9,32 @@
 ---
 require 'class/Error'
 
+---
+-- This is ugly.
+---
 do
 
 local symtab = {}
+local uses   = {'lemma'}
 local vararg = false
 
 ---
 -- Maybe this function should be provided/exported so that quasiquote
 -- can qualify symbols...
 ---
+local function resolve(str)
+	-- TODO: make a vector of namespaces that are currently referred to
+	--       and lookup symbols in them if no symbol is found
+	ns = lemma['cur-ns']
+	for i = #uses, 1, -1 do
+		if _NS[uses[i]][str] then
+			ns = uses[i]
+			break
+		end
+	end
+	return ns
+end
+
 local function namespace(str)
 	local _, _, ns, mem = string.find(str, "(.+)/(.+)")
 	if ns then
@@ -25,10 +42,12 @@ local function namespace(str)
 			return Error"This should not be a Symbol."
 		end
 		
-		-- TODO: make a vector of namespaces that are currently referred to
-		--       and lookup symbols in them if no symbols is found
-		if ns == '*ns*' then
+		if (ns == '*ns*') then
 			ns = lemma['cur-ns']
+		end
+		
+		if _NS[ns] == nil then
+			_NS[ns] = {}
 		end
 		
 		local v = {'_NS["', ns, '"]'}
@@ -80,10 +99,9 @@ lemma['sym-new'] = function(s)
 	local str = s:string()
 	local n = #symtab
 	
-	local ns = namespace(str)
-	if ns then
-		return ns
-	elseif n == 0 then
+	-- Problem here with uses lookup... maybe divide ns lookups
+	-- from ns insertions.
+	if n == 0 then
 		return namespace('*ns*/'..str)
 	end
 	
@@ -99,10 +117,7 @@ lemma['sym-find'] = function(s)
 	local str = s:string()
 	local n = #symtab
 	
-	local ns = namespace(str)
-	if ns then
-		return ns
-	end
+	local ns = resolve(str)
 	
 	local v = {}
 	for m in string.gmatch(str, '([^%.]+)') do
@@ -126,7 +141,7 @@ lemma['sym-find'] = function(s)
 		end
 	end
 	
-	return namespace('*ns*/'..str)
+	return namespace(ns..'/'..str)
 end
 
 end
