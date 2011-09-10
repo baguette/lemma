@@ -1,7 +1,6 @@
 ;;;
 ;; Work-in-progress compiler for Lemma
 ;; Still needs:
-;;  - Unsplice support in fn parameter vectors
 ;;  - More special forms:  expand
 ;;  - Support for metadata (and subsequently doc-strings)
 ;;  - Better error handling
@@ -37,6 +36,8 @@
 (defn handle-quote [xs]
   (rec-quote (first xs)))
 
+;; Translate a list of the form `(a ~b) to a list of the form (list 'a b), etc.
+;; I don't think this will nest properly as-is.
 (defn invert-quasiquote [xs]
   (if (= :List (type xs))
       (let [x (first xs)]
@@ -49,7 +50,6 @@
 (defn handle-quasiquote [xs]
   (compile (second (invert-quasiquote xs))))
 
-;; This needs to handle @args in the parameter vector
 (defn handle-fn [xs]
   (let [args (first xs)
         body (rest  xs)]
@@ -57,12 +57,16 @@
       (let [hyperbanana ["(function("
                          (comma-map sym-new args)
                          ")\n"
+                         (let-if [s (sym-vararg?)]
+                           (str "local " s " = List(...)\n"))  ; nil bug
                          @(map compile body)]]
         (lua/table.insert hyperbanana (length hyperbanana) "return ")
         (sym-pop)
         ; "\n-- function(" (comma-map (fn[x]x) args) ")\n"
         (str (lua/table.concat hyperbanana) "\nend)"))))
 
+;; TODO: Fexpr handling rather than a specials table.
+;;       Such a mechanism will enable defs like: (def lambda fn)
 (def specials {
   :ns      (fn [xs]
              (let [ns (first xs)]

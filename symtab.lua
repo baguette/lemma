@@ -12,7 +12,12 @@ require 'class/Error'
 do
 
 local symtab = {}
+local vararg = false
 
+---
+-- Maybe this function should be provided/exported so that quasiquote
+-- can qualify symbols...
+---
 local function namespace(str)
 	local _, _, ns, mem = string.find(str, "(.+)/(.+)")
 	if ns then
@@ -41,6 +46,12 @@ lemma['sym-len'] = function()
 	return #symtab
 end
 
+lemma['sym-vararg?'] = function()
+	local v = vararg
+	vararg = false
+	return v
+end
+
 lemma['sym-push'] = function ()
 	local t = {0}
 	table.insert(symtab, t)
@@ -52,6 +63,20 @@ lemma['sym-pop'] = function()
 end
 
 lemma['sym-new'] = function(s)
+	if type(s) == 'List' then
+		local f, r = s:first(), s:rest()
+		if  type(f) == 'Symbol'
+		and f:string() == 'splice'
+		then
+			local sym = r:first()
+			if type(sym) == 'Symbol' then
+				vararg = lemma['sym-new'](sym)
+				return '...'
+			else
+				return nil, 'Error parsing splice.'
+			end
+		end
+	end
 	local str = s:string()
 	local n = #symtab
 	

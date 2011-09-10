@@ -1,0 +1,6 @@
+;; Just for shits 'n' giggles.
+;; An expression which evaluates to itself.
+;; See also:  Y combinator.
+
+(let [let '`(let [let '~let] ~let)]
+  `(let [let '~let] ~let))
