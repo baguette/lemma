@@ -87,7 +87,7 @@
   (for-each
     (fn [s]
       (let [name (lua/Symbol (str "lemma/" (.lower s) "?"))]
-        (eval
+        (lua/eval
           `(def ~name (fn [a]
              (= (lua/type a) ~s)))
           lua/env)))

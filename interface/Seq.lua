@@ -7,7 +7,7 @@ Seq ={}
 Seq.sig = {
 	'first',
 	'rest',
-	'cons',
+--	'cons',
 	'empty?',
 	'length',
 	'seq'

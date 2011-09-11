@@ -139,8 +139,8 @@
                              (comma-map compile (rest x)) ")"))))
   }]
     (if (types (type exp))
-      ((types (type exp)) exp)
-      (str "-- Whoops! " exp` "\n"))))
+        ((types (type exp)) exp)
+        (str "-- Whoops! " exp` "\n"))))
 
 (loop []
   (lua/io.write "\n> ")

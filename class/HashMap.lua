@@ -23,7 +23,8 @@ local function __call(t, k, v)
 		t[k] = v
 		return v
 	else
-		return t[k]
+		-- use rawget to avoid pretending methods are part of the hashmap
+		return rawget(t, k)
 	end
 end
 
