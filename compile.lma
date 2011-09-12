@@ -137,12 +137,13 @@
                       :else
                         (str (compile head) "("
                              (comma-map compile (rest x)) ")"))))
+    :Error      (fn [x] x)
   }]
     (if (types (type exp))
         ((types (type exp)) exp)
-        (str "-- Whoops! " exp` "\n"))))
+        #;(str "-- Whoops! " exp` "\n"))))
 
-(loop []
+#;(loop []
   (lua/io.write "\n> ")
   (let [code (compile (lua/read (lua/FileStream (lua/io.input)) true))]
     (print "-------")
@@ -155,3 +156,11 @@
             (f))
           (print f))))
   (recur))
+
+(let-if [f (lua/io.open (second *sys-args*))]
+  (loop [code "-- Lemma 0.2 --"]
+    (when (not (= (lua/Error :eof) code))
+      (lua/io.write (str code "\n"))
+      (recur (compile (lua/read (lua/FileStream f) true)))))
+  (lua/io.write "-- EOF --\n")
+  (.close f))

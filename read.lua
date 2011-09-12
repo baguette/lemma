@@ -70,11 +70,11 @@ local function read_seq(eos, func)
 		
 		while true do
 			local c = f:get()
-			if not c then return 'eof' end
+			if not c then return Error'eof' end
 			
 			while whitespace[c] do
 				c = f:get()
-				if not c then return 'eof' end
+				if not c then return Error'eof' end
 			end
 			
 			if c == eos then
@@ -82,7 +82,7 @@ local function read_seq(eos, func)
 			else
 				f:unget(c)
 				local form = read(f, co)
-				if form == 'eof' then return 'eof' end
+				if form == Error'eof' then return Error'eof' end
 				table.insert(list, form)
 			end
 		end
@@ -96,7 +96,7 @@ local function read_delimed(delim, constr)
 		
 		while true do
 			local c = f:get()
-			if not c then return 'eof' end
+			if not c then return Error'eof' end
 			
 			if c == delim and not escape then
 				local str = table.concat(str)
@@ -131,7 +131,7 @@ local function read_keyword(f, co)
 	local str = {}
 	while true do
 		local c = f:get()
-		if not c then return 'eof' end
+		if not c then return Error'eof' end
 		
 		if delim[c] or whitespace[c] then
 			f:unget(c)
@@ -146,7 +146,7 @@ local function read_comment(f, co)
 	local c
 	repeat
 		c = f:get()
-		if not c then return 'eof' end
+		if not c then return Error'eof' end
 	until c == '\n'
 	return nil
 end
@@ -157,7 +157,7 @@ local function read_multicomment(f, co)
 	while true do
 		last = c
 		c = f:get()
-		if not c then return 'eof' end
+		if not c then return Error'eof' end
 		
 		if last == '#' and c == '|' then
 			read_multicomment(f)
@@ -228,17 +228,17 @@ function read(f, compiling)
 	---
 	
 	local c = f:get()
-	if not c then return 'eof' end
+	if not c then return Error'eof' end
 	
 	while whitespace[c] do
 		c = f:get()
-		if not c then return 'eof' end
+		if not c then return Error'eof' end
 	end
 	
 	local macro = reader_macros[c]
 	while type(macro) == 'table' do
 		c = f:get()
-		if c == 'eof' then return 'eof' end
+		if c == Error'eof' then return Error'eof' end
 		macro = macro[c]
 	end
 	
@@ -249,7 +249,7 @@ function read(f, compiling)
 		while not delim[c] and not whitespace[c] do
 			table.insert(str, c)
 			c = f:get()
-			if not c then return 'eof' end
+			if not c then return Error'eof' end
 		end
 		
 		f:unget(c)

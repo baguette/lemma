@@ -13,12 +13,19 @@ local mt = {
 	__tostring = __tostring
 }
 
+local cache = {}
+
 function Error(s)
+	if cache[s] then
+		return cache[s]
+	end
+	
 	local o = {}
 	function o:string()
 		return s
 	end
 	setmetatable(o, mt)
+	cache[s] = o
 	return o
 end
 

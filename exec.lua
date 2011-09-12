@@ -47,23 +47,28 @@ function exec(f)
 		local t, e = read(f)                       -- read an expression!
 	
 		if not e then
-			if t == 'eof' then
+			if t == Error'eof' then
 				if prompt then io.write('\n') end
 				done = true
 				f:close()
+				return
 			else
 --				print (f:lines())
-				local val = {eval(t, env)}           -- evaluate the expression!
+				local val = {eval(t, env)}         -- evaluate the expression!
 				local err = false
 				
 				for i, v in ipairs(val) do
-					if type(v) == 'Error' then
+					if v == Error'eof' then
+						done = true
+						f:close()
+						return
+					elseif type(v) == 'Error' then
 						io.stderr:write (f:lines() .. ': ' .. tostring(v) .. '\n')
 						err = true
 					end
 				end
 				if prompt and not err then
-					io.write';=> ' ; write(unpack(val))                -- print the value!
+					io.write';=> ' ; write(unpack(val))    -- print the value!
 				end
 			end
 		else
