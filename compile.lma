@@ -128,8 +128,8 @@
     :List       (fn [x]
                   (let [head (first x)]
                     (cond
-                      (specials (.string head))
-                        ((specials (.string head)) (rest x))
+                      (specials (tostring head))
+                        ((specials (tostring head)) (rest x))
                       ;; Currently, macros only work if defined at top level
                       (= :Macro (type (lua/eval head lua/env)))
                         (let [f (get (lua/eval head lua/env) :func)]
@@ -160,7 +160,7 @@
 (let-if [f (lua/io.open (second *sys-args*))]
   (loop [code "-- Lemma 0.2 --"]
     (when (not (= (lua/Error :eof) code))
-      (lua/io.write (str code "\n"))
+      (lua/io.write (str (or code "") "\n"))
       (recur (compile (lua/read (lua/FileStream f) true)))))
   (lua/io.write "-- EOF --\n")
   (.close f))

@@ -18,6 +18,14 @@ local symtab = {}
 local uses   = {'lemma'}
 local vararg = false
 
+function lemma.use(ns)
+	if type(ns) == 'string' then
+		table.insert(uses, ns)
+	else
+		return Error'use: string expected'
+	end
+end
+
 local function splitns(str)
 	local _, _, ns, mem = string.find(str, "(.+)/(.+)")
 	return ns, mem
