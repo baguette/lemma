@@ -13,12 +13,15 @@
 (def cur-ns :lemma)
 
 ;; Map f over xs, then return the concatenated results separated by commas
-(defn comma-map [f xs]
-  (let [strs (map (fn [a] (str (f a) ", ")) xs)]
-    (lua/string.sub (str @strs) 1 -3)))  ; remove the trailing comma
+(defn mapstr [f xs sep]
+  (when (not sep)
+        (set! sep "")
+        true)    ; TODO:  this really shouldn't be necessary...
+  (let [strs (map (fn [a] (str (f a) sep)) xs)]
+    (lua/string.sub (str @strs) 1 (- -1 (.len sep)))))   ; remove trailing sep
 
 (defn gen-quote [t]
-  (fn [x] (str t "(" (comma-map rec-quote x) ")")))
+  (fn [x] (str t "(" (mapstr rec-quote x ", ") ")")))
 
 ;; Quote is like compile, but it follows a different evaluation strategy.
 ;; For self-evaluating forms, it delegates the work to compile.
@@ -37,14 +40,17 @@
   (rec-quote (first xs)))
 
 ;; Translate a list of the form `(a ~b) to a list of the form (list 'a b), etc.
-;; I don't think this will nest properly as-is.
+;; I don't think this will nest properly as-is, and it certainly doesn't
+;; handle hashmaps.
 (defn invert-quasiquote [xs]
-  (if (= :List (type xs))
-      (let [x (first xs)]
-        (if (and (= :Symbol (type x))
-                 (= :unquote (.string x)))
-            (second xs)
-            (cons 'lua/List (map invert-quasiquote xs))))
+  (cond (= :List (type xs))
+        (let [x (first xs)]
+          (if (and (= :Symbol (type x))
+                   (= :unquote (.string x)))
+              (second xs)
+              (cons 'lua/List (map invert-quasiquote xs))))
+        (= :Vector (type xs))
+        (cons 'lua/Vector (map invert-quasiquote xs))
       `(quote ~xs)))
 
 (defn handle-quasiquote [xs]
@@ -55,10 +61,11 @@
         body (rest  xs)]
     (sym-push)
       (let [hyperbanana ["(function("
-                         (comma-map sym-new args)
+                         (mapstr sym-new args ", ")
                          ")\n"
                          (let-if [s (sym-vararg?)]
-                           (str "local " s " = List(...)\n"))  ; nil bug
+                           (str "local " s " = List(...)\n")   ; nil bug
+                           "")
                          @(map compile body)]]
         (lua/table.insert hyperbanana (length hyperbanana) "return ")
         (sym-pop)
@@ -100,6 +107,10 @@
                          (rest ks)
                          (rest vs))
                  "\nend\nend)()\n")))
+  :and     (fn [xs]
+             (str "(" (mapstr compile xs " and ") ")"))
+  :or      (fn [xs]
+             (str "(" (mapstr compile xs " or ") ")"))
   })
 
 (defn compile [exp]
@@ -109,7 +120,7 @@
     :boolean    (fn [x] (if x :true :false))
     :Nil        (fn [x] :nil)
     :False      (fn [x] :false)
-    :Vector     (fn [x] (str "Vectorize{"  (comma-map compile x) "}"))
+    :Vector     (fn [x] (str "Vectorize{"  (mapstr compile x ", ") "}"))
     :HashMap    (fn [x]
                   (let [mems []]
                   ;; In the imperative style because map produces another hash
@@ -136,7 +147,7 @@
                           (compile (f @(rest x))))
                       :else
                         (str (compile head) "("
-                             (comma-map compile (rest x)) ")"))))
+                             (mapstr compile (rest x) ", ") ")"))))
     :Error      (fn [x] x)
   }]
     (if (types (type exp))
@@ -158,9 +169,10 @@
   (recur))
 
 (let-if [f (lua/io.open (second *sys-args*))]
-  (loop [code "-- Lemma 0.2 --"]
-    (when (not (= (lua/Error :eof) code))
-      (lua/io.write (str (or code "") "\n"))
-      (recur (compile (lua/read (lua/FileStream f) true)))))
-  (lua/io.write "-- EOF --\n")
-  (.close f))
+  (do
+    (loop [code "-- Lemma 0.2 --"]
+      (when (not (= (lua/Error :eof) code))
+        (lua/io.write (str (or code "") "\n"))
+        (recur (compile (lua/read (lua/FileStream f) true)))))
+    (lua/io.write "-- EOF --\n")
+    (.close f)))

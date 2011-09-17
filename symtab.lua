@@ -110,8 +110,20 @@ lemma['sym-new'] = function(s)
 			else
 				return nil, 'Error parsing splice.'
 			end
+		else
+			print('Error in binding for '..f:string()..':'..type(f)..' '..tostring(s))
+			return 'Error'
 		end
+	elseif type(s) ~= 'Symbol' then
+		return nil, 'Symbol expected, got '..type(s)
 	end
+	
+	if not s.string then
+		print 'wtf is happening ?!'
+		print(type(s))
+		return nil, 'Error'
+	end
+	
 	local str = s:string()
 	local n = #symtab
 	

@@ -41,6 +41,7 @@ function eval(t, env)
 	local switch = {
 		Error   = pass,
 		number  = pass,
+		Number  = function() return tonumber(val:string()) end,    --wtf?
 		string  = pass,
 		boolean = pass,
 		table   = pass,

@@ -44,7 +44,7 @@ function Seq.lib.map(f, ...)
 	local rests = {}
 	
 	if #lsts > 0 and not implements(lsts[1], 'Seq') then
-		return Error'Seq expected'
+		return Error('map: Seq expected, got '..type(lsts[1]))
 	end
 	
 	if #lsts > 0 and lsts[1]:first() then
@@ -65,7 +65,7 @@ function Seq.lib.foreach(f, ...)
 	local rests = {}
 	
 	if #lsts > 0 and not implements(lsts[1], 'Seq') then
-		return Error'Seq expected'
+		return Error('for-each: Seq expected, got '..type(lsts[1]))
 	end
 	
 	if #lsts > 0 and lsts[1]:first() then
@@ -85,7 +85,7 @@ function Seq.lib.unpack(lst)
 	local curr = lst
 	
 	if not implements(lst, 'Seq') then
-		return Error'Seq expected'
+		return Error('unpack: Seq expected, got '..type(lst))
 	end
 	
 	while not curr['empty?'](curr) do

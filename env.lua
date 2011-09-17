@@ -270,8 +270,19 @@ lemma.splice = Seq.lib.unpack
 		lemma[k] = function(...)
 			local args = {...}
 			local diff = args[1] or 0
+			
+			-- TODO: clean this up once the real problem has been found...
+			if type(diff) ~= 'number' then
+				print(k..': number expected, got '..type(diff)..': '..tostring(diff))
+				return nil, 'Error: number expected'
+			end
 	
 			for i = 2, #args do
+				local ai = args[i]
+				if type(ai) ~= 'number' then
+					print(k..': number expected, got '..type(ai)..': '..tostring(ai))
+					return nil, 'Error: number expected'
+				end
 				diff = v(diff, args[i])
 			end
 	

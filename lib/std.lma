@@ -61,10 +61,10 @@
 
 ;; it's a mix of if and let
 ;; creates a binding and evaluates the body if the binding is truthy
-(defmacro let-if [binding @body]
+(defmacro let-if [binding texpr fexpr]
   (let [var (first binding)
         val (second binding)]
-    `((fn [~var] (when ~var ~@body)) ~val)))
+    `((fn [~var] (if ~var ~texpr ~fexpr)) ~val)))
 
 ;; like let, but sets all bindings to the result(s) of
 ;; the first expression in body
