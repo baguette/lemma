@@ -1,5 +1,0 @@
-#!/bin/sh
-
-lemma compile.lma lib/std.lma > std.out.lua
-lemma compile.lma compile.lma > compile.out.lua
-cat header.lua std.out.lua compile.out.lua > lemmac.lua
