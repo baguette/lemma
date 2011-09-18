@@ -38,6 +38,7 @@ end
 
 Seq.lib = {}
 
+-- TODO: Make this iterative
 function Seq.lib.map(f, ...)
 	local lsts = {...}
 	local firsts = {}
@@ -54,9 +55,8 @@ function Seq.lib.map(f, ...)
 			firsts[m] = v:first()
 			rests[m]  = v:rest()
 		end
-		local h = {f(unpack(firsts, 1, m))}
-	--	print (h[1])
-		return Seq.lib.map(f, unpack(rests, 1, m)):cons(unpack(h, 1, m))
+		local h = Vector(f(unpack(firsts, 1, m)))
+		return Seq.lib.map(f, unpack(rests, 1, m)):cons(unpack(h, 1, h:length()))
 	else
 		return lsts[1]:seq()
 	end
@@ -91,7 +91,7 @@ function Seq.lib.unpack(lst)
 	local n = 0
 	
 	if not implements(lst, 'Seq') then
-		return Error('unpack: Seq expected, got '..type(lst))
+		return Error('unpack: Seq expected, got '..type(lst)..': '..tostring(lst))
 	end
 	
 	while not curr['empty?'](curr) do

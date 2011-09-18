@@ -26,7 +26,7 @@ end
 -- TODO: false and nil don't mean anything in lists... so basically nowhere in
 --       lemma... use lemma/del as a workaround for nilifying variables
 local function tovalue(x)
-	local t = {['true'] = true, ['false'] = false, ['nil'] = Nil}
+	local t = {['true'] = true, ['false'] = false, ['nil'] = nil}
 	return t[x]
 end
 
@@ -67,6 +67,7 @@ local delim = {
 local function read_seq(eos, func)
 	return function(f, co)
 		local list = {}
+		local n = 0
 		
 		while true do
 			local c = f:get()
@@ -78,12 +79,13 @@ local function read_seq(eos, func)
 			end
 			
 			if c == eos then
-				return func(unpack(list))
+				return func(unpack(list, 1, n))
 			else
 				f:unget(c)
 				local form = read(f, co)
 				if form == Error'eof' then return Error'eof' end
-				table.insert(list, form)
+				n = n + 1
+				list[n] = form
 			end
 		end
 	end
@@ -265,7 +267,7 @@ function read(f, compiling)
 		end
 		
 		if not form then
-			return nil, 'lexical error on token: '..f:get()..str
+			return Error('lexical error on token: '..f:get()..str)
 		end
 	end
 	

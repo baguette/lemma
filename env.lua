@@ -44,11 +44,12 @@ end)()
 -- Write an external representation of t to stdout
 ---
 function write(...)
+	local n = select('#', ...)
 	local args = {...}
 	
-	if #args > 0 then
-		for i, t in ipairs(args) do
-			io.write(tostring(t))
+	if n > 0 then
+		for i = 1, n do
+			io.write(tostring(args[i]))
 			io.write(' ')
 		end
 	else

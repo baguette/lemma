@@ -18,10 +18,6 @@ function eval(t, env)
 	val = t
 	typ = type(t)
 	
-	if not val then
-		return val
-	end
-	
 	local function pass()
 		return val
 	end
@@ -44,7 +40,6 @@ function eval(t, env)
 		Number  = function() return tonumber(val:string()) end,
 		string  = pass,
 		boolean = pass,
-		Nil     = function() return nil end,
 		['nil'] = pass,
 		table   = pass,
 		Vector  = dovec,
@@ -70,13 +65,14 @@ function eval(t, env)
 			or     type(op) == 'Vector'
 			then
 				lst = Seq.lib.map(function(x) return eval(x, env) end, lst)
-				local rets = {pcall(op, Seq.lib.unpack(lst))}
+			    local rets = Vector(pcall(op, Seq.lib.unpack(lst)))
 				if rets[1] == true then
-					return unpack(rets, 2)
+					return unpack(rets, 2, rets:length())
 				else
 					return Error('eval: error calling '..tostring(val:first()),
-					             rets[2])
+					             rets[2]..'\n'..debug.traceback())
 				end
+			--	return op(Seq.lib.unpack(lst))
 			elseif type(op) == 'table'
 			or (type(op) == 'userdata' and getmetatable(op).__index)
 			then

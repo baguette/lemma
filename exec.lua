@@ -43,39 +43,38 @@ function exec(f)
 
 	while not done do
 		if prompt then io.write(prompt) end
+		
+		local t = read(f)                         -- read an expression!
 	
-		local t, e = read(f)                       -- read an expression!
-	
-		if not e then
+		if type(t) ~= 'Error' then
+			local val = Vector(eval(t, env))      -- evaluate the expression!
+			local err = false
+			
+			for i, v in ipairs(val) do
+				if v == Error'eof' then
+					done = true
+					f:close()
+					return
+				elseif type(v) == 'Error' then
+					io.stderr:write (f:lines() .. ': ' .. tostring(v) .. '\n')
+					err = true
+				end
+			end
+			if prompt and not err then
+				io.write';=> ' ; write(Seq.lib.unpack(val)) -- print the value!
+			end 
+		else
 			if t == Error'eof' then
 				if prompt then io.write('\n') end
 				done = true
 				f:close()
 				return
 			else
---				print (f:lines())
-				local val = {eval(t, env)}         -- evaluate the expression!
-				local err = false
-				
-				for i, v in ipairs(val) do
-					if v == Error'eof' then
-						done = true
-						f:close()
-						return
-					elseif type(v) == 'Error' then
-						io.stderr:write (f:lines() .. ': ' .. tostring(v) .. '\n')
-						err = true
-					end
+				io.stderr:write (f:lines() .. ': ' .. e:string() .. '\n')
+				if not prompt then
+					done = true
+					f:close()
 				end
-				if prompt and not err then
-					io.write';=> ' ; write(unpack(val))    -- print the value!
-				end
-			end
-		else
-			io.stderr:write (f:lines() .. ': ' .. e .. '\n')
-			if not prompt then
-				done = true
-				f:close()
 			end
 		end
 	end                                           -- loop!
