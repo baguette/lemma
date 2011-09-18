@@ -28,9 +28,10 @@ local mt = {
 
 function t:cons(...)
 	local new = self
+	local n = select('#', ...)
 	local args = {...}
 	
-	for i = #args, 1, -1 do
+	for i = n, 1, -1 do
 		local last = new
 		new = { args[i], last }
 		lemma['assoc-meta'](new, 'length', last:length() + 1)
@@ -53,7 +54,7 @@ function t:rest()
 end
 
 t['empty?'] = function(self)
-	return (#self == 0)
+	return (self[2] == nil)
 end
 
 function t:reverse()
@@ -71,9 +72,6 @@ end
 function List(...)
 	local o = {}
 	setmetatable(o, mt)
-	
-	local args = {...}
-	
 	return o:cons(...)
 end
 

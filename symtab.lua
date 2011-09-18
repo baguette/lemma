@@ -108,20 +108,20 @@ lemma['sym-new'] = function(s)
 				vararg = lemma['sym-new'](sym)
 				return '...'
 			else
-				return nil, 'Error parsing splice.'
+				return Error('Error parsing splice.')
 			end
 		else
 			print('Error in binding for '..f:string()..':'..type(f)..' '..tostring(s))
-			return 'Error'
+			return Error('Error in binding')
 		end
 	elseif type(s) ~= 'Symbol' then
-		return nil, 'Symbol expected, got '..type(s)
+		return Error('Symbol expected, got '..type(s))
 	end
 	
 	if not s.string then
 		print 'wtf is happening ?!'
 		print(type(s))
-		return nil, 'Error'
+		return Error('Error')
 	end
 	
 	local str = s:string()

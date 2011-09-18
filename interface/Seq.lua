@@ -47,13 +47,16 @@ function Seq.lib.map(f, ...)
 		return Error('map: Seq expected, got '..type(lsts[1]))
 	end
 	
-	if #lsts > 0 and lsts[1]:first() then
+	if #lsts > 0 and lsts[1]:length() > 0 then
+		local m = 0
 		for i, v in ipairs(lsts) do
-			table.insert(firsts, v:first())
-			table.insert(rests, v:rest())
+			m = m + 1
+			firsts[m] = v:first()
+			rests[m]  = v:rest()
 		end
-		local h = {f(unpack(firsts))}
-		return Seq.lib.map(f, unpack(rests)):cons(unpack(h))
+		local h = {f(unpack(firsts, 1, m))}
+	--	print (h[1])
+		return Seq.lib.map(f, unpack(rests, 1, m)):cons(unpack(h, 1, m))
 	else
 		return lsts[1]:seq()
 	end
@@ -68,13 +71,15 @@ function Seq.lib.foreach(f, ...)
 		return Error('for-each: Seq expected, got '..type(lsts[1]))
 	end
 	
-	if #lsts > 0 and lsts[1]:first() then
+	if #lsts > 0 and lsts[1]:length() > 0 then
+		local m = 0
 		for i, v in ipairs(lsts) do
-			table.insert(firsts, v:first())
-			table.insert(rests, v:rest())
+			m = m + 1
+			firsts[m] = v:first()
+			rests[m] = v:rest()
 		end
-		f(unpack(firsts))
-		return Seq.lib.foreach(f, unpack(rests))
+		f(unpack(firsts, 1, m))
+		return Seq.lib.foreach(f, unpack(rests, 1, m))
 	else
 		return nil
 	end
@@ -83,24 +88,27 @@ end
 function Seq.lib.unpack(lst)
 	local t = {}
 	local curr = lst
+	local n = 0
 	
 	if not implements(lst, 'Seq') then
 		return Error('unpack: Seq expected, got '..type(lst))
 	end
 	
 	while not curr['empty?'](curr) do
-		table.insert(t, curr:first())
+		n = n + 1
+		t[n] = curr:first()
 		curr = curr:rest()
 	end
 	
-	return unpack(t)
+	return unpack(t, 1, n)
 end
 
 function Seq.lib.pack(lst, ...)
+	local n = select('#', ...)
 	local t = {...}
 	local q = lst:seq()
 	
-	for i = #t, 1, -1 do
+	for i = n, 1, -1 do
 		q = q:cons(t[i])
 	end
 	

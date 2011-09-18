@@ -28,10 +28,11 @@ tostring, print = (function()
 		return xtostring(s)
 	end,
 	function(...)
+		local n = select('#', ...)
 		local args = {...}
 		
-		for i, v in ipairs(args) do
-			args[i] = xtostring(v)
+		for i = 1, n do
+			args[i] = xtostring(args[i])
 		end
 		
 		io.write(table.concat(args, '\t'))
@@ -123,9 +124,10 @@ end
 	end
 end){
 	def = function(env, ...)
+		local n = select('#', ...)
 		local args = {...}
 	
-		for i = 1, #args, 2 do
+		for i = 1, n, 2 do
 			local v = args[i + 1]
 			
 			if type(args[i]) ~= 'Symbol' then
@@ -134,35 +136,25 @@ end){
 			
 			v = eval(v, env)
 			if type(v) == 'Error' then
-				return v
+				return Error('in def:', v)
 			end
-			
-			env:insert(args[i]:string(), v)
+			if v ~= nil then
+				env:insert(args[i]:string(), v)
+			else
+				env:delete(args[i]:string())
+			end
 		end
 	
-		return nil
-	end,
-	
-	del = function(env, ...)
-		local args = {...}
-		
-		for i = 1, #args do
-			if type(args[i]) ~= 'Symbol' then
-				return Error('attempt to del a non-variable: '..tostring(args[i]))
-			end
-			
-			env:delete(args[i]:string())
-		end
-		
 		return nil
 	end,
 	
 	['set!'] = function(env, ...)
+		local n = select('#', ...)
 		local args = {...}
 		local i = 1
 		local ret
 	
-		while i <= #args do
+		while i <= n do
 			local s = args[i]
 			local v = args[i + 1]
 			
@@ -179,10 +171,15 @@ end){
 			
 			v = eval(v, env)
 			if type(v) == 'Error' then
-				return v
+				return Error('in set!:', v)
 			end
 			
-			ret = env:modify(s, v)
+			if v ~= nil then
+				ret = env:modify(s, v)
+			else
+				env:delete(s)
+				ret = nil
+			end
 			i = i + 2
 		end
 	
@@ -271,17 +268,24 @@ lemma.splice = Seq.lib.unpack
 			local args = {...}
 			local diff = args[1] or 0
 			
+			if type(diff) == 'Error' then
+				return Error('in '..k..':', diff)
+			end
+			
 			-- TODO: clean this up once the real problem has been found...
 			if type(diff) ~= 'number' then
 				print(k..': number expected, got '..type(diff)..': '..tostring(diff))
-				return nil, 'Error: number expected'
+				return Error('Error: number expected')
 			end
 	
 			for i = 2, #args do
 				local ai = args[i]
+				if type(ai) == 'Error' then
+					return Error('in '..k..':', ai)
+				end
 				if type(ai) ~= 'number' then
 					print(k..': number expected, got '..type(ai)..': '..tostring(ai))
-					return nil, 'Error: number expected'
+					return Error('Error: number expected')
 				end
 				diff = v(diff, args[i])
 			end
@@ -321,8 +325,10 @@ lemma['not'] = function(a)
 end
 
 function lemma.str(...)
+	local n = select('#', ...)
 	local t = {...}
-	for i, v in ipairs(t) do
+	for i = 1, n do
+		local v = t[i]
 		if type(v) ~= 'string' then
 			t[i] = tostring(v)
 		end
@@ -355,23 +361,24 @@ end
 
 function lemma.get(t, k)
 	if not k then
-		return Error'attempt to index table with nil'
+		return Error'get: attempt to index table with nil'
 	end
 	if not t then
-		return Error('attempt to index nil ['..k..']')
+		return Error('get: attempt to index nil ['..k..']')
 	end
 	return t[k]
 end
 
-function lemma.method(t, k)
-	if not k then
-		return Error'attempt to index table with nil'
+function lemma.method(t, k, ...)
+	--print(tostring(t).. ':' ..tostring(k), ...)
+	if k == nil then
+		return Error'method: attempt to index table with nil'
 	end
-	if not t then
-		return Error('attempt to index nil ['..k..']')
+	if t == nil then
+		return Error('method: attempt to index nil ['..k..']')
 	end
-	if not t[k] then
-		return Error('method is nil ['..k..']')
+	if t[k] == nil then
+		return Error('method: method is nil ['..k..']')
 	end
 	return function(...)
 		return t[k](t, ...)

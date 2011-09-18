@@ -7,8 +7,8 @@ do
 local function __tostring(e)
 	local str = {}
 	
-	for _, v in ipairs(e) do
-		table.insert(str, tostring(v))
+	for i = 1, e:length() do
+		table.insert(str, tostring(e[i]))
 		table.insert(str, ' ')
 	end
 	
@@ -36,17 +36,18 @@ local mt = {
 
 function t:cons(...)
 	local new = Vector()
+	local n = select('#', ...)
 	local args = {...}
 	
-	for i = 1, #args do
-		table.insert(new, args[i])
+	for i = 1, n do
+		new[i] = args[i]
 	end
 	
-	for i = 1, #self do
-		table.insert(new, self[i])
+	for i = 1, self:length() do
+		new[n+i] = self[i]
 	end
 	
-	lemma['assoc-meta'](new, 'length', self:length() + #args)
+	lemma['assoc-meta'](new, 'length', self:length() + n)
 	return new
 end
 
@@ -61,23 +62,23 @@ end
 function t:rest()
 	local new = Vector()
 	
-	for i = 2, #self do
-		table.insert(new, self[i])
+	for i = 2, self:length() do
+		new[i-1] = self[i]
 	end
 	
-	lemma['assoc-meta'](new, 'length', #new)
+	lemma['assoc-meta'](new, 'length', self:length()-1)
 	
 	return new
 end
 
 t['empty?'] = function(self)
-	return (#self == 0)
+	return (self:length() == 0)
 end
 
 function t:reverse()
 	local new = Vector()
 	
-	for i = #self, 1, -1 do
+	for i = self:length(), 1, -1 do
 		table.insert(new, self[i])
 	end
 	
@@ -85,15 +86,16 @@ function t:reverse()
 end
 
 -- TODO: This should preserve any potential metatable of o, if possible
-function Vectorize(o)
-	lemma['assoc-meta'](o, 'length', #o)
+function Vectorize(o, n)
+	lemma['assoc-meta'](o, 'length', n or #o)
 	setmetatable(o, mt)
 	return o
 end
 
 function Vector(...)
+	local n = select('#', ...)
 	local o = {...}
-	return Vectorize(o)
+	return Vectorize(o, n)
 end
 
 function t:seq()

@@ -12,13 +12,13 @@
 
 (def cur-ns :lemma)
 
-;; Map f over xs, then return the concatenated results separated by commas
+;; Map f over xs, then return the concatenated results separated by sep
 (defn mapstr [f xs sep]
-  (when (not sep)
-        (set! sep "")
-        true)    ; TODO:  this really shouldn't be necessary...
+  (set! sep (if (= sep nil)
+                ""
+                sep))
   (let [strs (map (fn [a] (str (f a) sep)) xs)]
-    (lua/string.sub (str @strs) 1 (- -1 (.len sep)))))   ; remove trailing sep
+    (lua/string.sub (str @strs) 1 (- -1 (length sep)))))   ; remove trailing sep
 
 (defn gen-quote [t]
   (fn [x] (str t "(" (mapstr rec-quote x ", ") ")")))
@@ -64,7 +64,7 @@
                          (mapstr sym-new args ", ")
                          ")\n"
                          (let-if [s (sym-vararg?)]
-                           (str "local " s " = List(...)\n")   ; nil bug
+                           (str "local " s " = List(...)\n")
                            "")
                          @(map compile body)]]
         (lua/table.insert hyperbanana (length hyperbanana) "return ")

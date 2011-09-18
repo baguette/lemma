@@ -15,17 +15,25 @@ local mt = {
 
 local cache = {}
 
-function Error(s)
-	if cache[s] then
+function Error(s, trace)
+	local o = {}
+	setmetatable(o, mt)
+	
+	if trace then
+		if type(trace) == 'Error' then
+			trace = trace:string()
+		end
+		s = trace..'\n'..s
+	elseif cache[s] then
 		return cache[s]
+	else
+		cache[s] = o
 	end
 	
-	local o = {}
 	function o:string()
 		return s
 	end
-	setmetatable(o, mt)
-	cache[s] = o
+	
 	return o
 end
 

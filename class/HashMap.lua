@@ -39,17 +39,18 @@ local mt = {
 
 function t:cons(...)
 	local new = HashMap()
+	local n = select('#', ...)
 	local args = {...}
 	
 	for k, v in pairs(self) do
 		new[k] = v
 	end
 	
-	for i = 1, #args, 2 do
+	for i = 1, n, 2 do
 		new[args[i]] = args[i+1]
 	end
 	
-	lemma['assoc-meta'](new, 'length', self:length() + #args / 2)
+	lemma['assoc-meta'](new, 'length', self:length() + n / 2)
 	return new
 end
 
@@ -96,10 +97,11 @@ function Mapify(o)
 end
 
 function HashMap(...)
+	local n = select('#', ...)
 	local args = {...}
 	local o = {}
 	
-	for i = 1, #args, 2 do
+	for i = 1, n, 2 do
 		o[args[i]] = args[i+1]
 	end
 	

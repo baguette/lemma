@@ -26,7 +26,7 @@ end
 -- TODO: false and nil don't mean anything in lists... so basically nowhere in
 --       lemma... use lemma/del as a workaround for nilifying variables
 local function tovalue(x)
-	local t = {['true'] = true, ['false'] = False, ['nil'] = Nil}
+	local t = {['true'] = true, ['false'] = false, ['nil'] = Nil}
 	return t[x]
 end
 

@@ -39,14 +39,14 @@ function eval(t, env)
 	end
 	
 	local switch = {
-		Error   = pass,
+		Error   = function() print(val:string()) end,
 		number  = pass,
-		Number  = function() return tonumber(val:string()) end,    --wtf?
+		Number  = function() return tonumber(val:string()) end,
 		string  = pass,
 		boolean = pass,
-		table   = pass,
 		Nil     = function() return nil end,
-		False   = function() return false end,
+		['nil'] = pass,
+		table   = pass,
 		Vector  = dovec,
 		PreHashMap = dohash,
 		HashMap = pass,
@@ -59,8 +59,9 @@ function eval(t, env)
 			local lst = val:rest()
 			
 			if type(op) == 'Error' then
-				return op
+				return Error('in eval: op was Error', op)
 			elseif type(op) == 'Fexpr' then
+			--	print(Seq.lib.unpack(lst))
 				return op.func(env, Seq.lib.unpack(lst))
 			elseif type(op) == 'Macro' then
 				return eval(op.func(Seq.lib.unpack(lst)), env)
@@ -69,7 +70,13 @@ function eval(t, env)
 			or     type(op) == 'Vector'
 			then
 				lst = Seq.lib.map(function(x) return eval(x, env) end, lst)
-				return op(Seq.lib.unpack(lst))
+				local rets = {pcall(op, Seq.lib.unpack(lst))}
+				if rets[1] == true then
+					return unpack(rets, 2)
+				else
+					return Error('eval: error calling '..tostring(val:first()),
+					             rets[2])
+				end
 			elseif type(op) == 'table'
 			or (type(op) == 'userdata' and getmetatable(op).__index)
 			then
