@@ -12,14 +12,6 @@
 
 (def cur-ns :lemma)
 
-;; Map f over xs, then return the concatenated results separated by sep
-(defn mapstr [f xs sep]
-  (set! sep (if (= sep nil)
-                ""
-                sep))
-  (let [strs (map (fn [a] (str (f a) sep)) xs)]
-    (lua/string.sub (str @strs) 1 (- -1 (length sep)))))   ; remove trailing sep
-
 (defn gen-quote [t]
   (fn [x] (str t "(" (mapstr rec-quote x ", ") ")")))
 

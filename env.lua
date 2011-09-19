@@ -411,6 +411,8 @@ lemma.write = write
 lemma.print = print
 lemma.type = type
 lemma.tostring = tostring
+lemma.foldl = Seq.lib.foldl
+lemma.foldr = Seq.lib.foldr
 lemma.map = Seq.lib.map
 lemma['for-each'] = Seq.lib.foreach
 

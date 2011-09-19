@@ -38,14 +38,13 @@ end
 
 Seq.lib = {}
 
--- TODO: Make this iterative
-function Seq.lib.map(f, ...)
+function Seq.lib.foldl(f, init, ...)
 	local lsts = {...}
 	local firsts = {}
 	local rests = {}
 	
 	if #lsts > 0 and not implements(lsts[1], 'Seq') then
-		return Error('map: Seq expected, got '..type(lsts[1]))
+		return Error('foldl: Seq expected, got '..type(lsts[1]))
 	end
 	
 	if #lsts > 0 and lsts[1]:length() > 0 then
@@ -55,11 +54,41 @@ function Seq.lib.map(f, ...)
 			firsts[m] = v:first()
 			rests[m]  = v:rest()
 		end
-		local h = Vector(f(unpack(firsts, 1, m)))
-		return Seq.lib.map(f, unpack(rests, 1, m)):cons(unpack(h, 1, h:length()))
+		return Seq.lib.foldl(f, f(init, unpack(firsts, 1, m)), unpack(rests, 1, m))
 	else
-		return lsts[1]:seq()
+		return init
 	end
+end
+
+function Seq.lib.foldr(f, init, ...)
+	local lsts = {...}
+	
+	if #lsts > 0 and not implements(lsts[1], 'Seq') then
+		return Error('foldr: Seq expected, got '..type(lsts[1]))
+	end
+	
+	if not implements(lsts[1], 'Reversible') then
+		return Error('foldr: cannot perform right fold on non-reversible seq')
+	end
+	
+	if #lsts > 0 and lsts[1]:length() > 0 then
+		for i, v in ipairs(lsts) do
+			lsts[i] = v:reverse()
+		end
+		return Seq.lib.foldl(f, init, unpack(lsts))
+	else
+		return init
+	end
+end
+
+function Seq.lib.map(f, ...)
+	local a = ...
+	return Seq.lib.foldr(
+		function(init, ...)
+			return init:cons(f(...))
+		end,
+		a:seq(),
+		...)
 end
 
 function Seq.lib.foreach(f, ...)

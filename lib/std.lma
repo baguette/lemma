@@ -100,6 +100,13 @@
     types))
 
 
+;; Map f over xs, then return the concatenated results separated by sep
+(defn mapstr [f xs sep]
+  (set! sep (if (= sep nil)
+                ""
+                sep))
+  (let [strs (map (fn [a] (str (f a) sep)) xs)]
+    (lua/string.sub (str @strs) 1 (- -1 (length sep)))))   ; remove trailing sep
 
 ;; A convenience macro for Lua interop
 (defmacro defmethod [t-dot-f args @body]

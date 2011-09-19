@@ -76,13 +76,13 @@ t['empty?'] = function(self)
 end
 
 function t:reverse()
-	local new = Vector()
+	local new = {}
 	
 	for i = self:length(), 1, -1 do
-		table.insert(new, self[i])
+		new[i] = self[self:length()-i+1]
 	end
 	
-	return new
+	return Vectorize(new, self:length())
 end
 
 -- TODO: This should preserve any potential metatable of o, if possible
