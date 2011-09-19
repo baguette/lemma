@@ -40,24 +40,30 @@ Seq.lib = {}
 
 function Seq.lib.foldl(f, init, ...)
 	local lsts = {...}
-	local firsts = {}
-	local rests = {}
 	
-	if #lsts > 0 and not implements(lsts[1], 'Seq') then
+	if #lsts == 0 then
+		return
+	elseif not implements(lsts[1], 'Seq') then
 		return Error('foldl: Seq expected, got '..type(lsts[1]))
 	end
 	
-	if #lsts > 0 and lsts[1]:length() > 0 then
-		local m = 0
-		for i, v in ipairs(lsts) do
-			m = m + 1
-			firsts[m] = v:first()
-			rests[m]  = v:rest()
+	local function foldl(f, init, lsts)
+		local firsts = {}
+		local rests = {}
+		
+		if lsts[1]:length() > 0 then
+			local m = 0
+			for i, v in ipairs(lsts) do
+				m = m + 1
+				firsts[m] = v:first()
+				rests[m]  = v:rest()
+			end
+			return foldl(f, f(init, unpack(firsts, 1, m)), rests)
+		else
+			return init
 		end
-		return Seq.lib.foldl(f, f(init, unpack(firsts, 1, m)), unpack(rests, 1, m))
-	else
-		return init
 	end
+	return foldl(f, init, lsts)
 end
 
 function Seq.lib.foldr(f, init, ...)
@@ -93,25 +99,28 @@ end
 
 function Seq.lib.foreach(f, ...)
 	local lsts = {...}
-	local firsts = {}
-	local rests = {}
 	
 	if #lsts > 0 and not implements(lsts[1], 'Seq') then
 		return Error('for-each: Seq expected, got '..type(lsts[1]))
 	end
 	
-	if #lsts > 0 and lsts[1]:length() > 0 then
-		local m = 0
-		for i, v in ipairs(lsts) do
-			m = m + 1
-			firsts[m] = v:first()
-			rests[m] = v:rest()
+	local function foreach(f, lsts)
+		local firsts = {}
+		local rests = {}
+		if #lsts > 0 and lsts[1]:length() > 0 then
+			local m = 0
+			for i, v in ipairs(lsts) do
+				m = m + 1
+				firsts[m] = v:first()
+				rests[m] = v:rest()
+			end
+			f(unpack(firsts, 1, m))
+			return foreach(f, rests)
+		else
+			return nil
 		end
-		f(unpack(firsts, 1, m))
-		return Seq.lib.foreach(f, unpack(rests, 1, m))
-	else
-		return nil
 	end
+	return foreach(f, lsts)
 end
 
 function Seq.lib.unpack(lst)

@@ -31,7 +31,7 @@ end
 local t = {}
 local mt = {
 	class = 'HashMap',
-	implements = { 'Seq' },
+	implements = { Seq = true },
 	__index = t,
 	__tostring = __tostring,
 	__call = __call

@@ -28,7 +28,7 @@ end
 local t = {}
 local mt = {
 	class = 'Vector',
-	implements = { 'Seq', 'Reversible' },
+	implements = { Seq = true, Reversible = true },
 	__index = t,
 	__tostring = __tostring,
 	__call = __call

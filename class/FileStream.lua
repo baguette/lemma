@@ -34,7 +34,7 @@ function FileStream(f)
 
 	local mt = {
 		class = 'FileStream',
-		implements = { 'Stream' },
+		implements = { Stream = true },
 		__index = t
 	}
 	

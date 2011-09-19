@@ -15,7 +15,7 @@ end
 local t = {}
 local mt = {
 	class = 'Nil',
-	implements = {},
+	implements = nil,
 	__index = t,
 	__tostring = __tostring,
 	__eq = __eq

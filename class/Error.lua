@@ -8,7 +8,7 @@ end
 local t = {}
 local mt = {
 	class = 'Error',
-	implements = {},
+	implements = nil,
 	__index = t,
 	__tostring = __tostring
 }

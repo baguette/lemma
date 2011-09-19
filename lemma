@@ -3,22 +3,26 @@
 -- The Lemma REPL
 ---
 
--- TODO: more special forms?
-
 require 'exec'
 LEMMA_VERSION = 0.1
 
 ---
 -- Execute command line argument or start a REPL
 ---
-local f = ...
+local o, f = ...
 lemma['*sys-args*'] = Vectorize{...}
 
 function update_prompt()
 	prompt = lemma['*ns*']..'> '
 end
 
-stdlib()
+if o and o:sub(1, 1) ~= '-' then
+	f, o = o, nil
+end
+
+if o ~= '-nolib' then
+	stdlib()
+end
 
 if not f or f == '--' then
 	f = io.input()

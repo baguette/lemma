@@ -10,7 +10,7 @@ end
 local t = {}
 local mt = {
 	class = 'Iter',
-	implements = { 'Seq' },
+	implements = { Seq = true },
 	__index = t,
 	__tostring = __tostring
 }
