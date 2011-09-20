@@ -110,7 +110,7 @@
     :Number     (fn [x] (.string x))
     :string     (fn [x] (format "%q" x))
     :boolean    (fn [x] (if x :true :false))
-    :Nil        (fn [x] :nil)
+    :nil        (fn [x] :nil)
     :False      (fn [x] :false)
     :Vector     (fn [x] (str "Vectorize{"  (mapstr compile x ", ") "}"))
     :HashMap    (fn [x]
@@ -144,7 +144,7 @@
   }]
     (if (types (type exp))
         ((types (type exp)) exp)
-        #;(str "-- Whoops! " exp` "\n"))))
+        (str "-- Whoops! " exp` ":" (type exp) "\n"))))
 
 #;(loop []
   (lua/io.write "\n> ")

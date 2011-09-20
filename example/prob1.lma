@@ -11,4 +11,4 @@
                               x
                               0))))))
 
-(prob1 1000)
+(print (prob1 98))		; craps out at 98 with C stack overflow

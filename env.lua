@@ -269,25 +269,7 @@ lemma.splice = Seq.lib.unpack
 			local args = {...}
 			local diff = args[1] or 0
 			
-			if type(diff) == 'Error' then
-				return Error('in '..k..':', diff)
-			end
-			
-			-- TODO: clean this up once the real problem has been found...
-			if type(diff) ~= 'number' then
-				print(k..': number expected, got '..type(diff)..': '..tostring(diff))
-				return Error('Error: number expected')
-			end
-	
 			for i = 2, #args do
-				local ai = args[i]
-				if type(ai) == 'Error' then
-					return Error('in '..k..':', ai)
-				end
-				if type(ai) ~= 'number' then
-					print(k..': number expected, got '..type(ai)..': '..tostring(ai))
-					return Error('Error: number expected')
-				end
 				diff = v(diff, args[i])
 			end
 	

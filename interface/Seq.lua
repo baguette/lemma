@@ -86,15 +86,42 @@ function Seq.lib.foldr(f, init, ...)
 		return init
 	end
 end
-
+--[[ -- This doesn't work with mapstr...
 function Seq.lib.map(f, ...)
 	local a = ...
-	return Seq.lib.foldr(
+	return Seq.lib.foldl(
 		function(init, ...)
 			return init:cons(f(...))
 		end,
 		a:seq(),
-		...)
+		...):reverse()
+end
+--]]
+function Seq.lib.map(f, ...)
+	local lsts = {...}
+	
+	if #lsts == 0 then
+		return
+	elseif not implements(lsts[1], 'Seq') then
+		return Error('map: Seq expected, got'..lsts[1])
+	end
+	
+	local function map(f, lsts)
+		local firsts = {}
+		local rests = {}
+		
+		if lsts[1]:first() then
+			for i, v in ipairs(lsts) do
+				table.insert(firsts, v:first())
+				table.insert(rests, v:rest())
+			end
+			local h = {f(unpack(firsts))}
+			return map(f, rests):cons(unpack(h))
+		else
+			return lsts[1]:seq()
+		end
+	end
+	return map(f, lsts)
 end
 
 function Seq.lib.foreach(f, ...)

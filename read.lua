@@ -23,8 +23,6 @@ function symbol_patterns()
 	}
 end
 
--- TODO: false and nil don't mean anything in lists... so basically nowhere in
---       lemma... use lemma/del as a workaround for nilifying variables
 local function tovalue(x)
 	local t = {['true'] = true, ['false'] = false, ['nil'] = nil}
 	return t[x]
@@ -150,28 +148,33 @@ local function read_comment(f, co)
 		c = f:get()
 		if not c then return Error'eof' end
 	until c == '\n'
-	return nil
+	return read(f, co)
 end
 
 local function read_multicomment(f, co)
 	local last, c
+	local level = 1
 	
 	while true do
+		if level == 0 then
+			return read(f, co)
+		end
+		
 		last = c
 		c = f:get()
 		if not c then return Error'eof' end
 		
 		if last == '#' and c == '|' then
-			read_multicomment(f)
+			level = level + 1
 		elseif last == '|' and c == '#' then
-			return nil
+			level = level - 1
 		end
 	end
 end
 
 local function read_datumcomment(f, c)
 	read(f, c)
-	return nil
+	return read(f, c)
 end
 
 local function read_quote(sym)
