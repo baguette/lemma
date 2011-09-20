@@ -114,18 +114,14 @@
     :False      (fn [x] :false)
     :Vector     (fn [x] (str "Vectorize{"  (mapstr compile x ", ") "}"))
     :HashMap    (fn [x]
-                  (let [mems []]
-                  ;; In the imperative style because map produces another hash
-                  ;; but we want something we can concat.
-                    (for-each (fn [a]
-                                (lua/table.insert mems
-                                                  (str "["
-                                                       (compile (first a))
-                                                       "] = "
-                                                       (compile (second a))
-                                                       ", ")))
-                              x)
-                    (str "Mapify{" @mems "}")))
+                  (let [mems (mapstr (fn [a]
+                                       (str "["
+                                            (compile a)
+                                            "] = "
+                                            (compile (x a))))
+                                       (keys x)
+                                       ", ")]
+                    (str "Mapify{" mems "}")))
     :PreHashMap (fn [x] (compile (lua/HashMap @x)))
     :Symbol     (fn [x] (sym-find x))
     :List       (fn [x]
@@ -144,7 +140,7 @@
   }]
     (if (types (type exp))
         ((types (type exp)) exp)
-        (str "-- Whoops! " exp` ":" (type exp) "\n"))))
+        (str "\n-- Whoops! " exp` ":" (type exp) "\n"))))
 
 #;(loop []
   (lua/io.write "\n> ")

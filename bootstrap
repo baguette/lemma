@@ -1,5 +1,5 @@
 #!/bin/sh
 
-luajit lemma compile.lma lib/std.lma > std.out.lua
-luajit lemma compile.lma compile.lma > compile.out.lua
+lemma compile.lma lib/std.lma > std.out.lua
+lemma compile.lma compile.lma > compile.out.lua
 cat header.lua std.out.lua compile.out.lua > lemmac.lua
