@@ -18,6 +18,25 @@ local symtab = {}
 local uses   = {'lemma'}
 local vararg = false
 
+function debug.printsyms()
+	print'--------'
+	print'Uses'
+	print'--------'
+	for i, v in ipairs(uses) do
+		print(v)
+	end
+	print(lemma['cur-ns'], '*')
+	print'--------'
+	print'Symbols'
+	print'--------'
+	for i, v in ipairs(symtab) do
+		for k, w in pairs(v) do
+			print(k..' : '..w)
+		end
+	end
+	print'--------'
+end
+
 function lemma.use(ns)
 	if type(ns) == 'string' then
 		table.insert(uses, ns)
@@ -40,13 +59,16 @@ local function resolve(str)
 	if ns then
 		return ns, mem
 	end
-	ns = lemma['cur-ns']
+	ns = lemma['cur-ns']  -- TODO
 	mem = str
 	for i = #uses, 1, -1 do
-		if _NS[uses[i]][mem] then
+		if _NS[uses[i]][mem] ~= nil then
 			ns = uses[i]
 			break
 		end
+	end
+	if type(ns) ~= 'string' then
+		debug.debug()
 	end
 	return ns, mem
 end

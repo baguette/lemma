@@ -68,12 +68,14 @@
 ;;       Such a mechanism will enable defs like: (def lambda fn)
 (def specials {
   :ns      (fn [xs]
+             (print "\n\nWHY AM I BEING CALLED?!\n")
              (let [ns (first xs)]
                (if (not (string? ns))
-                 (lua/Error (str "ns: string expected (Got " (type ns) ")"))
-                 (do
-                   (set! cur-ns ns)
-                   (str "lemma[\"*ns*\"] = " ns ";\n")))))
+                   (lua/Error (str "ns: string expected (Got " (type ns) ")"))
+                   (do
+                     (print ns)
+                     (set! cur-ns ns)
+                     (str "lemma[\"*ns*\"] = " ns ";\n")))))
   :quote   handle-quote
   :quasiquote handle-quasiquote
   :def     (fn [xs]

@@ -9,7 +9,6 @@ require 'class/Vector'
 require 'class/PreHashMap'
 require 'class/Symbol'
 require 'class/Nil'
-require 'class/False'
 require 'class/Number'
 
 local symbol =			 -- this is perhaps a little too permissive
@@ -80,10 +79,13 @@ local function read_seq(eos, func)
 				return func(unpack(list, 1, n))
 			else
 				f:unget(c)
-				local form = read(f, co)
-				if form == Error'eof' then return Error'eof' end
-				n = n + 1
-				list[n] = form
+				local form = read(f, co, true)
+				if form == Error'eof' then
+					return Error'eof'
+				elseif form ~= Nil then
+					n = n + 1
+					list[n] = form
+				end
 			end
 		end
 	end
@@ -148,7 +150,7 @@ local function read_comment(f, co)
 		c = f:get()
 		if not c then return Error'eof' end
 	until c == '\n'
-	return read(f, co)
+	return Nil
 end
 
 local function read_multicomment(f, co)
@@ -157,7 +159,7 @@ local function read_multicomment(f, co)
 	
 	while true do
 		if level == 0 then
-			return read(f, co)
+			return Nil
 		end
 		
 		last = c
@@ -174,7 +176,7 @@ end
 
 local function read_datumcomment(f, c)
 	read(f, c)
-	return read(f, c)
+	return Nil
 end
 
 local function read_quote(sym)
@@ -186,8 +188,9 @@ end
 
 local function table_idx(func)
 	return function(f, c)
-		local k = read(f, c):string()
+		local k = read(f, c)
 		local t = read(f, c)
+		k = List():cons(k):cons(Symbol('quote'))
 		return List():cons(k):cons(t):cons(Symbol(func))
 	end
 end
@@ -216,7 +219,7 @@ local reader_macros = {
 ---
 -- Read the next form from stream f. (Set compiling when... compiling.)
 ---
-function read(f, compiling)
+function read(f, compiling, waiting)
 	local form = nil
 	
 	if compiling then
@@ -249,6 +252,12 @@ function read(f, compiling)
 	
 	if type(macro) == 'function' then
 		form = macro(f, compiling)
+		if form == Nil then
+			if waiting then
+				return Nil
+			end
+			return read(f, compiling)
+		end
 	else
 		local str = {}
 		while not delim[c] and not whitespace[c] do

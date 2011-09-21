@@ -353,13 +353,13 @@ function lemma.get(t, k)
 end
 
 function lemma.method(t, k, ...)
-	--print(tostring(t).. ':' ..tostring(k), ...)
 	if k == nil then
 		return Error'method: attempt to index table with nil'
 	end
 	if t == nil then
 		return Error('method: attempt to index nil ['..k..']')
 	end
+	k = k:string()
 	if t[k] == nil then
 		return Error('method: method is nil ['..k..']')
 	end
