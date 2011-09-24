@@ -22,12 +22,20 @@ function symbol_patterns()
 	}
 end
 
-local function tovalue(x)
-	local t = {['true'] = true, ['false'] = false, ['nil'] = nil}
-	return t[x]
+local keywords = {['true'] = true, ['false'] = false, ['nil'] = nil}
+
+local function tovalue(x, co)
+	return keywords[x]
 end
 
-local handle_number = {}
+local function handle_number(n, co)
+	if co then
+		return Number(n)
+	else
+		return tonumber(n)
+	end
+end
+
 
 -- these are tried in order (make them specific!)
 local atoms = {
@@ -222,14 +230,6 @@ local reader_macros = {
 function read(f, compiling, waiting)
 	local form = nil
 	
-	if compiling then
-		local mt = { __call = function(x, n) return Number(n) end }
-		setmetatable(handle_number, mt)
-	else
-		local mt = { __call = function(x, n) return tonumber(n) end }
-		setmetatable(handle_number, mt)
-	end
-	
 	---
 	-- If it's not whitespace, and it's not a reader macro, then
 	-- it's either a symbol or number.
@@ -273,7 +273,7 @@ function read(f, compiling, waiting)
 		-- if no matches, lexical error
 		for i = 1, #atoms, 2 do
 			if string.find(str, atoms[i]) then
-				 form = atoms[i+1](str)
+				 form = atoms[i+1](str, compiling)
 				 return form
 			end
 		end

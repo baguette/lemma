@@ -9,7 +9,7 @@ local function __eq(a, b)
 end
 
 local function __tostring(e)
-	return 'Number'
+	return ':'..e.str
 end
 
 local t = {}

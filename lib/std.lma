@@ -75,12 +75,12 @@
 
 
 
-;; Evaluate body n times
+;; Evaluate body n times (times evaluates to true)
 (defmacro times [n @body]
   `(do
      (defn once [i]
        (if (= i 2)
-           (do ~@body)
+           (do ~@body true)
            (do
              ~@body
              (once (- i 1)))))

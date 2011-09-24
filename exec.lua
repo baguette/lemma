@@ -40,6 +40,7 @@ function exec(f)
 	end
 	
 	f = FileStream(f)
+	lemma['*in-stream*'] = f
 
 	while not done do
 		if prompt then io.write(prompt) end

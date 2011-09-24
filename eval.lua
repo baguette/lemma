@@ -37,7 +37,7 @@ function eval(t, env)
 	local switch = {
 		Error   = function() print(val:string()) end,
 		number  = pass,
-		Number  = function() return tonumber(val:string()) end,
+		Number  = pass,
 		string  = pass,
 		boolean = pass,
 		['nil'] = pass,

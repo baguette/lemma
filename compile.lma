@@ -67,8 +67,7 @@
 ;; TODO: Fexpr handling rather than a specials table.
 ;;       Such a mechanism will enable defs like: (def lambda fn)
 (def specials {
-  :ns      (fn [xs]
-             (print "\n\nWHY AM I BEING CALLED?!\n")
+  :ns     (fn [xs]
              (let [ns (first xs)]
                (if (not (string? ns))
                    (lua/Error (str "ns: string expected (Got " (type ns) ")"))
@@ -81,8 +80,11 @@
   :def     (fn [xs]
              (let [k (first  xs)
                    v (second xs)]
-               (let [local (if (= 0 (sym-len)) "" "local ")]
-                 (str local (sym-new k) " = " (compile v) ";\n"))))
+               (let [sym (sym-new k)]
+                 (let [local (if (= 0 (sym-len))
+                             ""
+                             (str "local " sym "; "))]
+                   (str local sym " = " (compile v) ";\n")))))
   :set!    (fn [xs]
              (let [k (first  xs)
                    v (second xs)]
@@ -110,10 +112,10 @@
 (defn compile [exp]
   (let [types {
     :Number     (fn [x] (.string x))
+ ;   :number     (fn [x] (lua/tostring x))
     :string     (fn [x] (format "%q" x))
     :boolean    (fn [x] (if x :true :false))
     :nil        (fn [x] :nil)
-    :False      (fn [x] :false)
     :Vector     (fn [x] (str "Vectorize{"  (mapstr compile x ", ") "}"))
     :HashMap    (fn [x]
                   (let [mems (mapstr (fn [a]
@@ -142,27 +144,29 @@
   }]
     (if (types (type exp))
         ((types (type exp)) exp)
-        (str "\n-- Whoops! " exp` ":" (type exp) "\n"))))
+        (str "\n-- Whoops! " exp " : " (type exp) "\n"))))
 
-#;(loop []
-  (lua/io.write "\n> ")
-  (let [code (compile (lua/read (lua/FileStream (lua/io.input)) true))]
-    (print "-------")
-    (print code)
-    (print "-------")
-    (let [f (lua/assert (lua/loadstring code))]
-      (if (= :function (type f))
-          (do
-            (lua/io.write ";=> ")
-            (f))
-          (print f))))
-  (recur))
-
-(let-if [f (lua/io.open (second *sys-args*))]
-  (do
+(let-if [f (lua/io.open (or (second *sys-args*) ""))]
+  (let [f (lua/FileStream f)]
     (loop [code "-- Lemma 0.2 --"]
       (when (not (= (lua/Error :eof) code))
-        (lua/io.write (str (or code "") "\n"))
-        (recur (compile (lua/read (lua/FileStream f) true)))))
+        (lua/io.write (str code "\n"))
+        (recur (compile (lua/read f true)))))
     (lua/io.write "-- EOF --\n")
-    (.close f)))
+    (.close f))
+  (do			;; Start a debug CLEPL (Compile-Load-Execute-Print-Loop)
+    (print "Entering the debug CLEPL.")
+    (def f (lua/FileStream (lua/io.input)))
+    (loop []
+      (lua/io.write "\n> ")
+      (let [code (compile (lua/read f true))]
+        (print "-------")
+        (print code)
+        (print "-------")
+        (let [f (lua/assert (lua/loadstring code))]
+          (if (= :function (type f))
+              (do
+                (lua/io.write ";=> ")
+                (f))
+              (print f))))
+      (recur))))
