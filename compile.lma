@@ -112,7 +112,7 @@
 (defn compile [exp]
   (let [types {
     :Number     (fn [x] (.string x))
- ;   :number     (fn [x] (lua/tostring x))
+    :number     (fn [x] (lua/tostring x))
     :string     (fn [x] (format "%q" x))
     :boolean    (fn [x] (if x :true :false))
     :nil        (fn [x] :nil)
@@ -146,6 +146,18 @@
         ((types (type exp)) exp)
         (str "\n-- Whoops! " exp " : " (type exp) "\n"))))
 
+(defn load [filename]
+  (let [f (lua/FileStream (lua/io.open filename))]
+  	(loop [code "-- Loading"]
+      (when (not (= (lua/Error :eof) code))
+      	(let [s (lua/assert (lua/loadstring code))]
+      	  (if (= :function (type s))
+      	  	  (s)
+      	  	  (print s)))
+      	(recur (compile (lua/read f true)))))
+    #;(print "Loaded" filename)))
+
+;(load "lib/std.lma")
 (let-if [f (lua/io.open (or (second *sys-args*) ""))]
   (let [f (lua/FileStream f)]
     (loop [code "-- Lemma 0.2 --"]

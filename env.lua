@@ -398,6 +398,9 @@ lemma.foldr = Seq.lib.foldr
 lemma.map = Seq.lib.map
 lemma['for-each'] = Seq.lib.foreach
 
+function lemma.undefined()
+	return nil
+end
 
 function string.split(s, p)
 	f, s, k = s:gmatch(p)
