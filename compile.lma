@@ -12,6 +12,9 @@
 
 (def cur-ns :lemma)
 
+(defn tag? [s xs]
+  (= s (first xs)))
+
 (defn gen-quote [t]
   (fn [x] (str t "(" (mapstr rec-quote x ", ") ")")))
 
@@ -37,8 +40,7 @@
 (defn invert-quasiquote [xs]
   (cond (= :List (type xs))
         (let [x (first xs)]
-          (if (and (= :Symbol (type x))
-                   (= :unquote (.string x)))
+          (if (= 'unquote (first xs))
               (second xs)
               (cons 'lua/List (map invert-quasiquote xs))))
         (= :Vector (type xs))
