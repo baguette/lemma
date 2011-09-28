@@ -1,6 +1,9 @@
 ;;;
 ;; Work-in-progress compiler for Lemma
 ;; Still needs:
+;;  - Macros defined at compile stage do not work properly.
+;;  - `return` insertion does not work properly.
+;;  - quasiquote is broken?
 ;;  - More special forms:  expand
 ;;  - Support for metadata (and subsequently doc-strings)
 ;;  - Better error handling
@@ -134,8 +137,8 @@
                       (specials (tostring head))
                         ((specials (tostring head)) (rest x))
                       ;; Currently, macros only work if defined at top level
-                      (= :Macro (type (lua/eval head lua/env)))
-                        (let [f (get (lua/eval head lua/env) :func)]
+                      (= :Macro (type (.lookup lua/env (.string head))))
+                        (let [f (get (.lookup lua/env (.string head)) :func)]
                           (compile (f @(rest x))))
                       :else
                         (str (compile head) "("
