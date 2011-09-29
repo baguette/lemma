@@ -1,7 +1,10 @@
 ;;;
 ;; Work-in-progress compiler for Lemma
 ;; Still needs:
-;;  - Macros defined at compile stage do not work properly.
+;;  - I think lemma code needs more complicated analysis to
+;;    compile to Lua.  For one thing, it needs to detect when
+;;    function calls are parts of expressions vs. standalone
+;;    statements...
 ;;  - `return` insertion does not work properly.
 ;;  - More special forms:  expand
 ;;  - Support for metadata (and subsequently doc-strings)
@@ -62,7 +65,7 @@
                          (let-if [s (sym-vararg?)]
                            (str "local " s " = List(...)\n")
                            "")
-                         @(map compile body)]]
+                         @(map (fn [x] (compile x true)) body)]]
         (lua/table.insert hyperbanana (length hyperbanana) "return ")
         (sym-pop)
         ; "\n-- function(" (comma-map (fn[x]x) args) ")\n"
@@ -113,7 +116,7 @@
              (str "(" (mapstr compile xs " or ") ")"))
   })
 
-(defn compile [exp]
+(defn compile [exp stat?]
   (let [types {
     :Number     (fn [x] (.string x))
     :number     (fn [x] (lua/tostring x))
@@ -142,8 +145,11 @@
                         (let [f (get (.lookup lua/env (.string head)) :func)]
                           (compile (f @(rest x))))
                       :else
-                        (str (compile head) "("
-                             (mapstr compile (rest x) ", ") ")"))))
+                        (let [p (if stat? ");" ")")]
+                          (str (compile head)
+                               "("
+                               (mapstr compile (rest x) ", ")
+                               p)))))
     :Error      (fn [x] x)
   }]
     (if (types (type exp))
