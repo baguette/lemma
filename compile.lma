@@ -1,10 +1,6 @@
 ;;;
 ;; Work-in-progress compiler for Lemma
 ;; Still needs:
-;;  - I think lemma code needs more complicated analysis to
-;;    compile to Lua.  For one thing, it needs to detect when
-;;    function calls are parts of expressions vs. standalone
-;;    statements...
 ;;  - `return` insertion does not work properly.
 ;;  - More special forms:  expand
 ;;  - Support for metadata (and subsequently doc-strings)
@@ -17,8 +13,6 @@
 
 (def cur-ns :lemma)
 
-(defn tag? [s xs]
-  (= s (first xs)))
 
 (defn gen-quote [t]
   (fn [x] (str t "(" (mapstr rec-quote x ", ") ")")))
@@ -48,7 +42,7 @@
               (second xs)
               (cons 'lua/List (map invert-quasiquote xs)))
         (= :Vector (type xs))
-          (cons 'lua/Vector (map invert-quasiquote xs))
+          (map invert-quasiquote xs)
         :else
           `(quote ~xs)))
 
@@ -63,7 +57,7 @@
                          (mapstr sym-new args ", ")
                          ")\n"
                          (let-if [s (sym-vararg?)]
-                           (str "local " s " = List(...)\n")
+                           (str "local " s " = List(...);\n")
                            "")
                          @(map (fn [x] (compile x true)) body)]]
         (lua/table.insert hyperbanana (length hyperbanana) "return ")
@@ -79,7 +73,6 @@
                (if (not (string? ns))
                    (lua/Error (str "ns: string expected (Got " (type ns) ")"))
                    (do
-                     (print ns)
                      (set! cur-ns ns)
                      (str "lemma[\"*ns*\"] = " ns ";\n")))))
   :quote   handle-quote
@@ -102,14 +95,14 @@
              (let [ks (odds  xs)
                    vs (evens xs)]
                (str "(function()\n"
-                 "if (" (compile (first ks)) ") then\nreturn "
-                      (compile (first vs))
-                 @(map (fn [k v]
-                         (str "\nelseif (" (compile k) ") then\nreturn "
-                           (compile v)))
-                         (rest ks)
-                         (rest vs))
-                 "\nend\nend)()\n")))
+                    "if (" (compile (first ks)) ") then\nreturn "
+                    (compile (first vs))
+                    (str @(map (fn [k v]
+                                 (str "\nelseif (" (compile k)
+                                  ") then\nreturn " (compile v)))
+                                 (rest ks)
+                                 (rest vs)))
+                    "\nend\nend)()\n")))
   :and     (fn [xs]
              (str "(" (mapstr compile xs " and ") ")"))
   :or      (fn [xs]
@@ -141,11 +134,11 @@
                       (specials (tostring head))
                         ((specials (tostring head)) (rest x))
                       ;; Currently, macros only work if defined at top level
-                      (= :Macro (type (.lookup lua/env (.string head))))
-                        (let [f (get (.lookup lua/env (.string head)) :func)]
+                      (= :Macro (type (lua/eval head lua/env)))
+                        (let [f (get (lua/eval head lua/env) :func)]
                           (compile (f @(rest x))))
                       :else
-                        (let [p (if stat? ");" ")")]
+                        (let [p (if stat? ");\n" ")")]
                           (str (compile head)
                                "("
                                (mapstr compile (rest x) ", ")
@@ -158,13 +151,13 @@
 
 (defn load [filename]
   (let [f (lua/FileStream (lua/io.open filename))]
-  	(loop [code "-- Loading"]
+    (loop [code "-- Loading"]
       (when (not (= (lua/Error :eof) code))
-      	(let [s (lua/assert (lua/loadstring code))]
-      	  (if (= :function (type s))
-      	  	  (s)
-      	  	  (print s)))
-      	(recur (compile (lua/read f true)))))
+        (let [s (lua/assert (lua/loadstring code))]
+          (if (= :function (type s))
+              (s)
+              (print s)))
+        (recur (compile (lua/read f true)))))
     #;(print "Loaded" filename)))
 
 ;(load "lib/std.lma")
@@ -192,3 +185,4 @@
                 (f))
               (print f))))
       (recur))))
+

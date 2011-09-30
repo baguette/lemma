@@ -59,7 +59,7 @@ local function resolve(str)
 	if ns then
 		return ns, mem
 	end
-	ns = lemma['cur-ns']  -- TODO
+	ns = lemma['cur-ns']
 	mem = str
 	for i = #uses, 1, -1 do
 		if _NS[uses[i]][mem] ~= nil then
