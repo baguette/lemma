@@ -171,7 +171,7 @@ end
 function Seq.lib.pack(lst, ...)
 	local n = select('#', ...)
 	local t = {...}
-	local q = lst:seq()
+	local q = lst
 	
 	for i = n, 1, -1 do
 		q = q:cons(t[i])
@@ -179,3 +179,45 @@ function Seq.lib.pack(lst, ...)
 	
 	return q
 end
+
+function Seq.lib.append(...)
+	local t = {...}
+	local q = t[1]:seq()
+	for i = #t, 1, -1 do
+		local v = t[i]
+		local s = {Seq.lib.unpack(v)}
+		for j = v:length(), 1, -1 do
+			q = q:cons(s[j])
+		end
+	end
+	return q
+end
+
+function Seq.lib.flatten(...)
+	local n = select('#', ...)
+	local t = {...}
+	local q = {}
+	local c = 1
+
+	for i = 1, n do
+		local v = t[i]
+		if implements(v, seq) then
+			local s = {Seq.lib.unpack(v)}
+			for j = v:length(), 1, -1 do
+				q[c] = s[j]
+				c = c + 1
+			end
+		elseif type(v) == 'table' then
+			for j = 1, #v do
+				q[c] = v[j]
+				c = c + 1
+			end
+		else
+			q[c] = v
+			c = c + 1
+		end
+	end
+	
+	return Vectorize(q, c)
+end
+

@@ -14,6 +14,18 @@
 (def cur-ns :lemma)
 
 
+(defn tag-splice? [x]
+  (and (= :List (type x))
+       (= 'splice (first x))))
+
+(defn congeal [f args]
+  (str "(function()\n"
+       "local gel = List();\n"
+       (mapstr (fn [x]
+                 (str "gel = lemma.unsplice(gel, " (compile x) ");"))
+               (reverse args) "\n")
+       "\nreturn " (compile f) "(lemma.splice(gel))\nend)("))
+
 (defn gen-quote [t]
   (fn [x] (str t "(" (mapstr rec-quote x ", ") ")")))
 
@@ -116,7 +128,7 @@
     :string     (fn [x] (format "%q" x))
     :boolean    (fn [x] (if x :true :false))
     :nil        (fn [x] :nil)
-    :Vector     (fn [x] (str "Vectorize{"  (mapstr compile x ", ") "}"))
+    :Vector     (fn [x] (str "Vector("  (mapstr compile x ", ") ")"))
     :HashMap    (fn [x]
                   (let [mems (mapstr (fn [a]
                                        (str "["
@@ -138,11 +150,14 @@
                         (let [f (get (lua/eval head lua/env) :func)]
                           (compile (f @(rest x))))
                       :else
-                        (let [p (if stat? ");\n" ")")]
-                          (str (compile head)
-                               "("
-                               (mapstr compile (rest x) ", ")
-                               p)))))
+                        (let [r (rest x)
+                              p (if stat? ");\n" ")")]
+                          (if (any? tag-splice? r)
+                              (str (congeal head r) p)
+                              (str (compile head)
+                                   "("
+                                   (mapstr compile r ", ")
+                                   p))))))
     :Error      (fn [x] x)
   }]
     (if (types (type exp))

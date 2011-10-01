@@ -258,6 +258,9 @@ end){
 }
 
 lemma.splice = Seq.lib.unpack
+lemma.unsplice = Seq.lib.pack
+lemma.append = Seq.lib.append
+lemma.flatten = Seq.lib.flatten
 
 ---
 -- "utility functions"

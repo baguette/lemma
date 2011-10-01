@@ -119,24 +119,14 @@
     (lua/Error (str "defmethod: expected vector, got " (lua/tostring args) " : " (lua/type args)))
     `(defn ~t-dot-f [self ~@args] ~@body)))
 
-
-#;(defmacro and [@args]
-  (def blargs [])
-  (loop [xs args]
-    (when (not (empty? xs))
-      (lua/table.insert blargs `(not ~(first xs)))
-      (lua/table.insert blargs false)
-      (recur (rest xs))))
-  `(cond ~@blargs true true))
-
-#;(defmacro or [@args]
-  (def blargs [])
-  (loop [xs args]
-    (when (not (empty? xs))
-      (lua/table.insert blargs (first xs))
-      (lua/table.insert blargs true)
-      (recur (rest xs))))
-  `(cond ~@blargs true false))
+;; True if any element x in xs satisfies (p? x), false otherwise
+(defn any? [p? xs]
+  (if (empty? xs)
+      false
+      (let [x (first xs)]
+        (if (p? x)
+            true
+            (any? p? (rest xs))))))
 
 ;; Temporarily here for debugging purposes
 ;; Dumps the *metadata* info
