@@ -45,7 +45,7 @@ function lemma.use(ns)
 	end
 end
 
-local function splitns(str)
+function splitns(str)
 	local _, _, ns, mem = string.find(str, "(.+)/(.+)")
 	return ns, mem
 end
@@ -54,7 +54,7 @@ end
 -- Maybe this function should be provided/exported so that quasiquote
 -- can qualify symbols...
 ---
-local function resolve(str)
+function resolve(str)
 	local ns, mem = splitns(str)
 	if ns then
 		return ns, mem
@@ -73,8 +73,8 @@ local function resolve(str)
 	return ns, mem
 end
 
-local function namespace(str)
-	local ns, mem = splitns(str)
+function namespace(str)
+	local ns, mem = resolve(str)
 	if ns then
 		if not mem then
 			return Error"This should not be a Symbol."
@@ -150,7 +150,12 @@ lemma['sym-new'] = function(s)
 	local n = #symtab
 	
 	if n == 0 then
-		return namespace('*ns*/'..str)
+		return namespace(str)
+	else
+		local ns, s = splitns(str)
+		if ns and s then
+			return namespace(str)
+		end
 	end
 	
 	local a = '_L'..n..'_'..symtab[n][1]
@@ -165,7 +170,10 @@ lemma['sym-find'] = function(s)
 	local str = s:string()
 	local n = #symtab
 	
-	local ns, str = resolve(str)
+	local ns, s = splitns(str)
+	if ns and s then
+		return namespace(str)
+	end
 	
 	local v = {}
 	for m in string.gmatch(str, '([^%.]+)') do
@@ -189,7 +197,7 @@ lemma['sym-find'] = function(s)
 		end
 	end
 	
-	return namespace(ns..'/'..str)
+	return namespace(str)
 end
 
 end
