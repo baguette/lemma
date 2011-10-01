@@ -45,7 +45,7 @@ function lemma.use(ns)
 	end
 end
 
-function splitns(str)
+local function splitns(str)
 	local _, _, ns, mem = string.find(str, "(.+)/(.+)")
 	return ns, mem
 end
@@ -54,7 +54,7 @@ end
 -- Maybe this function should be provided/exported so that quasiquote
 -- can qualify symbols...
 ---
-function resolve(str)
+local function resolve(str)
 	local ns, mem = splitns(str)
 	if ns then
 		return ns, mem
@@ -73,7 +73,7 @@ function resolve(str)
 	return ns, mem
 end
 
-function namespace(str)
+local function namespace(str)
 	local ns, mem = resolve(str)
 	if ns then
 		if not mem then
