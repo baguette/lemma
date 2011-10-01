@@ -146,7 +146,8 @@
                       (specials (tostring head))
                         ((specials (tostring head)) (rest x))
                       ;; Currently, macros only work if defined at top level
-                      (= :Macro (type (lua/eval head lua/env)))
+                      (and (= :Symbol (type head))
+                           (= :Macro (type (lua/eval head lua/env))))
                         (let [f (get (lua/eval head lua/env) :func)]
                           (compile (f @(rest x))))
                       :else
@@ -176,7 +177,7 @@
     #;(print "Loaded" filename)))
 
 ;(load "lib/std.lma")
-(let-if [f (lua/io.open (or (second *sys-args*) ""))]
+(let-if [f (lua/io.open (or (first *sys-args*) ""))]
   (let [f (lua/FileStream f)]
     (loop [code "-- Lemma 0.2 --"]
       (when (not (= (lua/Error :eof) code))

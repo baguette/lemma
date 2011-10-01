@@ -4,13 +4,12 @@
 ---
 
 require 'exec'
-LEMMA_VERSION = 0.1
+LEMMA_VERSION = 0.2
 
 ---
 -- Execute command line argument or start a REPL
 ---
 local o, f = ...
-lemma['*sys-args*'] = Vectorize{...}
 
 function update_prompt()
 	prompt = lemma['*ns*']..'> '
@@ -18,10 +17,17 @@ end
 
 if o and o:sub(1, 1) ~= '-' then
 	f, o = o, nil
+	lemma['*sys-args*'] = Vectorize{select(2, ...)}
+end
+if o then
+	lemma['*sys-args*'] = Vectorize{select(3, ...)}
 end
 
-if o ~= '-nolib' then
-	stdlib()
+local outfile
+if o == '-debug' then
+	lemma['*debug*'] = true
+elseif o and string.sub(o, 1, 2) == '-o' then
+	outfile = string.sub(o, 3)
 end
 
 if not f or f == '--' then
@@ -30,4 +36,19 @@ if not f or f == '--' then
 	print('Lemma '..LEMMA_VERSION..' (on '.. _VERSION..')')
 end
 
-exec(f)
+if outfile then
+	local f = FileStream(io.open(f))
+	local w = io.open(outfile, 'w')
+	local code = "-- Lemma "..LEMMA_VERSION.." --"
+	
+	while code ~= Error'eof' do
+		w:write(code..'\n')
+		code = lemma.compile(read(f, true))
+	end
+	w:write("-- EOF --\n")
+	w:close()
+	f:close()
+else
+	exec(f)
+end
+

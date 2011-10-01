@@ -23,8 +23,9 @@ tostring, print = (function()
 			return string.format('%q', s)
 		elseif s == false then
 			return "false"
+		elseif s == nil then
+			return "nil"
 		end
-	
 		return xtostring(s)
 	end,
 	function(...)
