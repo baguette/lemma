@@ -177,9 +177,8 @@ return (function()
 if (_L2_0(_NS["lemma"]["type"](_L1_0))) then
 return _L2_0(_NS["lemma"]["type"](_L1_0))(_L1_0)
 elseif (true) then
-return _NS["lemma"]["str"]("\
--- Whoops! ", _L1_0, " : ", _NS["lemma"]["type"](_L1_0), "\
-")
+return _NS["lua"]["Error"](_NS["lemma"]["str"]("Attempt to compile unrecognized type: ", _L1_0, " : ", _NS["lemma"]["type"](_L1_0), "\
+"))
 end
 end)()
 

@@ -47,6 +47,9 @@ if outfile then
 	local code = "-- Lemma "..LEMMA_VERSION.." --"
 	
 	while code ~= Error'eof' do
+		if type(code) == 'Error' then
+			error(code:string())
+		end
 		w:write(code..'\n')
 		code = lemma.compile(read(f, true))
 	end

@@ -163,7 +163,8 @@
   }]
     (if (types (type exp))
         ((types (type exp)) exp)
-        (str "\n-- Whoops! " exp " : " (type exp) "\n"))))
+        (lua/Error (str "Attempt to compile unrecognized type: "
+                         exp " : " (type exp) "\n")))))
 
 (defn load [filename]
   (let [f (lua/FileStream (lua/io.open filename))]
