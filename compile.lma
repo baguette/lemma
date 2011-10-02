@@ -173,10 +173,9 @@
           (if (= :function (type s))
               (s)
               (print s)))
-        (recur (compile (lua/read f true)))))
-    #;(print "Loaded" filename)))
+        (recur (compile (lua/read f true)))))))
 
-;(load "lib/std.lma")
+
 (let-if [f (lua/io.open (or (first *sys-args*) ""))]
   (let [f (lua/FileStream f)]
     (loop [code "-- Lemma 0.2 --"]
@@ -201,4 +200,3 @@
                 (f))
               (print f))))
       (recur))))
-
