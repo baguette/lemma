@@ -45,7 +45,10 @@ function eval(t, env)
 		print '------'
 	end
 	
-	local f = assert(loadstring(code))()
-	return f
+	local f, err = loadstring(code)
+	if not f then
+		return Error('compiler error:    \n'..tostring(err))
+	end
+	return select(2, pcall(f))
 end
 
