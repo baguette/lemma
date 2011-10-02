@@ -37,8 +37,13 @@ if not f or f == '--' then
 end
 
 if outfile then
+	local w
+	if outfile == '--' then
+		w = io.output()
+	else
+ 		w = io.open(outfile, 'w')
+ 	end
 	local f = FileStream(io.open(f))
-	local w = io.open(outfile, 'w')
 	local code = "-- Lemma "..LEMMA_VERSION.." --"
 	
 	while code ~= Error'eof' do
