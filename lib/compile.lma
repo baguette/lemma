@@ -82,11 +82,11 @@
 (def specials {
   :ns     (fn [xs]
              (let [ns (first xs)]
-               (if (not (string? ns))
+               (if (not (= :string (type ns)))
                    (lua/Error (str "ns: string expected (Got " (type ns) ")"))
                    (do
                      (set! cur-ns ns)
-                     (str "lemma[\"*ns*\"] = " ns ";\n")))))
+                     (str "lemma['*ns*'] = '" ns "';\n")))))
   :quote   handle-quote
   :quasiquote handle-quasiquote
   :def     (fn [xs]
@@ -176,7 +176,7 @@
         (recur (compile (lua/read f true)))))))
 
 
-(let-if [f (lua/io.open (or (first *sys-args*) ""))]
+#;(let-if [f (lua/io.open (or (first *sys-args*) ""))]
   (let [f (lua/FileStream f)]
     (loop [code "-- Lemma 0.2 --"]
       (when (not (= (lua/Error :eof) code))
