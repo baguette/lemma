@@ -48,6 +48,8 @@ if outfile then
 	
 	while code ~= Error'eof' do
 		if type(code) == 'Error' then
+			w:close()
+			f:close()
 			error(code:string())
 		end
 		w:write(code..'\n')
