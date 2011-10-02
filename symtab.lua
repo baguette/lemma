@@ -56,13 +56,14 @@ end
 ---
 local function resolve(str)
 	local ns, mem = splitns(str)
-	if ns then
+	if ns and mem then
 		return ns, mem
 	end
-	ns = lemma['cur-ns']
 	mem = str
+	ns = lemma['cur-ns']
+	imem = mem and string.match(mem, '([^%.]+)%..*') or mem
 	for i = #uses, 1, -1 do
-		if _NS[uses[i]][mem] ~= nil then
+		if _NS[uses[i]][imem] ~= nil then
 			ns = uses[i]
 			break
 		end

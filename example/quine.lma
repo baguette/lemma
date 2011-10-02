@@ -1,4 +1,4 @@
-;; A quine in Lemma, demonstrating the Lua integration
+;; A cheater's quine in Lemma, demonstrating the Lua integration
 
 ;; A leading . is syntactic sugar for calling a method in a table
 ;; A leading : is sugar for a string not containing spaces or delimeters
@@ -12,7 +12,7 @@
       (do-lines func file))))
 
 
-(let-if [quine (lua/io.open (lua/arg 1) :r)]
+(let-if [quine (lua/io.open (*sys-args* 1) :r)]
   (do
     (do-lines print quine)
     (.close quine)))
