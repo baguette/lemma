@@ -4,6 +4,7 @@
 ---
 
 require 'exec'
+LUA_VERSION = jit and jit.version or _VERSION
 LEMMA_VERSION = 0.2
 
 ---
@@ -33,7 +34,7 @@ end
 if not f or f == '--' then
 	f = io.input()
 	update_prompt()
-	print('Lemma '..LEMMA_VERSION..' (on '.. _VERSION..')')
+	print('Lemma '..LEMMA_VERSION..' (on '..LUA_VERSION..')')
 end
 
 if outfile then

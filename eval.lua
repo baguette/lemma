@@ -24,7 +24,7 @@ function eval(t, env)
 		local h = t:first()
 		if type(h) == 'Symbol' then
 			local undef = string.sub(h:string(), 1, 3)
-			if undef == 'def' or undef == 'set' or h:string() == 'ns' then
+			if undef == 'def' or undef == 'set' or undef == 'ns' then
 				undefined = true
 			end
 		end

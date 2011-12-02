@@ -1,6 +1,7 @@
 ;;;
 ;; Work-in-progress compiler for Lemma
 ;; Still needs:
+;;  - Make namespaces a compile-time feature; generate better code for them.
 ;;  - `return` insertion does not work properly.
 ;;  - More special forms:  expand
 ;;  - Support for metadata (and subsequently doc-strings)
@@ -77,14 +78,13 @@
         ; "\n-- function(" (comma-map (fn[x]x) args) ")\n"
         (str (lua/table.concat hyperbanana) "\nend)"))))
 
-;; TODO: Fexpr handling rather than a specials table.
-;;       Such a mechanism will enable defs like: (def lambda fn)
 (def specials {
   :ns     (fn [xs]
              (let [ns (first xs)]
                (if (not (= :string (type ns)))
                    (lua/Error (str "ns: string expected (Got " (type ns) ")"))
                    (do
+                     (add-ns ns)
                      (set! cur-ns ns)
                      (str "lemma['*ns*'] = '" ns "';\n")))))
   :quote   handle-quote

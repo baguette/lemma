@@ -94,7 +94,8 @@
 
 
 ;; Generate predicates to test for each type
-(let [types ["Vector" "HashMap" "List" "Symbol" "Macro" "Fexpr" "function" "string"]]
+;; Doesn't work with the compiler. Should be able to fix after library refactor
+#;(let [types ["Vector" "HashMap" "List" "Symbol" "Macro" "Fexpr" "function" "string"]]
   (for-each
     (fn [s]
       (let [name (lua/Symbol (str "lemma/" (.lower s) "?"))]

@@ -8,13 +8,15 @@
 -- sym-pop should occur to discard its locals from the symbol table.
 ---
 require 'class/Error'
+require 'class/Set'
 
 ---
--- This is ugly.
+-- This is ugly... but it's only temporary.
 ---
 do
 
 local symtab = {}
+local nses   = Set('lemma', 'lua')
 local uses   = {'lemma'}
 local vararg = false
 
@@ -37,9 +39,21 @@ function debug.printsyms()
 	print'--------'
 end
 
+---
+-- TODO: each namespace should have its own uses
+---
+lemma['add-ns'] = function(ns)
+	_G[ns] = _G[ns] or {}
+	nses:conj(ns)
+end
+
 function lemma.use(ns)
 	if type(ns) == 'string' then
-		table.insert(uses, ns)
+		if nses['contains?'](nses, ns) then
+			table.insert(uses, ns)
+		else
+			return Error('use: '..ns..' is not a known namespace')
+		end
 	else
 		return Error'use: string expected'
 	end
@@ -85,11 +99,11 @@ local function namespace(str)
 			ns = lemma['cur-ns']
 		end
 		
-		if _NS[ns] == nil then
-			_NS[ns] = {}
+		if not nses['contains?'](nses, ns) then
+			return Error('error: '..ns..' is not a known namespace.')
 		end
 		
-		local v = {'_NS["', ns, '"]'}
+		local v = {'_G["', ns, '"]'}
 		for m in string.gmatch(mem, '([^%.]+)') do
 			table.insert(v, '["')
 			table.insert(v, m)
