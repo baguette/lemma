@@ -16,6 +16,6 @@
     (let-values [line err] (.receive client)
       (when line
         (.send client (str "> " line "\n")))
-      (.close client))
+      (.close client)))
   (recur))
 

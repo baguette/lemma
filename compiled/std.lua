@@ -47,8 +47,7 @@ end)(), true)
 end);
 
 _G["lemma"]["second"] = (function(_L1_0)
-return _G["lemma"]["first"](_G["lemma"]["rest"](_L1_0));
-
+return _G["lemma"]["first"](_G["lemma"]["rest"](_L1_0))
 end);
 
 _G["lemma"]["odds"] = (function(_L1_0)
@@ -140,6 +139,15 @@ return _G["lua"]["List"](lemma.splice(gel))
 end)())), _G["lua"]["List"](Symbol("once"), _L1_0))
 end);
 
+(function(_L1_0)
+return _G["lemma"]["for-each"]((function(_L2_0)
+return (function(_L3_0)
+return _G["lemma"]["table-set!"](_G["lua"]["lemma"], _L3_0, (function(_L4_0)
+return _G["lemma"]["="](_G["lua"]["type"](_L4_0), _L2_0)
+end))
+end)(_G["lemma"]["str"](_G["lemma"]["method"](_L2_0, Symbol("lower"))(), "?"))
+end), _L1_0)
+end)(Vector("Vector", "HashMap", "List", "Symbol", "Macro", "Fexpr", "function", "string"))
 _G["lemma"]["mapstr"] = (function(_L1_0, _L1_1, _L1_2)
 _L1_2 = (function()
 if (_G["lemma"]["="](_L1_2)) then
@@ -154,11 +162,9 @@ return _G["lua"]["string"]["sub"]((function()
 local gel = List();
 gel = lemma.unsplice(gel, _G["lemma"]["splice"](_L2_0));
 return _G["lemma"]["str"](lemma.splice(gel))
-end)(), 1, _G["lemma"]["-"](-1, _G["lemma"]["length"](_L1_2)));
-
+end)(), 1, _G["lemma"]["-"](-1, _G["lemma"]["length"](_L1_2)))
 end)(_G["lemma"]["map"]((function(_L2_0)
-return _G["lemma"]["str"](_L1_0(_L2_0), _L1_2);
-
+return _G["lemma"]["str"](_L1_0(_L2_0), _L1_2)
 end), _L1_1))
 end);
 
@@ -208,8 +214,7 @@ return _G["lua"]["loadstring"]("\
         io.write(tostring(k)..': '..m..' =  '..w..'\\n')\
       end\
     end\
-  ")();
-
+  ")()
 end);
 
 _G["lua"]["collectgarbage"]("collect")

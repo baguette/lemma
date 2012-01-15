@@ -172,68 +172,57 @@ end)()\
 end)(_G["lemma"]["odds"](_L1_0), _G["lemma"]["evens"](_L1_0))
 end)};
 
-_G["lemma"]["compile"] = (function(_L1_0, _L1_1)
+_G["lemma"]["types"] = Mapify{["number"] = (function(_L1_0)
+return _G["lua"]["tostring"](_L1_0);
+
+end), ["string"] = (function(_L1_0)
+return _G["lemma"]["format"]("%q", _L1_0);
+
+end), ["HashMap"] = (function(_L1_0)
 return (function(_L2_0)
-return (function()
-if (_L2_0(_G["lemma"]["type"](_L1_0))) then
-return _L2_0(_G["lemma"]["type"](_L1_0))(_L1_0)
-elseif (true) then
-return _G["lua"]["Error"](_G["lemma"]["str"]("Attempt to compile unrecognized type: ", _L1_0, " : ", _G["lemma"]["type"](_L1_0), "\
-"))
-end
-end)()
+return _G["lemma"]["str"]("Mapify{", _L2_0, "}");
 
-end)(Mapify{["number"] = (function(_L2_0)
-return _G["lua"]["tostring"](_L2_0);
+end)(_G["lemma"]["mapstr"]((function(_L2_0)
+return _G["lemma"]["str"]("[", _G["lemma"]["compile"](_L2_0), "] = ", _G["lemma"]["compile"](_L1_0(_L2_0)));
 
-end), ["string"] = (function(_L2_0)
-return _G["lemma"]["format"]("%q", _L2_0);
-
-end), ["HashMap"] = (function(_L2_0)
-return (function(_L3_0)
-return _G["lemma"]["str"]("Mapify{", _L3_0, "}");
-
-end)(_G["lemma"]["mapstr"]((function(_L3_0)
-return _G["lemma"]["str"]("[", _G["lemma"]["compile"](_L3_0), "] = ", _G["lemma"]["compile"](_L2_0(_L3_0)));
-
-end), _G["lemma"]["keys"](_L2_0), ", "))
-end), ["Error"] = (function(_L2_0)
-return _L2_0
-end), ["nil"] = (function(_L2_0)
+end), _G["lemma"]["keys"](_L1_0), ", "))
+end), ["Error"] = (function(_L1_0)
+return _L1_0
+end), ["nil"] = (function(_L1_0)
 return "nil"
-end), ["PreHashMap"] = (function(_L2_0)
+end), ["PreHashMap"] = (function(_L1_0)
 return _G["lemma"]["compile"]((function()
 local gel = List();
-gel = lemma.unsplice(gel, _G["lemma"]["splice"](_L2_0));
+gel = lemma.unsplice(gel, _G["lemma"]["splice"](_L1_0));
 return _G["lua"]["HashMap"](lemma.splice(gel))
 end)());
 
-end), ["List"] = (function(_L2_0)
-return (function(_L3_0)
+end), ["List"] = (function(_L1_0)
+return (function(_L2_0)
 return (function()
-if (_G["lemma"]["specials"](_G["lemma"]["tostring"](_L3_0))) then
-return _G["lemma"]["specials"](_G["lemma"]["tostring"](_L3_0))(_G["lemma"]["rest"](_L2_0))
-elseif ((_G["lemma"]["="]("Symbol", _G["lemma"]["type"](_L3_0)) and _G["lemma"]["="]("Macro", _G["lemma"]["type"](_G["lua"]["eval"](_L3_0, _G["lua"]["env"]))))) then
-return (function(_L4_0)
+if (_G["lemma"]["specials"](_G["lemma"]["tostring"](_L2_0))) then
+return _G["lemma"]["specials"](_G["lemma"]["tostring"](_L2_0))(_G["lemma"]["rest"](_L1_0))
+elseif ((_G["lemma"]["="]("Symbol", _G["lemma"]["type"](_L2_0)) and _G["lemma"]["="]("Macro", _G["lemma"]["type"](_G["lua"]["eval"](_L2_0, _G["lua"]["env"]))))) then
+return (function(_L3_0)
 return _G["lemma"]["compile"]((function()
 local gel = List();
-gel = lemma.unsplice(gel, _G["lemma"]["splice"](_G["lemma"]["rest"](_L2_0)));
-return _L4_0(lemma.splice(gel))
+gel = lemma.unsplice(gel, _G["lemma"]["splice"](_G["lemma"]["rest"](_L1_0)));
+return _L3_0(lemma.splice(gel))
 end)());
 
-end)(_G["lemma"]["get"](_G["lua"]["eval"](_L3_0, _G["lua"]["env"]), "func"))
+end)(_G["lemma"]["get"](_G["lua"]["eval"](_L2_0, _G["lua"]["env"]), "func"))
 elseif ("else") then
-return (function(_L4_0, _L4_1)
+return (function(_L3_0, _L3_1)
 return (function()
-if (_G["lemma"]["any?"](_G["lemma"]["tag-splice?"], _L4_0)) then
-return _G["lemma"]["str"](_G["lemma"]["congeal"](_L3_0, _L4_0), _L4_1)
+if (_G["lemma"]["any?"](_G["lemma"]["tag-splice?"], _L3_0)) then
+return _G["lemma"]["str"](_G["lemma"]["congeal"](_L2_0, _L3_0), _L3_1)
 elseif (true) then
-return _G["lemma"]["str"](_G["lemma"]["compile"](_L3_0), "(", _G["lemma"]["mapstr"](_G["lemma"]["compile"], _L4_0, ", "), _L4_1)
+return _G["lemma"]["str"](_G["lemma"]["compile"](_L2_0), "(", _G["lemma"]["mapstr"](_G["lemma"]["compile"], _L3_0, ", "), _L3_1)
 end
 end)()
 
-end)(_G["lemma"]["rest"](_L2_0), (function()
-if (_L1_1) then
+end)(_G["lemma"]["rest"](_L1_0), (function()
+if (_G["lemma"]["stat?"]) then
 return ");\
 "
 elseif (true) then
@@ -244,26 +233,37 @@ end)()
 end
 end)()
 
-end)(_G["lemma"]["first"](_L2_0))
-end), ["Symbol"] = (function(_L2_0)
-return _G["lemma"]["sym-find"](_L2_0);
+end)(_G["lemma"]["first"](_L1_0))
+end), ["Symbol"] = (function(_L1_0)
+return _G["lemma"]["sym-find"](_L1_0);
 
-end), ["Number"] = (function(_L2_0)
-return _G["lemma"]["method"](_L2_0, Symbol("string"))();
+end), ["Number"] = (function(_L1_0)
+return _G["lemma"]["method"](_L1_0, Symbol("string"))();
 
-end), ["boolean"] = (function(_L2_0)
+end), ["boolean"] = (function(_L1_0)
 return (function()
-if (_L2_0) then
+if (_L1_0) then
 return "true"
 elseif (true) then
 return "false"
 end
 end)()
 
-end), ["Vector"] = (function(_L2_0)
-return _G["lemma"]["str"]("Vector(", _G["lemma"]["mapstr"](_G["lemma"]["compile"], _L2_0, ", "), ")");
+end), ["Vector"] = (function(_L1_0)
+return _G["lemma"]["str"]("Vector(", _G["lemma"]["mapstr"](_G["lemma"]["compile"], _L1_0, ", "), ")");
 
-end)})
+end)};
+
+_G["lemma"]["compile"] = (function(_L1_0, _L1_1)
+return (function()
+if (_G["lemma"]["types"](_G["lemma"]["type"](_L1_0))) then
+return _G["lemma"]["types"](_G["lemma"]["type"](_L1_0))(_L1_0)
+elseif (true) then
+return _G["lua"]["Error"](_G["lemma"]["str"]("Attempt to compile unrecognized type: ", _L1_0, " : ", _G["lemma"]["type"](_L1_0), "\
+"))
+end
+end)()
+
 end);
 
 _G["lemma"]["load"] = (function(_L1_0)

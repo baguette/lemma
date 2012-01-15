@@ -121,50 +121,51 @@
              (str "(" (mapstr compile xs " or ") ")"))
   })
 
+(def types {
+  :Number     (fn [x] (.string x))
+  :number     (fn [x] (lua/tostring x))
+  :string     (fn [x] (format "%q" x))
+  :boolean    (fn [x] (if x :true :false))
+  :nil        (fn [x] :nil)
+  :Vector     (fn [x] (str "Vector("  (mapstr compile x ", ") ")"))
+  :HashMap    (fn [x]
+                (let [mems (mapstr (fn [a]
+                                     (str "["
+                                          (compile a)
+                                          "] = "
+                                          (compile (x a))))
+                                     (keys x)
+                                     ", ")]
+                  (str "Mapify{" mems "}")))
+  :PreHashMap (fn [x] (compile (lua/HashMap @x)))
+  :Symbol     (fn [x] (sym-find x))
+  :List       (fn [x]
+                (let [head (first x)]
+                  (cond
+                    (specials (tostring head))
+                      ((specials (tostring head)) (rest x))
+                    ;; Currently, macros only work if defined at top level
+                    (and (= :Symbol (type head))
+                         (= :Macro (type (lua/eval head lua/env))))
+                      (let [f (get (lua/eval head lua/env) :func)]
+                        (compile (f @(rest x))))
+                    :else
+                      (let [r (rest x)
+                            p (if stat? ");\n" ")")]
+                        (if (any? tag-splice? r)
+                            (str (congeal head r) p)
+                            (str (compile head)
+                                 "("
+                                 (mapstr compile r ", ")
+                                 p))))))
+  :Error      (fn [x] x)
+  })
+
 (defn compile [exp stat?]
-  (let [types {
-    :Number     (fn [x] (.string x))
-    :number     (fn [x] (lua/tostring x))
-    :string     (fn [x] (format "%q" x))
-    :boolean    (fn [x] (if x :true :false))
-    :nil        (fn [x] :nil)
-    :Vector     (fn [x] (str "Vector("  (mapstr compile x ", ") ")"))
-    :HashMap    (fn [x]
-                  (let [mems (mapstr (fn [a]
-                                       (str "["
-                                            (compile a)
-                                            "] = "
-                                            (compile (x a))))
-                                       (keys x)
-                                       ", ")]
-                    (str "Mapify{" mems "}")))
-    :PreHashMap (fn [x] (compile (lua/HashMap @x)))
-    :Symbol     (fn [x] (sym-find x))
-    :List       (fn [x]
-                  (let [head (first x)]
-                    (cond
-                      (specials (tostring head))
-                        ((specials (tostring head)) (rest x))
-                      ;; Currently, macros only work if defined at top level
-                      (and (= :Symbol (type head))
-                           (= :Macro (type (lua/eval head lua/env))))
-                        (let [f (get (lua/eval head lua/env) :func)]
-                          (compile (f @(rest x))))
-                      :else
-                        (let [r (rest x)
-                              p (if stat? ");\n" ")")]
-                          (if (any? tag-splice? r)
-                              (str (congeal head r) p)
-                              (str (compile head)
-                                   "("
-                                   (mapstr compile r ", ")
-                                   p))))))
-    :Error      (fn [x] x)
-  }]
     (if (types (type exp))
         ((types (type exp)) exp)
         (lua/Error (str "Attempt to compile unrecognized type: "
-                         exp " : " (type exp) "\n")))))
+                         exp " : " (type exp) "\n"))))
 
 (defn load [filename]
   (let [f (lua/FileStream (lua/io.open filename))]

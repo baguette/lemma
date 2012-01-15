@@ -12,11 +12,13 @@ require 'class/Set'
 
 ---
 -- This is ugly... but it's only temporary.
+-- TODO: reconsider namespaces
+--       they affect interop and don't map to the filesystem
+--       why not have ns, use take any table?
 ---
 do
 
 local symtab = {}
-local nses   = Set('lemma', 'lua')
 local uses   = {'lemma'}
 local vararg = false
 
@@ -44,12 +46,11 @@ end
 ---
 lemma['add-ns'] = function(ns)
 	_G[ns] = _G[ns] or {}
-	nses:conj(ns)
 end
 
 function lemma.use(ns)
 	if type(ns) == 'string' then
-		if nses['contains?'](nses, ns) then
+		if _G[ns] then
 			table.insert(uses, ns)
 		else
 			return Error('use: '..ns..' is not a known namespace')
@@ -77,7 +78,7 @@ local function resolve(str)
 	ns = lemma['cur-ns']
 	imem = mem and string.match(mem, '([^%.]+)%..*') or mem
 	for i = #uses, 1, -1 do
-		if _NS[uses[i]][imem] ~= nil then
+		if _G[uses[i]][imem] ~= nil then
 			ns = uses[i]
 			break
 		end
@@ -99,7 +100,7 @@ local function namespace(str)
 			ns = lemma['cur-ns']
 		end
 		
-		if not nses['contains?'](nses, ns) then
+		if not _G[ns] then
 			return Error('error: '..ns..' is not a known namespace.')
 		end
 		

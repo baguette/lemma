@@ -155,6 +155,17 @@ function lemma.get(t, k)
 	return t[k]
 end
 
+lemma['table-set!'] = function(t, k, v)
+	if not k then
+		return Error'table-set!: attempt to index table with nil'
+	end
+	if not t then
+		return Error('table-set!: attempt to index nil ['..k..']')
+	end
+	t[k] = v
+	return v
+end
+
 function lemma.method(t, k, ...)
 	if k == nil then
 		return Error'method: attempt to index table with nil'
