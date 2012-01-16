@@ -18,12 +18,23 @@ local function __tostring(e)
 	return '('..table.concat(str)..')'
 end
 
+local function __eq(self, e)
+	if self:length() == 0 and e:length() == 0 then
+		return true
+	end
+	if self:first() ~= e:first() then
+		return false
+	end
+	return (self:rest() == e:rest())
+end
+
 local t = {}
 local mt = {
 	class = 'List',
 	implements = { Seq = true, Reversible = true },
 	__index = t,
-	__tostring = __tostring
+	__tostring = __tostring,
+	__eq = __eq
 }
 
 function t:cons(...)

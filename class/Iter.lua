@@ -4,7 +4,13 @@ require 'class/Vector'
 do
 
 local function __tostring(e)
-	return 'iter:'..tostring(e.f)..':'..tostring(e.xs)
+	return 'iter:'..tostring(e.f)..','..tostring(e.s)..','..tostring(e.a)
+end
+
+local function __eq(self, e)
+	return (rawequal(self.f, e.f)
+	    and rawequal(self.s, e.s)
+	    and rawequal(self.a, e.a))
 end
 
 local t = {}
@@ -12,7 +18,8 @@ local mt = {
 	class = 'Iter',
 	implements = { Seq = true },
 	__index = t,
-	__tostring = __tostring
+	__tostring = __tostring,
+	__eq = __eq
 }
 
 function Iter(f, s, a)

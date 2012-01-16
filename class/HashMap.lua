@@ -18,6 +18,21 @@ local function __tostring(e)
 	return '{'..table.concat(str)..'}'
 end
 
+local function __eq(self, e)
+	if self:length() ~= e:length() then
+		return false
+	end
+	for k, v in pairs(self) do
+		if not e[k] then
+			return false
+		end
+		if e[k] ~= v then
+			return false
+		end
+	end
+	return true
+end
+
 local function __call(t, k, v)
 	if v then
 		t[k] = v
@@ -34,7 +49,8 @@ local mt = {
 	implements = { Seq = true },
 	__index = t,
 	__tostring = __tostring,
-	__call = __call
+	__call = __call,
+	__eq = __eq
 }
 
 function t:cons(...)
