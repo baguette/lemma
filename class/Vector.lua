@@ -38,13 +38,19 @@ local function __call(t, k, v)
 end
 
 local t = {}
+
+function t:length()
+	return lemma['get-meta'](self, 'length') or 0
+end
+
 local mt = {
 	class = 'Vector',
 	implements = { Seq = true, Reversible = true },
 	__index = t,
 	__tostring = __tostring,
 	__call = __call,
-	__eq = __eq
+	__eq = __eq,
+	__len = t.length
 }
 
 function t:cons(...)
@@ -62,10 +68,6 @@ function t:cons(...)
 	
 	lemma['assoc-meta'](new, 'length', self:length() + n)
 	return new
-end
-
-function t:length()
-	return lemma['get-meta'](self, 'length') or 0
 end
 
 function t:first()

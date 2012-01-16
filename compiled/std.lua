@@ -43,7 +43,7 @@ local gel = List();
 gel = lemma.unsplice(gel, _G["lemma"]["splice"](_L1_1));
 gel = lemma.unsplice(gel, Symbol("do"));
 return _G["lua"]["List"](lemma.splice(gel))
-end)(), true)
+end)(), true, nil)
 end);
 
 _G["lemma"]["second"] = (function(_L1_0)
@@ -145,12 +145,12 @@ return (function(_L3_0)
 return _G["lemma"]["table-set!"](_G["lua"]["lemma"], _L3_0, (function(_L4_0)
 return _G["lemma"]["="](_G["lua"]["type"](_L4_0), _L2_0)
 end))
-end)(_G["lemma"]["str"](_G["lemma"]["method"](_L2_0, Symbol("lower"))(), "?"))
+end)(_G["lemma"]["str"](_G["lemma"]["method"]("lower")(_L2_0), "?"))
 end), _L1_0)
 end)(Vector("Vector", "HashMap", "List", "Symbol", "Macro", "Fexpr", "function", "string"))
 _G["lemma"]["mapstr"] = (function(_L1_0, _L1_1, _L1_2)
 _L1_2 = (function()
-if (_G["lemma"]["="](_L1_2)) then
+if (_G["lemma"]["="](_L1_2, nil)) then
 return ""
 elseif (true) then
 return _L1_2

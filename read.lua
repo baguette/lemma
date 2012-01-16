@@ -196,9 +196,11 @@ end
 local function table_idx(func)
 	return function(f, c)
 		local k = read(f, c)
-		local t = read(f, c)
-		k = List():cons(k):cons(Symbol('quote'))
-		return List():cons(k):cons(t):cons(Symbol(func))
+	--	k = List():cons(k):cons(Symbol('quote'))
+		if type(k) ~= 'Symbol' then
+			return Error'read: dot syntax requires symbol'
+		end
+		return List():cons(k:string()):cons(Symbol(func))
 	end
 end
 

@@ -32,6 +32,11 @@ local function __eq(self, e)
 end
 
 local t = {}
+
+function t:length()
+	return lemma['get-meta'](self, 'length') or 0
+end
+
 local mt = {
 	class = 'List',
 	implements = { Seq = true, Reversible = true },
@@ -53,10 +58,6 @@ function t:cons(...)
 	end
 	
 	return new
-end
-
-function t:length()
-	return lemma['get-meta'](self, 'length') or 0
 end
 
 function t:first()

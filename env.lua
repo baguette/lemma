@@ -41,6 +41,14 @@ tostring, print = (function()
 	end
 end)()
 
+function lemma.rawstring(t)
+	local old = getmetatable(t)
+	setmetatable(t, nil)
+	local s = tostring(t)
+	setmetatable(t, old)
+	return s
+end
+
 ---
 -- Write an external representation of t to stdout
 ---
@@ -192,18 +200,19 @@ function lemma.table(a, h)
 	return t
 end
 
-function lemma.method(t, k, ...)
-	if k == nil then
-		return Error'method: attempt to index table with nil'
+function lemma.method(k)
+	if type(k) ~= 'string' then
+		return Error('method: expected string, got '..tostring(k))
 	end
-	if t == nil then
-		return Error('method: attempt to index nil ['..k..']')
-	end
-	k = k:string()
-	if t[k] == nil then
-		return Error('method: method is nil ['..k..']')
-	end
-	return function(...)
+	--k = k:string()
+	
+	return function(t, ...)
+		if t == nil then
+			return Error('method: attempt to index nil ['..k..']')
+		end
+		if t[k] == nil then
+			return Error('method: method is nil ['..k..']')
+		end
 		return t[k](t, ...)
 	end
 end
