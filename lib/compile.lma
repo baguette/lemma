@@ -19,6 +19,10 @@
   (and (= :List (type x))
        (= 'splice (first x))))
 
+(defn seq? [x]
+  (or (= :List (type x))
+      (= :Iter (type x))))
+
 (defn congeal [f args]
   (str "(function()\n"
        "local gel = List();\n"
@@ -50,7 +54,7 @@
 ;; I don't think this will nest properly as-is, and it certainly doesn't
 ;; handle hashmaps.
 (defn invert-quasiquote [xs]
-  (cond (= :List (type xs))
+  (cond (seq? xs)
           (if (= 'unquote (first xs))
               (second xs)
               (cons 'lua/List (map invert-quasiquote xs)))

@@ -47,7 +47,7 @@ end);
 
 _G["lemma"]["invert-quasiquote"] = (function(_L1_0)
 return (function()
-if (_G["lemma"]["="]("List", _G["lemma"]["type"](_L1_0))) then
+if (_G["lemma"]["="]("List", _G["lemma"]["type"](_L1_0)) or type(_L1_0) == 'Iter') then
 return (function()
 if (_G["lemma"]["="](Symbol("unquote"), _G["lemma"]["first"](_L1_0))) then
 return _G["lemma"]["second"](_L1_0)
