@@ -93,7 +93,7 @@ function Seq.lib.map(f, ...)
 	if #lsts == 0 then
 		return
 	elseif not implements(lsts[1], 'Seq') then
-		return Error('map: Seq expected, got'..lsts[1])
+		return Error('map: Seq expected, got'..tostring(lsts[1]))
 	end
 
 	local function map(f, lsts)
@@ -120,7 +120,7 @@ function Seq.lib.map(f, ...)
 	if #lsts == 0 then
 		return
 	elseif not implements(lsts[1], 'Seq') then
-		return Error('map: Seq expected, got'..lsts[1])
+		return Error('map: Seq expected, got'..tostring(lsts[1]))
 	end
 	
 	local function map(f, lsts)
