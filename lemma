@@ -18,10 +18,10 @@ end
 
 if o and o:sub(1, 1) ~= '-' then
 	f, o = o, nil
-	lemma['*sys-args*'] = Vectorize{select(2, ...)}
+	lemma['*sys-args*'] = Vectorize{select(1, ...)}
 end
 if o then
-	lemma['*sys-args*'] = Vectorize{select(3, ...)}
+	lemma['*sys-args*'] = Vectorize{select(2, ...)}
 end
 
 local outfile
