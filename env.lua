@@ -91,9 +91,7 @@ end){
 
 ;(function(t)
 	for k, v in pairs(t) do
-		lemma[k] = function(...)
-			local a, b = ...
-			
+		lemma[k] = function(a, b)
 			return v(a, b)
 		end
 	end
@@ -105,6 +103,10 @@ end){
  ['>=']  = function(a, b) return a >= b end,
  ['<=']  = function(a, b) return a <= b end
 }
+
+lemma['id?'] = function(a, b)
+	return rawequal(a, b)
+end
 
 lemma['not'] = function(a)
 	return not a
