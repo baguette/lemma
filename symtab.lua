@@ -77,6 +77,9 @@ local function resolve(str)
 	mem = str
 	ns = lemma['cur-ns']
 	imem = mem and string.match(mem, '([^%.]+)%..*') or mem
+	if _G[ns][imem] ~= nil then
+		return ns, mem
+	end
 	for i = #uses, 1, -1 do
 		if _G[uses[i]][imem] ~= nil then
 			ns = uses[i]
@@ -89,14 +92,15 @@ local function resolve(str)
 	return ns, mem
 end
 
-local function namespace(str)
+local function namespace(str, deffing)
+	deffing = deffing or false
 	local ns, mem = resolve(str)
 	if ns then
 		if not mem then
 			return Error"This should not be a Symbol."
 		end
 		
-		if (ns == '*ns*') then
+		if (ns == '*ns*' or deffing) then
 			ns = lemma['cur-ns']
 		end
 		
@@ -165,12 +169,12 @@ lemma['sym-new'] = function(s)
 	local str = s:string()
 	local n = #symtab
 	
-	if n == 0 then
+	local ns, sp = splitns(str)
+	if ns and sp then
 		return namespace(str)
 	else
-		local ns, s = splitns(str)
-		if ns and s then
-			return namespace(str)
+		if n == 0 then
+			return namespace('*ns*/'..str)
 		end
 	end
 	
