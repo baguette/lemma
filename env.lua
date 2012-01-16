@@ -169,6 +169,29 @@ lemma['table-set!'] = function(t, k, v)
 	return v
 end
 
+---
+-- Create a raw Lua table with array part a (optional) and hash part h.
+-- If no arguments are specified, returns an empty table.
+---
+function lemma.table(a, h)
+	if not h then
+		h = a
+		a = nil
+	end
+	local t
+	if a then
+		t = {Seq.lib.unpack(a)}
+	else
+		t = {}
+	end
+	if h then
+		for k, v in h do
+			t[k] = v
+		end
+	end
+	return t
+end
+
 function lemma.method(t, k, ...)
 	if k == nil then
 		return Error'method: attempt to index table with nil'
