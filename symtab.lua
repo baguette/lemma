@@ -92,8 +92,7 @@ local function resolve(str)
 	return ns, mem
 end
 
-local function namespace(str, deffing)
-	deffing = deffing or false
+local function namespace(str)
 	local ns, mem = resolve(str)
 	if ns then
 		if not mem then

@@ -12,13 +12,16 @@ require 'class/Vector'
 do
 
 local function __tostring(e)
-	return 'iter:'..tostring(e.f)..','..tostring(e.s)..','..tostring(e.a)
+	return 'iter:'..tostring(e.f)
 end
 
 local function __eq(self, e)
 	return (rawequal(self.f, e.f)
 	    and rawequal(self.s, e.s)
-	    and rawequal(self.a, e.a))
+	    and rawequal(self.a, e.a)
+	    and rawequal(self.buffer.n, e.buffer.n)
+	    and rawequal(self.buffer.i, e.buffer.i)
+	    and rawequal(self.buffer.s, e.buffer.s))
 end
 
 local t = {}
@@ -81,6 +84,8 @@ function t:first()
 	end
 	if self.buffer.i <= self.buffer.n then
 		return self.buffer.s[self.buffer.i]
+	else
+		return Error'something went wrong in Iter'
 	end
 end
 
@@ -95,6 +100,16 @@ function t:rest()
 	end
 	return attach(self.f, self.s, self.a, self.filter,
 	              { n=self.buffer.n, i=self.buffer.i+1, s=self.buffer.s})
+end
+
+function t:cons(a)
+	local s = {}
+	for i = 1, self.buffer.n do
+		s[i] = self.buffer.s[i]
+	end
+	table.insert(s, self.buffer.i, a)
+	return attach(self.f, self.s, self.a, self.filter,
+	              { n=self.buffer.n+1, i=self.buffer.i, s=s})
 end
 
 t['empty?'] = function(self)

@@ -158,6 +158,7 @@
                                  "("
                                  (mapstr compile r ", ")
                                  p))))))
+  :Iter       (fn [x] (compile (lua/List @x)))  ;; TODO: temporary workaround
   :Error      (fn [x] x)
   })
 
