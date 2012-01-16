@@ -220,6 +220,41 @@ function lemma.undefined()
 	return nil
 end
 
+function lemma.take(n, seq)
+	if type(n) ~= 'number' then
+		return Error('take: number expected, got ', tostring(n))
+	end
+	if not implements(seq, 'Seq') then
+		return Error('take: seq expected, got ', tostring(seq))
+	end
+	lst = {}
+	for i = 1, n do
+		if seq['empty?'](seq) then
+			n = i - 1
+			break
+		end
+		lst[i] = seq:first()
+		seq = seq:rest()
+	end
+	return List(unpack(lst, 1, n))
+end
+
+function lemma.drop(n, seq)
+	if type(n) ~= 'number' then
+		return Error('take: number expected, got ', tostring(n))
+	end
+	if not implements(seq, 'Seq') then
+		return Error('take: seq expected, got ', tostring(seq))
+	end
+	for i = 1, n do
+		if seq['empty?'](seq) then
+			break
+		end
+		seq = seq:rest()
+	end
+	return seq
+end
+
 function string.split(s, p)
 	f, s, k = s:gmatch(p)
 	return f(s, k)
