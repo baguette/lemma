@@ -126,6 +126,7 @@ end
 
 lemma.vec = Vector
 lemma['hash-map'] = HashMap
+lemma.iter = Iter
 
 function lemma.keys(t)
 	local list = List()

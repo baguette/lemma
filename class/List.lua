@@ -19,7 +19,10 @@ local function __tostring(e)
 end
 
 local function __eq(self, e)
-	if self:length() == 0 and e:length() == 0 then
+	if self:length() ~= e:length() then
+		return false
+	end
+	if self:length() == 0 then
 		return true
 	end
 	if self:first() ~= e:first() then
@@ -61,7 +64,7 @@ function t:first()
 end
 
 function t:rest()
-	return self[2] or List()
+	return self[2]
 end
 
 t['empty?'] = function(self)
@@ -82,6 +85,7 @@ end
 
 function List(...)
 	local o = {}
+	lemma['assoc-meta'](o, 'length', 0)
 	setmetatable(o, mt)
 	return o:cons(...)
 end

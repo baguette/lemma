@@ -34,7 +34,8 @@ function exec(f)
 			local val = Vector(eval(t, env))      -- evaluate the expression!
 			local err = false
 			
-			for i, v in ipairs(val) do
+			for i = 1, val:length() do
+				v = val[i]
 				if v == Error'eof' then
 					done = true
 					f:close()

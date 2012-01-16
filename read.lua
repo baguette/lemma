@@ -8,7 +8,7 @@ require 'class/List'
 require 'class/Vector'
 require 'class/PreHashMap'
 require 'class/Symbol'
-require 'class/Nil'
+require 'class/Nil'		-- used to signal that a comment has been read
 require 'class/Number'
 
 local symbol =			 -- this is perhaps a little too permissive
@@ -68,7 +68,6 @@ local delim = {
 	['}'] = true
 }
 
--- TODO: would probably be beneficial to make this tail-recursive
 local function read_seq(eos, func)
 	return function(f, co)
 		local list = {}
