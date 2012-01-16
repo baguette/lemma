@@ -22,7 +22,7 @@ end
 local t = {}
 local mt = {
 	class = 'PreHashMap',
-	implements = { 'Seq', 'Reversible' },
+	implements = { Seq = true, Reversible = true },
 	__index = getmetatable(Vector()).__index,
 	__tostring = __tostring
 }

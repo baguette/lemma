@@ -4,28 +4,11 @@ lemma = {}
 require 'class/FileStream'
 require 'read'
 require 'eval'
+require 'compiled/std'
+require 'compiled/compile'
 require 'env'
 require 'type'
 
-
----
--- Load the standard library
----
-function stdlib()
-	local base = os.getenv('LEMMA_PATH') or '.'
-	local lib = io.open(base..'/lib/std.lma', 'r')
-	if lib then
-		exec(lib)
-	else
-		io.write
-[[
-Error: unable to open standard library std.lma
-Check that the LEMMA_PATH environment variable
-print 'is set to the base path of the lemma directory.
-]]
-		os.exit(1)
-	end
-end
 
 ---
 -- Execute file f in the global environment.
@@ -40,6 +23,7 @@ function exec(f)
 	end
 	
 	f = FileStream(f)
+	lemma['*in-stream*'] = f
 
 	while not done do
 		if prompt then io.write(prompt) end
@@ -50,7 +34,8 @@ function exec(f)
 			local val = Vector(eval(t, env))      -- evaluate the expression!
 			local err = false
 			
-			for i, v in ipairs(val) do
+			for i = 1, val:length() do
+				v = val[i]
 				if v == Error'eof' then
 					done = true
 					f:close()
@@ -79,3 +64,4 @@ function exec(f)
 		end
 	end                                           -- loop!
 end
+

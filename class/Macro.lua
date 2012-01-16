@@ -20,7 +20,7 @@ end
 local t = {}
 local mt = {
 	class = 'Macro',
-	implements = {},	-- should implement a Callable interface later?
+	implements = nil,	-- should implement a Callable interface later?
 	__index = t,
 	__eq = __eq,
 	__tostring = __tostring,

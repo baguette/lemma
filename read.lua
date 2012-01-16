@@ -8,8 +8,7 @@ require 'class/List'
 require 'class/Vector'
 require 'class/PreHashMap'
 require 'class/Symbol'
-require 'class/Nil'
-require 'class/False'
+require 'class/Nil'		-- used to signal that a comment has been read
 require 'class/Number'
 
 local symbol =			 -- this is perhaps a little too permissive
@@ -23,14 +22,20 @@ function symbol_patterns()
 	}
 end
 
--- TODO: false and nil don't mean anything in lists... so basically nowhere in
---       lemma... use lemma/del as a workaround for nilifying variables
-local function tovalue(x)
-	local t = {['true'] = true, ['false'] = false, ['nil'] = nil}
-	return t[x]
+local keywords = {['true'] = true, ['false'] = false, ['nil'] = nil}
+
+local function tovalue(x, co)
+	return keywords[x]
 end
 
-local handle_number = {}
+local function handle_number(n, co)
+	if co then
+		return Number(n)
+	else
+		return tonumber(n)
+	end
+end
+
 
 -- these are tried in order (make them specific!)
 local atoms = {
@@ -63,7 +68,6 @@ local delim = {
 	['}'] = true
 }
 
--- TODO: would probably be beneficial to make this tail-recursive
 local function read_seq(eos, func)
 	return function(f, co)
 		local list = {}
@@ -82,10 +86,13 @@ local function read_seq(eos, func)
 				return func(unpack(list, 1, n))
 			else
 				f:unget(c)
-				local form = read(f, co)
-				if form == Error'eof' then return Error'eof' end
-				n = n + 1
-				list[n] = form
+				local form = read(f, co, true)
+				if form == Error'eof' then
+					return Error'eof'
+				elseif form ~= Nil then
+					n = n + 1
+					list[n] = form
+				end
 			end
 		end
 	end
@@ -150,28 +157,33 @@ local function read_comment(f, co)
 		c = f:get()
 		if not c then return Error'eof' end
 	until c == '\n'
-	return nil
+	return Nil
 end
 
 local function read_multicomment(f, co)
 	local last, c
+	local level = 1
 	
 	while true do
+		if level == 0 then
+			return Nil
+		end
+		
 		last = c
 		c = f:get()
 		if not c then return Error'eof' end
 		
 		if last == '#' and c == '|' then
-			read_multicomment(f)
+			level = level + 1
 		elseif last == '|' and c == '#' then
-			return nil
+			level = level - 1
 		end
 	end
 end
 
 local function read_datumcomment(f, c)
 	read(f, c)
-	return nil
+	return Nil
 end
 
 local function read_quote(sym)
@@ -183,8 +195,9 @@ end
 
 local function table_idx(func)
 	return function(f, c)
-		local k = read(f, c):string()
+		local k = read(f, c)
 		local t = read(f, c)
+		k = List():cons(k):cons(Symbol('quote'))
 		return List():cons(k):cons(t):cons(Symbol(func))
 	end
 end
@@ -213,16 +226,8 @@ local reader_macros = {
 ---
 -- Read the next form from stream f. (Set compiling when... compiling.)
 ---
-function read(f, compiling)
+function read(f, compiling, waiting)
 	local form = nil
-	
-	if compiling then
-		local mt = { __call = function(x, n) return Number(n) end }
-		setmetatable(handle_number, mt)
-	else
-		local mt = { __call = function(x, n) return tonumber(n) end }
-		setmetatable(handle_number, mt)
-	end
 	
 	---
 	-- If it's not whitespace, and it's not a reader macro, then
@@ -246,6 +251,12 @@ function read(f, compiling)
 	
 	if type(macro) == 'function' then
 		form = macro(f, compiling)
+		if form == Nil then
+			if waiting then
+				return Nil
+			end
+			return read(f, compiling)
+		end
 	else
 		local str = {}
 		while not delim[c] and not whitespace[c] do
@@ -261,7 +272,7 @@ function read(f, compiling)
 		-- if no matches, lexical error
 		for i = 1, #atoms, 2 do
 			if string.find(str, atoms[i]) then
-				 form = atoms[i+1](str)
+				 form = atoms[i+1](str, compiling)
 				 return form
 			end
 		end

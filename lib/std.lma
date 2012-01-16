@@ -47,8 +47,13 @@
   `((fn ~(odds bindings) ~@body) ~@(evens bindings)))
 
 ;; like let, but allows recursion using recur
-;; makes use of the Y combinator
 (defmacro loop [bindings @body]
+  `(do
+     (defn recur ~(odds bindings) ~@body)
+     (recur ~@(evens bindings))))
+
+;; old version makes use of the Y combinator
+#;(defmacro loop [bindings @body]
   (let [prm (odds  bindings)
         arg (evens bindings)]
   `(do
@@ -75,12 +80,12 @@
 
 
 
-;; Evaluate body n times
+;; Evaluate body n times (times evaluates to true)
 (defmacro times [n @body]
   `(do
      (defn once [i]
        (if (= i 2)
-           (do ~@body)
+           (do ~@body true)
            (do
              ~@body
              (once (- i 1)))))
@@ -89,17 +94,22 @@
 
 
 ;; Generate predicates to test for each type
-(let [types ["Vector" "HashMap" "List" "Symbol" "Macro" "Fexpr" "function"]]
+(let [types ["Vector" "HashMap" "List" "Symbol" "Macro" "Fexpr" "function" "string"]]
   (for-each
     (fn [s]
-      (let [name (lua/Symbol (str "lemma/" (.lower s) "?"))]
-        (lua/eval
-          `(def ~name (fn [a]
-             (= (lua/type a) ~s)))
-          lua/env)))
+      (let [name (str (.lower s) "?")]
+        (table-set! lua/lemma name (fn [a]
+             (= (lua/type a) s)))))
     types))
 
 
+;; Map f over xs, then return the concatenated results separated by sep
+(defn mapstr [f xs sep]
+  (set! sep (if (= sep nil)
+                ""
+                sep))
+  (let [strs (map (fn [a] (str (f a) sep)) xs)]
+    (lua/string.sub (str @strs) 1 (- -1 (length sep)))))   ; remove trailing sep
 
 ;; A convenience macro for Lua interop
 (defmacro defmethod [t-dot-f args @body]
@@ -107,24 +117,14 @@
     (lua/Error (str "defmethod: expected vector, got " (lua/tostring args) " : " (lua/type args)))
     `(defn ~t-dot-f [self ~@args] ~@body)))
 
-
-#;(defmacro and [@args]
-  (def blargs [])
-  (loop [xs args]
-    (when (not (empty? xs))
-      (lua/table.insert blargs `(not ~(first xs)))
-      (lua/table.insert blargs false)
-      (recur (rest xs))))
-  `(cond ~@blargs true true))
-
-#;(defmacro or [@args]
-  (def blargs [])
-  (loop [xs args]
-    (when (not (empty? xs))
-      (lua/table.insert blargs (first xs))
-      (lua/table.insert blargs true)
-      (recur (rest xs))))
-  `(cond ~@blargs true false))
+;; True if any element x in xs satisfies (p? x), false otherwise
+(defn any? [p? xs]
+  (if (empty? xs)
+      false
+      (let [x (first xs)]
+        (if (p? x)
+            true
+            (any? p? (rest xs))))))
 
 ;; Temporarily here for debugging purposes
 ;; Dumps the *metadata* info

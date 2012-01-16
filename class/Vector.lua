@@ -16,6 +16,18 @@ local function __tostring(e)
 	return '['..table.concat(str)..']'
 end
 
+local function __eq(self, e)
+	if self:length() ~= e:length() then
+		return false
+	end
+	for i = 1, self:length() do
+		if self[i] ~= e[i] then
+			return false
+		end
+	end
+	return true
+end
+
 local function __call(t, k, v)
 	if v then
 		t[k] = v
@@ -28,10 +40,11 @@ end
 local t = {}
 local mt = {
 	class = 'Vector',
-	implements = { 'Seq', 'Reversible' },
+	implements = { Seq = true, Reversible = true },
 	__index = t,
 	__tostring = __tostring,
-	__call = __call
+	__call = __call,
+	__eq = __eq
 }
 
 function t:cons(...)
@@ -76,13 +89,13 @@ t['empty?'] = function(self)
 end
 
 function t:reverse()
-	local new = Vector()
+	local new = {}
 	
 	for i = self:length(), 1, -1 do
-		table.insert(new, self[i])
+		new[i] = self[self:length()-i+1]
 	end
 	
-	return new
+	return Vectorize(new, self:length())
 end
 
 -- TODO: This should preserve any potential metatable of o, if possible

@@ -9,13 +9,13 @@ local function __eq(a, b)
 end
 
 local function __tostring(e)
-	return 'Number'
+	return ':'..e.str
 end
 
 local t = {}
 local mt = {
 	class = 'Number',
-	implements = {},
+	implements = nil,
 	__index = t,
 	__tostring = __tostring,
 	__eq = __eq

@@ -8,9 +8,13 @@
 -- sym-pop should occur to discard its locals from the symbol table.
 ---
 require 'class/Error'
+require 'class/Set'
 
 ---
--- This is ugly.
+-- This is ugly... but it's only temporary.
+-- TODO: reconsider namespaces
+--       they affect interop and don't map to the filesystem
+--       why not have ns, use take any table?
 ---
 do
 
@@ -18,9 +22,39 @@ local symtab = {}
 local uses   = {'lemma'}
 local vararg = false
 
+function debug.printsyms()
+	print'--------'
+	print'Uses'
+	print'--------'
+	for i, v in ipairs(uses) do
+		print(v)
+	end
+	print(lemma['cur-ns'], '*')
+	print'--------'
+	print'Symbols'
+	print'--------'
+	for i, v in ipairs(symtab) do
+		for k, w in pairs(v) do
+			print(k..' : '..w)
+		end
+	end
+	print'--------'
+end
+
+---
+-- TODO: each namespace should have its own uses
+---
+lemma['add-ns'] = function(ns)
+	_G[ns] = _G[ns] or {}
+end
+
 function lemma.use(ns)
 	if type(ns) == 'string' then
-		table.insert(uses, ns)
+		if _G[ns] then
+			table.insert(uses, ns)
+		else
+			return Error('use: '..ns..' is not a known namespace')
+		end
 	else
 		return Error'use: string expected'
 	end
@@ -37,36 +71,44 @@ end
 ---
 local function resolve(str)
 	local ns, mem = splitns(str)
-	if ns then
+	if ns and mem then
 		return ns, mem
 	end
-	ns = lemma['cur-ns']
 	mem = str
+	ns = lemma['cur-ns']
+	imem = mem and string.match(mem, '([^%.]+)%..*') or mem
+	if _G[ns][imem] ~= nil then
+		return ns, mem
+	end
 	for i = #uses, 1, -1 do
-		if _NS[uses[i]][mem] then
+		if _G[uses[i]][imem] ~= nil then
 			ns = uses[i]
 			break
 		end
 	end
+	if type(ns) ~= 'string' then
+		debug.debug()
+	end
 	return ns, mem
 end
 
-local function namespace(str)
-	local ns, mem = splitns(str)
+local function namespace(str, deffing)
+	deffing = deffing or false
+	local ns, mem = resolve(str)
 	if ns then
 		if not mem then
 			return Error"This should not be a Symbol."
 		end
 		
-		if (ns == '*ns*') then
+		if (ns == '*ns*' or deffing) then
 			ns = lemma['cur-ns']
 		end
 		
-		if _NS[ns] == nil then
-			_NS[ns] = {}
+		if not _G[ns] then
+			return Error('error: '..ns..' is not a known namespace.')
 		end
 		
-		local v = {'_NS["', ns, '"]'}
+		local v = {'_G["', ns, '"]'}
 		for m in string.gmatch(mem, '([^%.]+)') do
 			table.insert(v, '["')
 			table.insert(v, m)
@@ -127,8 +169,13 @@ lemma['sym-new'] = function(s)
 	local str = s:string()
 	local n = #symtab
 	
-	if n == 0 then
-		return namespace('*ns*/'..str)
+	local ns, sp = splitns(str)
+	if ns and sp then
+		return namespace(str)
+	else
+		if n == 0 then
+			return namespace('*ns*/'..str)
+		end
 	end
 	
 	local a = '_L'..n..'_'..symtab[n][1]
@@ -143,7 +190,10 @@ lemma['sym-find'] = function(s)
 	local str = s:string()
 	local n = #symtab
 	
-	local ns, str = resolve(str)
+	local ns, s = splitns(str)
+	if ns and s then
+		return namespace(str)
+	end
 	
 	local v = {}
 	for m in string.gmatch(str, '([^%.]+)') do
@@ -167,7 +217,7 @@ lemma['sym-find'] = function(s)
 		end
 	end
 	
-	return namespace(ns..'/'..str)
+	return namespace(str)
 end
 
 end

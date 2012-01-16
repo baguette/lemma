@@ -38,51 +38,138 @@ end
 
 Seq.lib = {}
 
--- TODO: Make this iterative
-function Seq.lib.map(f, ...)
+function Seq.lib.foldl(f, init, ...)
 	local lsts = {...}
-	local firsts = {}
-	local rests = {}
+	
+	if #lsts == 0 then
+		return
+	elseif not implements(lsts[1], 'Seq') then
+		return Error('foldl: Seq expected, got '..type(lsts[1]))
+	end
+	
+	local function foldl(f, init, lsts)
+		local firsts = {}
+		local rests = {}
+		
+		if lsts[1]:length() > 0 then
+			local m = 0
+			for i, v in ipairs(lsts) do
+				m = m + 1
+				firsts[m] = v:first()
+				rests[m]  = v:rest()
+			end
+			return foldl(f, f(init, unpack(firsts, 1, m)), rests)
+		else
+			return init
+		end
+	end
+	return foldl(f, init, lsts)
+end
+
+function Seq.lib.foldr(f, init, ...)
+	local lsts = {...}
 	
 	if #lsts > 0 and not implements(lsts[1], 'Seq') then
-		return Error('map: Seq expected, got '..type(lsts[1]))
+		return Error('foldr: Seq expected, got '..type(lsts[1]))
+	end
+	
+	if not implements(lsts[1], 'Reversible') then
+		return Error('foldr: cannot perform right fold on non-reversible seq')
 	end
 	
 	if #lsts > 0 and lsts[1]:length() > 0 then
-		local m = 0
 		for i, v in ipairs(lsts) do
-			m = m + 1
-			firsts[m] = v:first()
-			rests[m]  = v:rest()
+			lsts[i] = v:reverse()
 		end
-		local h = Vector(f(unpack(firsts, 1, m)))
-		return Seq.lib.map(f, unpack(rests, 1, m)):cons(unpack(h, 1, h:length()))
+		return Seq.lib.foldl(f, init, unpack(lsts))
 	else
-		return lsts[1]:seq()
+		return init
 	end
+end
+--[[
+function Seq.lib.map(f, ...)
+	local lsts = {...}
+
+	if #lsts == 0 then
+		return
+	elseif not implements(lsts[1], 'Seq') then
+		return Error('map: Seq expected, got'..tostring(lsts[1]))
+	end
+
+	local function map(f, lsts)
+		local firsts = {}
+		local rests = {}
+
+		if lsts[1]:length() > 0 then
+			for i, v in ipairs(lsts) do
+				table.insert(firsts, v:first())
+				table.insert(rests, v:rest())
+			end
+			local h = {f(unpack(firsts))}
+			return map(f, rests):cons(unpack(h))
+		else
+			return lsts[1]:seq()
+		end
+	end
+	return map(f, lsts)
+end
+--]]
+function Seq.lib.map(f, ...)
+	local lsts = {...}
+	
+	if #lsts == 0 then
+		return
+	elseif not implements(lsts[1], 'Seq') then
+		return Error('map: Seq expected, got'..tostring(lsts[1]))
+	end
+	
+	local function map(f, lsts)
+		local firsts = {}
+		local rests = {}
+		
+		if not lsts[1]['empty?'](lsts[1]) then
+			for i, v in ipairs(lsts) do
+				table.insert(firsts, v:first())
+				table.insert(rests, v:rest())
+			end
+			
+			return rests, f(unpack(firsts))
+		else
+			return nil, List()
+		end
+	end
+	
+	local function package(r, f)
+		return r, f
+	end
+	
+	return Iter(map, f, lsts, package)
 end
 
 function Seq.lib.foreach(f, ...)
 	local lsts = {...}
-	local firsts = {}
-	local rests = {}
 	
 	if #lsts > 0 and not implements(lsts[1], 'Seq') then
 		return Error('for-each: Seq expected, got '..type(lsts[1]))
 	end
 	
-	if #lsts > 0 and lsts[1]:length() > 0 then
-		local m = 0
-		for i, v in ipairs(lsts) do
-			m = m + 1
-			firsts[m] = v:first()
-			rests[m] = v:rest()
+	local function foreach(f, lsts)
+		local firsts = {}
+		local rests = {}
+		if #lsts > 0 and lsts[1]:length() > 0 then
+			local m = 0
+			for i, v in ipairs(lsts) do
+				m = m + 1
+				firsts[m] = v:first()
+				rests[m] = v:rest()
+			end
+			f(unpack(firsts, 1, m))
+			return foreach(f, rests)
+		else
+			return nil
 		end
-		f(unpack(firsts, 1, m))
-		return Seq.lib.foreach(f, unpack(rests, 1, m))
-	else
-		return nil
 	end
+	return foreach(f, lsts)
 end
 
 function Seq.lib.unpack(lst)
@@ -106,7 +193,7 @@ end
 function Seq.lib.pack(lst, ...)
 	local n = select('#', ...)
 	local t = {...}
-	local q = lst:seq()
+	local q = lst
 	
 	for i = n, 1, -1 do
 		q = q:cons(t[i])
@@ -114,3 +201,45 @@ function Seq.lib.pack(lst, ...)
 	
 	return q
 end
+
+function Seq.lib.append(...)
+	local t = {...}
+	local q = t[1]:seq()
+	for i = #t, 1, -1 do
+		local v = t[i]
+		local s = {Seq.lib.unpack(v)}
+		for j = v:length(), 1, -1 do
+			q = q:cons(s[j])
+		end
+	end
+	return q
+end
+
+function Seq.lib.flatten(...)
+	local n = select('#', ...)
+	local t = {...}
+	local q = {}
+	local c = 1
+
+	for i = 1, n do
+		local v = t[i]
+		if implements(v, seq) then
+			local s = {Seq.lib.unpack(v)}
+			for j = v:length(), 1, -1 do
+				q[c] = s[j]
+				c = c + 1
+			end
+		elseif type(v) == 'table' then
+			for j = 1, #v do
+				q[c] = v[j]
+				c = c + 1
+			end
+		else
+			q[c] = v
+			c = c + 1
+		end
+	end
+	
+	return Vectorize(q, c)
+end
+

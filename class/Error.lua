@@ -8,7 +8,7 @@ end
 local t = {}
 local mt = {
 	class = 'Error',
-	implements = {},
+	implements = nil,
 	__index = t,
 	__tostring = __tostring
 }
@@ -27,11 +27,13 @@ function Error(s, trace)
 	elseif cache[s] then
 		return cache[s]
 	else
-		cache[s] = o
+		if s then
+			cache[s] = o
+		end
 	end
 	
 	function o:string()
-		return s
+		return tostring(s)
 	end
 	
 	return o

@@ -18,12 +18,26 @@ local function __tostring(e)
 	return '('..table.concat(str)..')'
 end
 
+local function __eq(self, e)
+	if self:length() ~= e:length() then
+		return false
+	end
+	if self:length() == 0 then
+		return true
+	end
+	if self:first() ~= e:first() then
+		return false
+	end
+	return (self:rest() == e:rest())
+end
+
 local t = {}
 local mt = {
 	class = 'List',
-	implements = { 'Seq', 'Reversible' },
+	implements = { Seq = true, Reversible = true },
 	__index = t,
-	__tostring = __tostring
+	__tostring = __tostring,
+	__eq = __eq
 }
 
 function t:cons(...)
@@ -50,7 +64,7 @@ function t:first()
 end
 
 function t:rest()
-	return self[2] or List()
+	return self[2]
 end
 
 t['empty?'] = function(self)
@@ -71,6 +85,7 @@ end
 
 function List(...)
 	local o = {}
+	lemma['assoc-meta'](o, 'length', 0)
 	setmetatable(o, mt)
 	return o:cons(...)
 end

@@ -1,15 +1,8 @@
 Besides the TODOs listed in comments:
 
-- To allow for short-circuiting, 'and and 'or need to be specials.
-- Fix bug where interpreter disregards nil literals.
-  (Use lemma/del to set variables to nil as a workaround for that
-   case. Seqs with holes are still not possible...).
 - (auto?) gensym
 - destructuring
 - multimethods
 - protocols
 - LemmaDoc
 - Better error handling
-
-Future:
-- Self-hosting compiler!

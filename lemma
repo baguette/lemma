@@ -3,27 +3,63 @@
 -- The Lemma REPL
 ---
 
--- TODO: more special forms?
-
 require 'exec'
-LEMMA_VERSION = 0.1
+LUA_VERSION = jit and jit.version or _VERSION
+LEMMA_VERSION = 0.2
 
 ---
 -- Execute command line argument or start a REPL
 ---
-local f = ...
-lemma['*sys-args*'] = Vectorize{...}
+local o, f = ...
 
 function update_prompt()
 	prompt = lemma['*ns*']..'> '
 end
 
-stdlib()
+if o and o:sub(1, 1) ~= '-' then
+	f, o = o, nil
+	lemma['*sys-args*'] = Vectorize{select(1, ...)}
+end
+if o then
+	lemma['*sys-args*'] = Vectorize{select(2, ...)}
+end
+
+local outfile
+if o == '-debug' then
+	lemma['*debug*'] = true
+elseif o and string.sub(o, 1, 2) == '-o' then
+	outfile = string.sub(o, 3)
+end
 
 if not f or f == '--' then
 	f = io.input()
 	update_prompt()
-	print('Lemma '..LEMMA_VERSION..' (on '.. _VERSION..')')
+	print('Lemma '..LEMMA_VERSION..' (on '..LUA_VERSION..')')
 end
 
-exec(f)
+if outfile then
+	local w
+	if outfile == '--' then
+		w = io.output()
+	else
+ 		w = io.open(outfile, 'w')
+ 	end
+	local f = FileStream(io.open(f))
+	local code = "-- Lemma "..LEMMA_VERSION.." --"
+	
+	while code ~= Error'eof' do
+		if type(code) == 'Error' then
+			w:close()
+			f:close()
+			error(code:string())
+		end
+		w:write(code..'\n')
+		code = lemma.compile(read(f, true))
+	end
+	w:write("-- EOF --\n")
+	w:close()
+	f:close()
+else
+	exec(f)
+end
+

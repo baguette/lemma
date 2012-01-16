@@ -1,0 +1,8 @@
+;; Something along the lines of Common Lisp's getf for plists
+(defn getf [plist key]
+  (loop [lst plist]
+    (if (= key (first lst))
+        (second lst)
+        (when (not (empty? lst))
+          (recur (rest (rest lst)))))))
+

@@ -5,10 +5,11 @@
   (let [sum 0
         x   0]
        (times n
-         (set! x (+ x 1)
-               sum (+ sum (if (or (= 0 (mod x 3))
+         (set! x   (+ x 1))
+         (set! sum (+ sum (if (or (= 0 (mod x 3))
                                   (= 0 (mod x 5)))
                               x
-                              0))))))
+                              0))))
+       sum))
 
 (print (prob1 1000))
