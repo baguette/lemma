@@ -127,9 +127,7 @@ function HashMap(...)
 end
 
 function t:seq()
-	local o = {}
-	setmetatable(o, mt)
-	return o
+	return Iter(pairs(self))
 end
 
 end

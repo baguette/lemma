@@ -92,10 +92,7 @@ function List(...)
 end
 
 function t:seq()
-	local o = {}
-	lemma['assoc-meta'](o, 'length', 0)
-	setmetatable(o, mt)
-	return o
+	return self
 end
 
 end

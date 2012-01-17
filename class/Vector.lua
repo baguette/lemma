@@ -114,10 +114,7 @@ function Vector(...)
 end
 
 function t:seq()
-	local o = {}
-	lemma['assoc-meta'](o, 'length', 0)
-	setmetatable(o, mt)
-	return o
+	return Seq.lib.map(function(x) return x end, self)
 end
 
 end
