@@ -87,6 +87,26 @@ function Seq.lib.foldr(f, init, ...)
 	end
 end
 
+local function map(f, lsts)
+	local firsts = {}
+	local rests = {}
+
+	if not lsts[1]['empty?'](lsts[1]) then
+		for i, v in ipairs(lsts) do
+			table.insert(firsts, v:first())
+			table.insert(rests, v:rest())
+		end
+
+		return rests, f(unpack(firsts))
+	else
+		return nil, List()
+	end
+end
+
+local function package(r, f)
+	return r, f
+end
+
 function Seq.lib.map(f, ...)
 	local lsts = {...}
 
@@ -95,47 +115,8 @@ function Seq.lib.map(f, ...)
 	elseif not implements(lsts[1], 'Seq') then
 		return Error('map: Seq expected, got'..tostring(lsts[1]))
 	end
-	
-	if type(lsts[1]) == 'Iter' then
-			local function map(f, lsts)
-			local firsts = {}
-			local rests = {}
-			
-			if not lsts[1]['empty?'](lsts[1]) then
-				for i, v in ipairs(lsts) do
-					table.insert(firsts, v:first())
-					table.insert(rests, v:rest())
-				end
-				
-				return rests, f(unpack(firsts))
-			else
-				return nil, List()
-			end
-		end
-    	
-		local function package(r, f)
-			return r, f
-		end
-		
-		return Iter(map, f, lsts, package)
-    end
-    
-	local function map(f, lsts)
-		local firsts = {}
-		local rests = {}
 
-		if lsts[1]:length() > 0 then
-			for i, v in ipairs(lsts) do
-				table.insert(firsts, v:first())
-				table.insert(rests, v:rest())
-			end
-			local h = {f(unpack(firsts))}
-			return map(f, rests):cons(unpack(h))
-		else
-			return lsts[1]:seq()
-		end
-	end
-	return map(f, lsts)
+	return Iter(map, f, lsts, package)
 end
 
 function Seq.lib.foreach(f, ...)
@@ -148,7 +129,7 @@ function Seq.lib.foreach(f, ...)
 	local function foreach(f, lsts)
 		local firsts = {}
 		local rests = {}
-		if #lsts > 0 and lsts[1]:length() > 0 then
+		if #lsts > 0 and not lsts[1]['empty?'](lsts[1]) then
 			local m = 0
 			for i, v in ipairs(lsts) do
 				m = m + 1
@@ -196,7 +177,7 @@ end
 
 function Seq.lib.append(...)
 	local t = {...}
-	local q = t[1]:seq()
+	local q = List()
 	for i = #t, 1, -1 do
 		local v = t[i]
 		local s = {Seq.lib.unpack(v)}

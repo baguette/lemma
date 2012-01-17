@@ -7,6 +7,10 @@ _G["lemma"]["tag-splice?"] = (function(_L1_0)
 return (_G["lemma"]["="]("List", _G["lemma"]["type"](_L1_0)) and _G["lemma"]["="](Symbol("splice"), _G["lemma"]["first"](_L1_0)))
 end);
 
+_G["lemma"]["seq?"] = (function(_L1_0)
+return (_G["lemma"]["="]("List", _G["lemma"]["type"](_L1_0)) or _G["lemma"]["="]("Iter", _G["lemma"]["type"](_L1_0)))
+end);
+
 _G["lemma"]["congeal"] = (function(_L1_0, _L1_1)
 return _G["lemma"]["str"]("(function()\
 ", "local gel = List();\
@@ -47,7 +51,7 @@ end);
 
 _G["lemma"]["invert-quasiquote"] = (function(_L1_0)
 return (function()
-if (_G["lemma"]["="]("List", _G["lemma"]["type"](_L1_0))) then
+if (_G["lemma"]["seq?"](_L1_0)) then
 return (function()
 if (_G["lemma"]["="](Symbol("unquote"), _G["lemma"]["first"](_L1_0))) then
 return _G["lemma"]["second"](_L1_0)
@@ -57,7 +61,7 @@ end
 end)()
 
 elseif (_G["lemma"]["="]("Vector", _G["lemma"]["type"](_L1_0))) then
-return _G["lemma"]["map"](_G["lemma"]["invert-quasiquote"], _L1_0)
+return _G["lemma"]["vec"](_G["lemma"]["map"](_G["lemma"]["invert-quasiquote"], _L1_0))
 elseif ("else") then
 return _G["lua"]["List"](Symbol("quote"), _L1_0)
 end

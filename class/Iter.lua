@@ -12,16 +12,15 @@ require 'class/Vector'
 do
 
 local function __tostring(e)
-	return 'iter:'..tostring(e.f)
+	return tostring(e:seq())
 end
 
 local function __eq(self, e)
-	return (rawequal(self.f, e.f)
-	    and rawequal(self.s, e.s)
-	    and rawequal(self.a, e.a)
-	    and rawequal(self.buffer.n, e.buffer.n)
-	    and rawequal(self.buffer.i, e.buffer.i)
-	    and rawequal(self.buffer.s, e.buffer.s))
+	return (self.f == e.f
+	    and self.s == e.s
+	    and self.a == e.a
+	    and self.filter == e.filter
+	    and self.head == e.head)
 end
 
 local t = {}
@@ -50,74 +49,53 @@ end
 
 function Iter(f, s, a, filter)
 	filter = filter or package
-	buffer = {n=0, i=1, s={}}
 	
-	if buffer.n == 0 then
-		local val
-		a, val = filter(f(s, a))
-		buffer.n = 1
-		buffer.s[buffer.n] = val
-		if a == nil then
-			return List()
-		end
+	local val
+	a, val = filter(f(s, a))
+	if a == nil then
+		return List()
 	end
 	
-	local o = { f = f, s = s, a = a, filter = filter, buffer = buffer }
-	setmetatable(o, mt)
-	return o
-end
-
-local function attach(f, s, a, filter, buffer)	
-	local o = { f = f, s = s, a = a, filter = filter, buffer = buffer }
+	local o = { f = f, s = s, a = a, filter = filter, head = val }
 	setmetatable(o, mt)
 	return o
 end
 
 function t:first()
-	if self.a ~= nil then
-		local new_a, val = self.filter(self.f(self.s, self.a))
-		if new_a ~= nil then
-			self.buffer.n = self.buffer.n + 1
-			self.buffer.s[self.buffer.n] = val
-		end
-		self.a = new_a
-	end
-	if self.buffer.i <= self.buffer.n then
-		return self.buffer.s[self.buffer.i]
-	else
-		return Error'something went wrong in Iter'
-	end
+	return self.head
 end
 
 function t:rest()
-	if self.a ~= nil then
-		local new_a, val = self.filter(self.f(self.s, self.a))
-		if new_a ~= nil then
-			self.buffer.n = self.buffer.n + 1
-			self.buffer.s[self.buffer.n] = val
-		end
-		self.a = new_a
+	if self.tail ~= nil then
+		return self.tail
 	end
-	return attach(self.f, self.s, self.a, self.filter,
-	              { n=self.buffer.n, i=self.buffer.i+1, s=self.buffer.s})
+	return Iter(self.f, self.s, self.a, self.filter)
 end
 
 function t:cons(a)
-	local s = {}
-	for i = 1, self.buffer.n do
-		s[i] = self.buffer.s[i]
-	end
-	table.insert(s, self.buffer.i, a)
-	return attach(self.f, self.s, self.a, self.filter,
-	              { n=self.buffer.n+1, i=self.buffer.i, s=s})
+	local o = {head = a, tail = self}
+	setmetatable(o, mt)
+	return o
 end
 
+-- Iter will return an empty List when there are no further values.
 t['empty?'] = function(self)
-	return (self.a == nil and self.buffer.i > self.buffer.n)
+	return false
 end
 
+---
+-- Be careful when using these! Use on an infite list will never terminate.
+---
 function t:seq()
-	return List()
+	return List(Seq.lib.unpack(self))
+end
+
+function t:length()
+	return self:seq():length()
+end
+
+function t:reverse()
+	return self:seq():reverse()
 end
 
 end

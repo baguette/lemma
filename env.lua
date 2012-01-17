@@ -9,6 +9,7 @@ require 'class/Vector'
 require 'class/HashMap'
 require 'class/Symbol'
 require 'class/Error'
+require 'class/Iter'
 require 'interface/Seq'
 require 'symtab'
 require 'type'
@@ -132,9 +133,12 @@ function lemma.str(...)
 	return table.concat(t)
 end
 
-lemma.vec = Vector
+lemma.vector = Vector
 lemma['hash-map'] = HashMap
-lemma.iter = Iter
+
+function lemma.vec(seq)
+	return Vector(Seq.lib.unpack(seq))
+end
 
 function lemma.keys(t)
 	local list = List()
@@ -247,6 +251,7 @@ lemma.foldl = Seq.lib.foldl
 lemma.foldr = Seq.lib.foldr
 lemma.map = Seq.lib.map
 lemma['for-each'] = Seq.lib.foreach
+lemma.iter = Iter
 
 function lemma.undefined()
 	return nil
