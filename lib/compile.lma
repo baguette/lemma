@@ -59,7 +59,7 @@
               (second xs)
               (cons 'lua/List (map invert-quasiquote xs)))
         (= :Vector (type xs))
-          (map invert-quasiquote xs)
+          (vec (map invert-quasiquote xs))
         :else
           `(quote ~xs)))
 

@@ -90,13 +90,13 @@ end
 local function map(f, lsts)
 	local firsts = {}
 	local rests = {}
-	
+
 	if not lsts[1]['empty?'](lsts[1]) then
 		for i, v in ipairs(lsts) do
 			table.insert(firsts, v:first())
 			table.insert(rests, v:rest())
 		end
-		
+
 		return rests, f(unpack(firsts))
 	else
 		return nil, List()
@@ -115,7 +115,7 @@ function Seq.lib.map(f, ...)
 	elseif not implements(lsts[1], 'Seq') then
 		return Error('map: Seq expected, got'..tostring(lsts[1]))
 	end
-	
+
 	return Iter(map, f, lsts, package)
 end
 

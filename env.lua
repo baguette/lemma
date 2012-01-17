@@ -133,8 +133,12 @@ function lemma.str(...)
 	return table.concat(t)
 end
 
-lemma.vec = Vector
+lemma.vector = Vector
 lemma['hash-map'] = HashMap
+
+function lemma.vec(seq)
+	return Vector(Seq.lib.unpack(seq))
+end
 
 function lemma.keys(t)
 	local list = List()
