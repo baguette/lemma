@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <link rel="stylesheet" href="refman.css" type="text/css" />
+</head>
+<body>
+<h1 id="lemma-0.2-reference-manual">Lemma 0.2 Reference Manual</h1>
+<h3 id="january-2012">20 January 2012</h3>
+<blockquote>
+<p><em>Language is froth on the surface of thought.</em> -- John McCarthy</p>
+</blockquote>
+<blockquote>
+<p><em>Programming languages should be designed not by piling feature on top of feature, but by removing the weaknesses and restrictions that make additional features appear necessary.</em> -- Revised(3) Report on the Algorithmic Language Scheme</p>
+</blockquote>
+<blockquote>
+<p><em>Having an open, and large, set of functions operate upon an open, and small, set of extensible abstractions is the key to algorithmic reuse and library interoperability.</em> -- Rich Hickey</p>
+</blockquote>
+<h2 id="introduction">Introduction</h2>
+<p>Lemma is a general-purpose programming language. It is a member of the Lisp family of languages and is designed to interoperate with the <a href="http://lua.org/">Lua</a> platform. Lemma is multi-paradigm, offering support for procedural, object-oriented, and functional programming.</p>
+<p><code>lemma</code> is also the name of a processor for the Lemma programming language. <code>lemma</code> provides an interactive interpreter (a <em>REPL</em> or <em>read-evaluate-print loop</em> in Lisp parlance) and a compiler that translates Lemma source code to Lua source code.</p>
+<p>Both the language and processor (as well as this manual) are works in progress.</p>
+<p><strong>TODO</strong> Note about Lemma being <em>properly tail-recursive</em>. (Thanks to Lua being properly tail-recursive).</p>
+<h2 id="values-and-types">Values and types</h2>
+<p>Lemma is an <em>untyped</em>, <em>dynamically checked</em> language -- variables don't have types, but values do. Lemma provides values of several types. Programmers are free to add new types.</p>
+<ul>
+<li><em>Booleans</em> represent truth values. The two boolean values are <em>true</em> and <em>false</em>. In many contexts where boolean values are needed, <em>truthy</em> or <em>falsy</em> values may be substituted. Falsy values are <em>false</em> and <em>nil</em>; all other values are considered truthy.</li>
+<li><em>Nil</em> is a value that paradoxically signifies the lack of any significant value. It is the only member of the nil type.</li>
+<li><em>Number</em> values represent Lua numbers. The specific type of number is dependent on the Lua installation, but it's usually an IEEE 754 double-precision floating point.</li>
+<li><em>Symbols</em> represent names but can sometimes represent other things, too.</li>
+<li><em>Strings</em> represent sequences of characters (e.g., text).</li>
+<li><em>Lists</em> represent sequences of values.</li>
+<li><em>Iters</em> also represent sequences of values, but do so (almost) lazily. They are potentially (countably) infinite in length.</li>
+<li><em>Vectors</em> represent arrays of values.</li>
+<li><em>Hashmaps</em> represent collections of mappings from values to values.</li>
+<li><em>Function</em> values may represent procedures and methods; they are essentially little packets of executable code.</li>
+</ul>
+<p>Lemma may have values of any type in Lua; programmers may stumble upon <em>tables</em>, <em>threads</em>, <em>userdata</em>. Lemma doesn't currently provide any direct support for manipulating these types of values, however they may be manipulated by calling Lua functions.</p>
+<h2 id="external-representation">External representation</h2>
+<p>The textual representation of data in Lemma is known as the <em>external representation</em>. Before Lemma code is processed, a subprogram known as the <em>reader</em> converts these human-readable external representations into machine-friendly forms known as <em>internal representations</em>. The reader's compliment, the <em>writer</em>, can perform the inverse conversion. Note that there are some types of value that do not have an external representation (functions, for example). It is important to distinguish between external and internal representations: the numeral <code>4</code> is the external representation of the number four. The two representations are equivalent but are not equal.</p>
+<p>Lemma source consists of</p>
+<ol style="list-style-type: decimal">
+<li><em>atoms</em> separated by whitespace or delimiters,</li>
+<li>delimited collection literals, and</li>
+<li><em>comments</em>.</li>
+</ol>
+<p>Atoms and collections together constitute <em>data</em> (plural of <em>datum</em>). Whitespace consists of spaces, tabs, newlines, or commas (<code>,</code>); whitespace is only significant for the separation of atoms. Delimiters are parentheses <code>()</code>, square brackets <code>[]</code>, and curly brackets <code>{}</code>.</p>
+<h3 id="atoms">Atoms</h3>
+<ul>
+<li><em>Booleans</em> are written as <code>true</code> or <code>false</code>.</li>
+<li><em>Nil</em> is written as <code>nil</code>.</li>
+<li><em>Numbers</em> are written as any number of digits, optionally with a sign, a decimal point, and/or a decimal exponent. Integers in base 16 are also permitted with a <code>0x</code> prefix. <code>3    -3    3.0    +3.1416    314.16e-2    -0.31416E1    0xff    -0x56</code></li>
+<li><em>Symbols</em> may be written in two ways:
+<ol style="list-style-type: decimal">
+<li>as a sequence of characters not containing any whitespace or delimiters and not representing any other type of datum*: <code>this-is-a-symbol</code></li>
+<li>as a sequence of characters enclosed in pipes, where literal pipes may be escaped within: <code>|a single symbol enclosed in \| characters|</code></li>
+</ol></li>
+<li><em>Strings</em> may be written in two ways:
+<ol style="list-style-type: decimal">
+<li>as a type 1 symbol prefixed with a colon: <code>:short-form-string</code></li>
+<li>as a sequence of characters enclosed in double quotes, where literal double quotes may be escaped within: <code>&quot;a string enclosed in \&quot; characters&quot;</code></li>
+</ol></li>
+</ul>
+<p>* Type 1 symbols may also not begin with a character which begins a reader macro. See below.</p>
+<h3 id="collections">Collections</h3>
+<p>Lemma provides three kinds of collection literals:</p>
+<ul>
+<li><em>Lists</em> are sequences of data enclosed in balanced parentheses: <code>(= forty-two 42)</code> is a list of 3 data, the symbol <code>=</code>, the symbol <code>forty-two</code>, and the number <code>42</code>.</li>
+<li><em>Vectors</em> are arrays of data enclosed in square brackets: <code>[:a :b 1 2]</code> is a vector of 4 data, two strings and two numbers.</li>
+<li><em>Hashmaps</em> are associative mappings between pairs of data enclosed in curly brackets: <code>{:a 1 :b 2}</code> represents a map of strings to numbers.</li>
+</ul>
+<p>Since collections are groups of data, and since collections are themselves data, they may be nested arbitrarily: <code>(list [1 2 3 4] {:a 1 :b 2})</code></p>
+<p><strong>Note</strong> Iters have no external representation, but many functions in the standard library produce them.</p>
+<h3 id="comments">Comments</h3>
+<p>Comments do not correspond to any type of data; they are ignored by the reader completely. They allow the programmer to include notes directly in the source. There are three kinds of <em>comments</em> in Lemma:</p>
+<ol style="list-style-type: decimal">
+<li>Line comments start with a semicolon (<code>;</code>) that is not a part of a symbol or a string and continues until the end of the line.</li>
+<li>Datum comments start with <code>#;</code> and subsume the next datum: <code>#;commented-symbol</code> <code>#;(commented list)</code></li>
+<li>Block comments start with <code>#|</code> and end with a corresponding <code>|#</code>. Block comments may be nested.</li>
+</ol>
+<h3 id="reader-macros">Reader macros</h3>
+<p>Some data are so common in Lemma programs that the reader actually provides shorthand ways of writing them. These abbreviations are known as <em>reader macros</em>. A reader macro is triggered by one or more special characters that precede a form. The list below shows the supported reader macros and their expansions, where <code>x</code> stands for any datum and <code>=&gt;</code> in this context should be read as &quot;expands to&quot; (the meaning of the expansions will be presented later).</p>
+<pre><code>    'x  =&gt;  (quote x)
+    `x  =&gt;  (quasiquote x)
+    ~x  =&gt;  (unquote x)
+    @x  =&gt;  (splice x)
+    .x  =&gt;  (method x)
+</code></pre>
+<h2 id="execution-model">Execution model</h2>
+<p>Lemma's execution model centers around <em>expressions</em> and the <em>evaluation</em> of expressions to yield values. Any datum can form an expression. Numbers, strings, booleans, and nil evaluate to themselves; they are called <em>self-evaluating</em> (<code>=&gt;</code> should be read as &quot;evaluates to&quot; in this context):</p>
+<pre><code>    42    =&gt;  42
+    &quot;hi&quot;  =&gt;  &quot;hi&quot;
+    true  =&gt;  true
+    false =&gt;  false
+    nil   =&gt;  nil
+</code></pre>
+<p>Symbols are evaluated as names for some other value, and are sometimes called <em>variables</em>. A symbol can be <em>bound</em> to a value; unbound symbols evaluate to nil:</p>
+<pre><code>    unbound-sym  =&gt;  nil
+    lemma/*ns*   =&gt;  &quot;lemma&quot;
+</code></pre>
+<p>Vectors are evaluated by evaluating all of their constituents in place:</p>
+<pre><code>    [:hi 42 nil lemma/*ns*]  =&gt;  [&quot;hi&quot; 42 nil &quot;lemma&quot;]
+</code></pre>
+<p>Hashmaps are evaluated by evaluating their keys and associating them with the results of evaluating their values:</p>
+<pre><code>    { lemma/*ns* lemma/*ns*, :a 1 }  =&gt;  { &quot;lemma&quot; &quot;lemma&quot;, &quot;a&quot; 1 }
+</code></pre>
+<p>The most complicated evaluation is the evaluation of lists. Lists are used to represent function calls. First, Lemma evaluates the first element (or <em>head</em>) of the list and expects it to yield a function value (it is an error if the head does not evaluate to a callable object). Next, Lemma evaluates each element in the rest of the list (or <em>tail</em>) and passes those values as <em>arguments</em> to the function, thus <em>calling</em> the function. The result of evaluating the entire list is the result returned from the function call:</p>
+<pre><code>    (+ 2 4)  =&gt;  6
+</code></pre>
+<p>In this example, the head of the list, the symbol <code>+</code>, is evaluated. It results in a function that takes two arguments and returns the sum of those arguments. Each element of the tail is evaluated. Since the tail is composed of only self-evaluating forms, the final function call is simply the addition of 2 and 4. The entire list, then, evaluates to 6.</p>
+<p><strong>Note</strong> There are a few lists in Lemma that do not follow the above evaluation strategy; see <em>Special forms</em> below.</p>
+<p><strong>Note</strong> Functions in Lemma may produce side-effects.</p>
+<h3 id="symbol-resolution">Symbol resolution</h3>
+<h4 id="namespaces">Namespaces</h4>
+<p><strong>Note</strong> Namespaces are broken at the moment. They will correspond to a module system eventually.</p>
+<h4 id="environments">Environments</h4>
+<h4 id="table-paths">Table paths</h4>
+<p>Symbols that contain periods are resolved as paths into nested tables. This mimics the <code>var</code> production rule of the Lua 5.1 grammar. Conceptually, the symbol is split into subsymbols at the periods. The leftmost subsymbol is evaluated in the current environment, expecting a table value. The other subsymbols are converted to strings and used as subsequent indexes into a hierarchy of nested tables.</p>
+<pre><code>    html.head.title
+</code></pre>
+<p>is semantically equivalent to</p>
+<pre><code>    (get (get html :head) :title)
+</code></pre>
+<p>however, the first representation happens at resolution time while the second happens at runtime.</p>
+<h3 id="special-forms">Special forms</h3>
+<h3 id="macros">Macros</h3>
+<p><strong>Note</strong> Macros work but are kludgey when working with compiled files. They'll be fixed along with namespaces.</p>
+<h2 id="library-reference">Library reference</h2>
+<h3 id="general">General</h3>
+<p><em>macro</em> <strong><code>defn</code></strong> <code>name argvec @body</code></p>
+<blockquote>
+<p>Defines a function named <code>name</code> with parameter vector <code>argvec</code> and body <code>@body</code>. The parameter vector is exactly as in the <code>fn</code> special form.</p>
+</blockquote>
+<p><em>procedure</em> <strong><code>type</code></strong> <code>obj</code></p>
+<blockquote>
+<p>Returns a string indicating the type of <code>obj</code>.</p>
+</blockquote>
+<p><em>procedure</em> <strong><code>method</code></strong> <code>key</code></p>
+<blockquote>
+<p>Returns a function of <code>[t @args]</code> that calls the method specified by <code>key</code> on <code>t</code> with <code>@args</code> as arguments. A shortened form is available as the <code>.</code> reader macro:</p>
+</blockquote>
+<pre><code>    (.upper :hello)          =&gt;  &quot;HELLO&quot;
+    (map .upper [:a :b :c])  =&gt;  [&quot;A&quot; &quot;B&quot; &quot;C&quot;]
+</code></pre>
+<h3 id="sequences">Sequences</h3>
+<p>All sequences in Lemma must implement <code>first</code>, <code>rest</code>, and <code>empty?</code>. All built-in sequences also implement <code>cons</code>:</p>
+<p><em>procedure</em> <strong><code>first</code></strong> <code>seq</code></p>
+<blockquote>
+<p>Returns the head of <code>seq</code>.</p>
+</blockquote>
+<p><em>procedure</em> <strong><code>rest</code></strong> <code>seq</code></p>
+<blockquote>
+<p>Returns the tail of <code>seq</code>.</p>
+</blockquote>
+<p><em>procedure</em> <strong><code>empty?</code></strong> <code>seq</code></p>
+<blockquote>
+<p>Returns truthy if there are no elements in <code>seq</code>, falsy otherwise.</p>
+</blockquote>
+<p><em>procedure</em> <strong><code>cons</code></strong> <code>obj seq</code></p>
+<blockquote>
+<p>Returns a new sequence whose head is <code>obj</code> and tail is <code>seq</code>.</p>
+</blockquote>
+<p>Lemma provides a number of functions for sequence manipulation <strong>TODO</strong>:</p>
+<p><em>procedure</em> <strong><code>second</code></strong> <code>seq</code></p>
+<blockquote>
+<p>Returns the second value of a <code>seq</code>.</p>
+</blockquote>
+<p><em>procedure</em> <strong><code>map</code></strong> <code>f seq</code></p>
+<blockquote>
+<p>Returns a new iter where each element is the result of applying <code>f</code> to the corresponding element in <code>seq</code>.</p>
+</blockquote>
+<p><em>procedure</em> <strong><code>for-each</code></strong> <code>f seq</code></p>
+<blockquote>
+<p>Applies <code>f</code> to each element of <code>seq</code>, presumably for side effects. Always returns <code>nil</code>.</p>
+</blockquote>
+<p><em>procedure</em> <strong><code>filter</code></strong> <code>f seq</code></p>
+<blockquote>
+<p>Returns a new iter where each element is the next element of <code>seq</code> that, when <code>f</code> is applied to it, evaluates truthily.</p>
+</blockquote>
+<p><em>procedure</em> <strong><code>fold</code></strong> <code>f init seq</code></p>
+<h4 id="lists">Lists</h4>
+<p><em>procedure</em> <strong><code>list</code></strong> <code>@args</code></p>
+<blockquote>
+<p>Constructs a new list whose elements are the elements of <code>args</code>, in the same order.</p>
+</blockquote>
+<h4 id="iters">Iters</h4>
+<p><em>procedure</em> <strong><code>iter</code></strong> <code>f s var filter?</code></p>
+<blockquote>
+<p>Constructs a new iter whose elements are generated by calling <code>(filter (f s var))</code> expecting two results. The first result becomes the next value of <code>var</code> while the second result is added to the sequence. If <code>filter</code> is unspecified, it defaults to something compatible with Lua's builtin iterators (<code>ipairs</code>, <code>pairs</code>, etc.) which packs multiple return values into a vector.</p>
+</blockquote>
+<pre><code>    (first (iter (lua/pairs lua/table)))  =&gt;  [&quot;insert&quot; function: 0x100102a60]
+    (map .upper (iter (lua/io.lines)))    =&gt;  reads lines and upcases them until EOF
+</code></pre>
+<h3 id="vectors">Vectors</h3>
+<h3 id="hashmaps">Hashmaps</h3>
+<h3 id="inputoutput">Input/Output</h3>
+<h2 id="lua-interoperation">Lua interoperation</h2>
+<h3 id="tables">Tables</h3>
+<h3 id="the-lua-namespace">The <code>lua</code> namespace</h3>
+<h3 id="compiling">Compiling</h3>
+<h2 id="differences-from-other-lisps">Differences from other Lisps</h2>
+<ul>
+<li><code>nil</code> is not a symbol, nor is <code>nil</code> the empty list. A symbol named &quot;nil&quot; can be written as <code>|nil|</code>. (Likewise, <code>true</code> and <code>false</code> are not symbols, but <code>|true|</code> and <code>|false|</code> are.)</li>
+<li>There is no built-in pair type.</li>
+<li><code>splice</code> (also known as the <code>@</code> operator) is not restricted to use inside <code>quasiquote</code>. It may be used anywhere to unpack the values of any sequence. For example, <code>(apply f lst)</code> is better expressed as <code>(f @lst)</code> in Lemma.</li>
+<li>Lemma has no keyword type. <code>:string</code>s are provided as a shorthand to facilitate interoperability with Lua. Use them appropriately.</li>
+</ul>
+<h2 id="about-this-document">About this document</h2>
+<p>This document has been formatted as <a href="http://github.github.com/github-flavored-markdown/">GitHub Flavored Markdown</a> and is readable as plain text. Care has been taken for compatibility with other Markdown processing systems, such as the original <a href="http://daringfireball.net/projects/markdown/">Markdown</a> and <a href="http://johnmacfarlane.net/pandoc/">Pandoc</a>. When viewing as plain text, it may be helpful to wrap long lines. Many text editors, as well as the Unix commands <code>fold</code> and <code>fmt</code>, can do this automatically.</p>
+</body>
+</html>

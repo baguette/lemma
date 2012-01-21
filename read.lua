@@ -11,14 +11,13 @@ require 'class/Symbol'
 require 'class/Nil'		-- used to signal that a comment has been read
 require 'class/Number'
 
-local symbol =			 -- this is perhaps a little too permissive
-[[([%a%-%?%*%+%%%$%^<>/\\_=:&!][%.%a%d%-%?%*%+%%%$%^<>/\\_=:&|!~@']*)]]
+local symbol = '(.+)'   -- this is perhaps a little too permissive
 
 function symbol_patterns()
 	return {
 		full = symbol,
-		table = [[([%a%-%?%*%+%%%$%^<>/\\_=:&!][%a%d%-%?%*%+%%%$%^<>/\\_=:&|!~@']*)]],
-		ns = [[([%a%-%?%*%+%%%$%^<>/\\_=:&!][%.%a%d%-%?%*%+%%%$%^<>\\_=:&|!~@']*)]]
+		table = '([^%.]*)',
+		ns = '([^/]*)'
 	}
 end
 
@@ -29,6 +28,9 @@ local function tovalue(x, co)
 end
 
 local function handle_number(n, co)
+	if not tonumber(n) then
+		return Error('lexical error on token: '..n)
+	end
 	if co then
 		return Number(n)
 	else
@@ -39,11 +41,12 @@ end
 
 -- these are tried in order (make them specific!)
 local atoms = {
-	'^([%+%-]?%d+%.?%d+)',		handle_number,	-- with decimal point
-	'^([%+%-]?%d+)',			handle_number,	-- without decimal point
-	'^(true)',					tovalue,
-	'^(false)',					tovalue,
-	'^(nil)',					tovalue,
+	'^([%+%-]?0x%x+)$',			handle_number,  -- hexadecimal
+	'^([%+%-]?%d+%.?%d+)$',		handle_number,	-- with decimal point
+	'^([%+%-]?%d+)$',			handle_number,	-- without decimal point
+	'^(true)$',					tovalue,
+	'^(false)$',				tovalue,
+	'^(nil)$',					tovalue,
 	'^'..symbol,				Symbol
 }
 
@@ -196,7 +199,6 @@ end
 local function table_idx(func)
 	return function(f, c)
 		local k = read(f, c)
-	--	k = List():cons(k):cons(Symbol('quote'))
 		if type(k) ~= 'Symbol' then
 			return Error'read: dot syntax requires symbol'
 		end

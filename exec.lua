@@ -28,7 +28,7 @@ function exec(f)
 	while not done do
 		if prompt then io.write(prompt) end
 		
-		local t = read(f)                         -- read an expression!
+		local t = read(f, true)                   -- read an expression!
 	
 		if type(t) ~= 'Error' then
 			local val = Vector(eval(t, env))      -- evaluate the expression!
@@ -55,7 +55,7 @@ function exec(f)
 				f:close()
 				return
 			else
-				io.stderr:write (f:lines() .. ': ' .. e:string() .. '\n')
+				io.stderr:write (f:lines() .. ': ' .. t:string() .. '\n')
 				if not prompt then
 					done = true
 					f:close()
