@@ -51,12 +51,12 @@ Lemma may have values of any type in Lua; programmers may stumble upon *tables*,
 External representation
 -----------------------
 
-The textual representation of data in Lemma is known as the *external representation*.  Before Lemma code is processed, a subprogram known as the *reader* converts these human-readable external representations into machine-friendly forms known as *internal representations*.  The reader's compliment, the *writer*, can perform the inverse conversion.  Note that there are some types of value that do not have an external representation (functions, for example). It is important to distinguish between external and internal representations: the numeral `4` is the external representation of the number four. The two representations are equivalent but are not equal.
+The textual representation of data in Lemma is known as the *external representation*.  Before Lemma code is processed, a subprogram known as the *reader* converts these human-readable external representations into machine-friendly forms known as *internal representations*.  The reader's compliment, the *writer*, can perform the (almost) inverse conversion.  Note that there are some types of value that do not have an external representation (iters, for example), and some values may have multiple external representations (strings and symbols, for example).  It is important to distinguish between external and internal representations: the numeral `42`, which is a sequence of characters, is the external representation of the number forty-two, which is a number.
 
 Lemma source consists of
 
 1. *atoms* separated by whitespace or delimiters, 
-2. delimited collection literals, and
+2. delimited *collection* literals, and
 3. *comments*.
 
 Atoms and collections together constitute *data* (plural of *datum*).  Whitespace consists of spaces, tabs, newlines, or commas (`,`); whitespace is only significant for the separation of atoms.  Delimiters are parentheses `()`, square brackets `[]`, and curly brackets `{}`.
@@ -72,7 +72,7 @@ Atoms and collections together constitute *data* (plural of *datum*).  Whitespac
     1. as a sequence of characters not containing any whitespace or delimiters and not representing any other type of datum*: `this-is-a-symbol`
     2. as a sequence of characters enclosed in pipes, where literal pipes may be escaped within: `|a single symbol enclosed in \| characters|`
 - *Strings* may be written in two ways:
-    1. as a type 1 symbol prefixed with a colon: `:short-form-string`
+    1. as any atom prefixed with a colon: `:short-form-string` `:123  =>  "123"`
     2. as a sequence of characters enclosed in double quotes, where literal double quotes may be escaped within: `"a string enclosed in \" characters"`
 
 \* Type 1 symbols may also not begin with a character which begins a reader macro. See below.
@@ -196,7 +196,9 @@ Library reference
         (.upper :hello)          =>  "HELLO"
         (map .upper [:a :b :c])  =>  ("A" "B" "C")
 
-### Arithmetic
+### Booleans
+
+### Numbers
 
 ### Sequences
 
@@ -237,12 +239,14 @@ Lemma provides a number of functions for sequence manipulation **TODO**:
 
 *procedure* **`filter`** ` f seq`
 
-> Returns a new iter where each element is the next element of `seq` that, when `f` is applied to it, evaluates truthily.
+> Returns a new sequence where each element is the next element of `seq` that, when `f` is applied to it, evaluates truthily.
 
         (filter odd? [1 2 3 4 5])                  =>  (1 3 5)
         (filter (fn [x] (< x 10)) [7 9 10 11 12])  =>  (7 9)
 
-*procedure* **`fold`** ` f init seq`
+*procedure* **`foldl`** ` f init seq`
+
+*procedure* **`foldr`** ` f init seq`
 
 #### Lists
 
