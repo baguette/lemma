@@ -53,10 +53,10 @@ function lemma.use(ns)
 		if _G[ns] then
 			table.insert(uses, ns)
 		else
-			return Error('use: '..ns..' is not a known namespace')
+			return error('use: '..ns..' is not a known namespace')
 		end
 	else
-		return Error'use: string expected'
+		return error'use: string expected'
 	end
 end
 
@@ -96,7 +96,7 @@ local function namespace(str)
 	local ns, mem = resolve(str)
 	if ns then
 		if not mem then
-			return Error"This should not be a Symbol."
+			return error"This should not be a Symbol."
 		end
 		
 		if (ns == '*ns*' or deffing) then
@@ -104,7 +104,7 @@ local function namespace(str)
 		end
 		
 		if not _G[ns] then
-			return Error('error: '..ns..' is not a known namespace.')
+			return error('error: '..ns..' is not a known namespace.')
 		end
 		
 		local v = {'_G["', ns, '"]'}
@@ -149,20 +149,20 @@ lemma['sym-new'] = function(s)
 				vararg = lemma['sym-new'](sym)
 				return '...'
 			else
-				return Error('Error parsing splice.')
+				return error('Error parsing splice.')
 			end
 		else
 			print('Error in binding for '..f:string()..':'..type(f)..' '..tostring(s))
-			return Error('Error in binding')
+			return error('Error in binding')
 		end
 	elseif type(s) ~= 'Symbol' then
-		return Error('Symbol expected, got '..type(s))
+		return error('Symbol expected, got '..type(s))
 	end
 	
 	if not s.string then
 		print 'wtf is happening ?!'
 		print(type(s))
-		return Error('Error')
+		return error('Error')
 	end
 	
 	local str = s:string()
@@ -200,7 +200,7 @@ lemma['sym-find'] = function(s)
 	end
 	
 	if not v[1] then
-		return Error"This should not be a Symbol."
+		return error"This should not be a Symbol."
 	end
 	
 	for i = n, 1, -1 do

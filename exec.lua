@@ -29,9 +29,15 @@ function exec(f)
 		if prompt then io.write(prompt) end
 		
 		local t = read(f, true)                   -- read an expression!
-	
+		
 		if type(t) ~= 'Error' then
-			local val = Vector(eval(t, env))      -- evaluate the expression!
+			local blarg = Vector(pcall(eval, t, env))
+			local good = blarg(1)
+			if not good then
+				io.stderr:write (f:lines() .. ': ' .. tostring(blarg(2)) .. '\n')
+			end
+			                                      -- evaluate the expression!
+			local val = Vector(select(2, Seq.lib.unpack(blarg)))
 			local err = false
 			
 			for i = 1, val:length() do
@@ -40,9 +46,6 @@ function exec(f)
 					done = true
 					f:close()
 					return
-				elseif type(v) == 'Error' then
-					io.stderr:write (f:lines() .. ': ' .. tostring(v) .. '\n')
-					err = true
 				end
 			end
 			if prompt and not err then

@@ -19,7 +19,7 @@ for i, v in pairs(Seq.sig) do
 		if x and x[v] then
 			return x[v](x, ...)
 		else
-			return Error(tostring(x)..' has type '..type(x)..', not a Seq')
+			return error(tostring(x)..' has type '..type(x)..', not a Seq')
 		end
 	end
 end
@@ -31,7 +31,7 @@ lemma.cons = function(x, xs, xss)
 	elseif xs and xs.cons then
 		return xs:cons(x)
 	else
-		return Error('Attempt to cons to '..tostring(xs)..', not a Seq')
+		return error('Attempt to cons to '..tostring(xs)..', not a Seq')
 	end
 end
 
@@ -44,7 +44,7 @@ function Seq.lib.foldl(f, init, ...)
 	if #lsts == 0 then
 		return
 	elseif not implements(lsts[1], 'Seq') then
-		return Error('foldl: Seq expected, got '..type(lsts[1]))
+		return error('foldl: Seq expected, got '..type(lsts[1]))
 	end
 	
 	local function foldl(f, init, lsts)
@@ -70,11 +70,11 @@ function Seq.lib.foldr(f, init, ...)
 	local lsts = {...}
 	
 	if #lsts > 0 and not implements(lsts[1], 'Seq') then
-		return Error('foldr: Seq expected, got '..type(lsts[1]))
+		return error('foldr: Seq expected, got '..type(lsts[1]))
 	end
 	
 	if not implements(lsts[1], 'Reversible') then
-		return Error('foldr: cannot perform right fold on non-reversible seq')
+		return error('foldr: cannot perform right fold on non-reversible seq')
 	end
 	
 	if #lsts > 0 and lsts[1]:length() > 0 then
@@ -113,7 +113,7 @@ function Seq.lib.map(f, ...)
 	if #lsts == 0 then
 		return
 	elseif not implements(lsts[1], 'Seq') then
-		return Error('map: Seq expected, got'..tostring(lsts[1]))
+		return error('map: Seq expected, got'..tostring(lsts[1]))
 	end
 
 	return Iter(map, f, lsts, package)
@@ -123,7 +123,7 @@ function Seq.lib.foreach(f, ...)
 	local lsts = {...}
 	
 	if #lsts > 0 and not implements(lsts[1], 'Seq') then
-		return Error('for-each: Seq expected, got '..type(lsts[1]))
+		return error('for-each: Seq expected, got '..type(lsts[1]))
 	end
 	
 	local function foreach(f, lsts)
@@ -151,7 +151,7 @@ function Seq.lib.unpack(lst)
 	local n = 0
 	
 	if not implements(lst, 'Seq') then
-		return Error('unpack: Seq expected, got '..type(lst)..': '..tostring(lst))
+		return error('unpack: Seq expected, got '..type(lst)..': '..tostring(lst))
 	end
 	
 	while not curr['empty?'](curr) do

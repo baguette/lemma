@@ -126,7 +126,7 @@ end), ["ns"] = (function(_L1_0)
 return (function(_L2_0)
 return (function()
 if (_G["lemma"]["not"](_G["lemma"]["="]("string", _G["lemma"]["type"](_L2_0)))) then
-return _G["lua"]["Error"](_G["lemma"]["str"]("ns: string expected (Got ", _G["lemma"]["type"](_L2_0), ")"))
+return _G["lua"]["error"](_G["lemma"]["str"]("ns: string expected (Got ", _G["lemma"]["type"](_L2_0), ")"))
 elseif (true) then
 return (function()
 _G["lemma"]["add-ns"](_L2_0)_G["lemma"]["cur-ns"] = _L2_0;
@@ -240,7 +240,7 @@ return (function()
 if (_G["lemma"]["types"](_G["lemma"]["type"](_L1_0))) then
 return _G["lemma"]["types"](_G["lemma"]["type"](_L1_0))(_L1_0)
 elseif (true) then
-return _G["lua"]["Error"](_G["lemma"]["str"]("Attempt to compile unrecognized type: ", _L1_0, " : ", _G["lemma"]["type"](_L1_0), "\
+return _G["lua"]["error"](_G["lemma"]["str"]("Attempt to compile unrecognized type: ", _L1_0, " : ", _G["lemma"]["type"](_L1_0), "\
 "))
 end
 end)()

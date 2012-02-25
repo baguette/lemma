@@ -29,7 +29,7 @@ end
 
 local function handle_number(n, co)
 	if not tonumber(n) then
-		return Error('lexical error on token: '..n)
+		return error('lexical error on token: '..n)
 	end
 	if co then
 		return Number(n)
@@ -200,7 +200,7 @@ local function table_idx(func)
 	return function(f, c)
 		local k = read(f, c)
 		if type(k) ~= 'Symbol' then
-			return Error'read: dot syntax requires symbol'
+			return error'read: dot syntax requires symbol'
 		end
 		return List():cons(k:string()):cons(Symbol(func))
 	end
@@ -282,7 +282,7 @@ function read(f, compiling, waiting)
 		end
 		
 		if not form then
-			return Error('lexical error on token: '..f:get()..str)
+			return error('lexical error on token: '..f:get()..str)
 		end
 	end
 	

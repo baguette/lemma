@@ -23,7 +23,7 @@ local mt = {
 
 Number = function(n)
 	if type(n) ~= 'string' then
-		return Error('Number objects serve to wrap numbers (as strings) at'..
+		return error('Number objects serve to wrap numbers (as strings) at'..
 		             'compile time. (Got '..type(n)..')')
 	end
 	

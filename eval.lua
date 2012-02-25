@@ -47,8 +47,13 @@ function eval(t, env)
 	
 	local f, err = loadstring(code)
 	if not f then
-		return Error('compiler error:    \n'..tostring(err))
+		return error('compiler error:    \n'..tostring(err))
 	end
-	return select(2, pcall(f))
+	
+	local blarg = Vector(pcall(f))
+	if not blarg(1) then
+		return error('eval: '..tostring(blarg(2)))
+	end
+	return select(2, Seq.lib.unpack(blarg))
 end
 

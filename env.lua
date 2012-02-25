@@ -162,20 +162,20 @@ end
 
 function lemma.get(t, k)
 	if not k then
-		return Error'get: attempt to index table with nil'
+		return error'get: attempt to index table with nil'
 	end
 	if not t then
-		return Error('get: attempt to index nil ['..k..']')
+		return error('get: attempt to index nil ['..k..']')
 	end
 	return t[k]
 end
 
 lemma['table-set!'] = function(t, k, v)
 	if not k then
-		return Error'table-set!: attempt to index table with nil'
+		return error'table-set!: attempt to index table with nil'
 	end
 	if not t then
-		return Error('table-set!: attempt to index nil ['..k..']')
+		return error('table-set!: attempt to index nil ['..k..']')
 	end
 	t[k] = v
 	return v
@@ -206,16 +206,16 @@ end
 
 function lemma.method(k)
 	if type(k) ~= 'string' then
-		return Error('method: expected string, got '..tostring(k))
+		return error('method: expected string, got '..tostring(k))
 	end
 	--k = k:string()
 	
 	return function(t, ...)
 		if t == nil then
-			return Error('method: attempt to index nil ['..k..']')
+			return error('method: attempt to index nil ['..k..']')
 		end
 		if t[k] == nil then
-			return Error('method: method is nil ['..k..']')
+			return error('method: method is nil ['..k..']')
 		end
 		return t[k](t, ...)
 	end
@@ -259,10 +259,10 @@ end
 
 function lemma.take(n, seq)
 	if type(n) ~= 'number' then
-		return Error('take: number expected, got ', tostring(n))
+		return error('take: number expected, got ', tostring(n))
 	end
 	if not implements(seq, 'Seq') then
-		return Error('take: seq expected, got ', tostring(seq))
+		return error('take: seq expected, got ', tostring(seq))
 	end
 	lst = {}
 	for i = 1, n do
@@ -278,10 +278,10 @@ end
 
 function lemma.drop(n, seq)
 	if type(n) ~= 'number' then
-		return Error('take: number expected, got ', tostring(n))
+		return error('take: number expected, got ', tostring(n))
 	end
 	if not implements(seq, 'Seq') then
-		return Error('take: seq expected, got ', tostring(seq))
+		return error('take: seq expected, got ', tostring(seq))
 	end
 	for i = 1, n do
 		if seq['empty?'](seq) then
@@ -319,6 +319,6 @@ function lemma.length(t)
 	elseif type(t) == 'string' then
 		return string.len(t)
 	else
-		return Error("Don't know how to get length of "..type(t))
+		return error("Don't know how to get length of "..type(t))
 	end
 end

@@ -86,7 +86,7 @@
   :ns     (fn [xs]
              (let [ns (first xs)]
                (if (not (= :string (type ns)))
-                   (lua/Error (str "ns: string expected (Got " (type ns) ")"))
+                   (lua/error (str "ns: string expected (Got " (type ns) ")"))
                    (do
                      (add-ns ns)
                      (set! cur-ns ns)
@@ -169,7 +169,7 @@
 (defn compile [exp stat?]
     (if (types (type exp))
         ((types (type exp)) exp)
-        (lua/Error (str "Attempt to compile unrecognized type: "
+        (lua/error (str "Attempt to compile unrecognized type: "
                          exp " : " (type exp) "\n"))))
 
 (defn load [filename]
