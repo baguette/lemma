@@ -11,7 +11,7 @@ local function __tostring(e)
 	local str = {}
 	
 	for _, v in ipairs(e) do
-		table.insert(str, tostring(v))
+		table.insert(str, towrite(v))
 		table.insert(str, ' ')
 	end
 	
