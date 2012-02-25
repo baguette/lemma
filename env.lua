@@ -17,8 +17,7 @@ require 'type'
 ---
 -- Some Lua functions that could really use customizing.
 ---
-tostring, print = (function()
-	local xtostring = tostring
+towrite, print = (function()
 	return function(s)
 		if type(s) == 'string' then
 			return string.format('%q', s)
@@ -27,14 +26,14 @@ tostring, print = (function()
 		elseif s == nil then
 			return "nil"
 		end
-		return xtostring(s)
+		return tostring(s)
 	end,
 	function(...)
 		local n = select('#', ...)
 		local args = {...}
 		
 		for i = 1, n do
-			args[i] = xtostring(args[i])
+			args[i] = tostring(args[i])
 		end
 		
 		io.write(table.concat(args, '\t'))
@@ -56,10 +55,10 @@ end
 function write(...)
 	local n = select('#', ...)
 	local args = {...}
-	
+
 	if n > 0 then
 		for i = 1, n do
-			io.write(tostring(args[i]))
+			io.write(towrite(args[i]))
 			io.write(' ')
 		end
 	else

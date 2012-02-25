@@ -8,7 +8,7 @@ local function __tostring(e)
 	local str = {}
 	
 	for i = 1, e:length() do
-		table.insert(str, tostring(e[i]))
+		table.insert(str, towrite(e[i]))
 		table.insert(str, ' ')
 	end
 	

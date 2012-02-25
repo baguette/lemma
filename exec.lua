@@ -33,12 +33,13 @@ function exec(f)
 		if type(t) ~= 'Error' then
 			local blarg = Vector(pcall(eval, t, env))
 			local good = blarg(1)
+			local err = false
 			if not good then
 				io.stderr:write (f:lines() .. ': ' .. tostring(blarg(2)) .. '\n')
+				err = true
 			end
 			                                      -- evaluate the expression!
 			local val = Vector(select(2, Seq.lib.unpack(blarg)))
-			local err = false
 			
 			for i = 1, val:length() do
 				v = val[i]

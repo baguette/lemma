@@ -9,7 +9,7 @@ local function __tostring(e)
 	local curr = e
 	
 	while not curr['empty?'](curr) do
-		table.insert(str, tostring(curr:first()))
+		table.insert(str, towrite(curr:first()))
 		table.insert(str, ' ')
 		curr = curr:rest()
 	end
