@@ -43,20 +43,25 @@ end
 local function ns_attach(t)
 	local o = getmetatable(t) or {}
 	o.__uses = o.__uses or {}
-
+	
 	local function find_use(s, k)
 		local uses = o.__uses
+		local checked = {}
 		for i = #uses, 1, -1 do
+			local u = uses[i]
 			-- Prevent infinite recursion looking for a symbol
-			if uses[i] == lemma['cur-ns'] then
+			if u == lemma['cur-ns'] then
 				return nil
 			end
-			local u = _G[uses[i]][k]
-			if u ~= nil then return u end
+			if not checked[u] then
+				local u = _G[uses[i]][k]
+				if u ~= nil then return u end
+			end
+			checked[u] = true
 		end
 		return nil
 	end
-
+	
 	-- favor any existing indexers when attaching
 	if o.__index then
 		local f = o.__index
@@ -73,7 +78,7 @@ local function ns_attach(t)
 	else
 		o.__index = find_use
 	end
-
+	
 	return setmetatable(t, o)
 end
 
