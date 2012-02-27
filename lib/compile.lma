@@ -90,7 +90,7 @@
                    (do
                      (add-ns ns)
                      (set! cur-ns ns)
-                     (str "lemma['*ns*'] = '" ns "';\n")))))
+                     (str "lemma['cur-ns'] = '" ns "';\n")))))
   :quote   handle-quote
   :quasiquote handle-quasiquote
   :def     (fn [xs]

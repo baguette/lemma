@@ -130,7 +130,7 @@ return _G["lua"]["error"](_G["lemma"]["str"]("ns: string expected (Got ", _G["le
 elseif (true) then
 return (function()
 _G["lemma"]["add-ns"](_L2_0)_G["lemma"]["cur-ns"] = _L2_0;
-return _G["lemma"]["str"]("lemma['*ns*'] = '", _L2_0, "';\
+return _G["lemma"]["str"]("lemma['cur-ns'] = '", _L2_0, "';\
 ")
 end)()
 end
