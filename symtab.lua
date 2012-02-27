@@ -12,7 +12,12 @@ require 'class/Set'
 ---
 -- This is ugly... but it's only temporary.
 -- I am seriously reconsidering namespaces... they just end up being
--- awkward when compiled to Lua.  Maybe there's a better way?
+-- awkward when compiled to Lua.  Maybe all new namespaces will use lemma,
+-- but no use would be provided externally, only a nickname mechanism for
+-- some cases to reduce keystrokes.
+--
+-- The way use works now, if you use a namespace, you're using every
+-- namespace that it has ever used.  Slow and dirty... it just feels wrong.
 ---
 do
 
