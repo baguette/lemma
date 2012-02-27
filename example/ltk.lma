@@ -3,13 +3,14 @@
 ;; It's another example of Lua interoperability.
 
 (lua/require :ltk)
+(use :ltk)
 
 (defn on-click []
   (print "Okay, bye!")
-  (ltk/exit))
+  (exit))
 
-(let [msg (ltk/label  {:text "Hello, world!"})
-      btn (ltk/button {:text "Hi!", :command on-click})]
-  (ltk/pack [msg btn])
-  (ltk/mainloop))
+(let [msg (label  {:text "Hello, world!"})
+      btn (button {:text "Hi!", :command on-click})]
+  (pack [msg btn])
+  (mainloop))
 

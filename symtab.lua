@@ -7,19 +7,16 @@
 -- body can be resolved with sym-find. At the end of function compilation,
 -- sym-pop should occur to discard its locals from the symbol table.
 ---
-require 'class/Error'
 require 'class/Set'
 
 ---
 -- This is ugly... but it's only temporary.
--- TODO: reconsider namespaces
---       they affect interop and don't map to the filesystem
---       why not have ns, use take any table?
+-- I am seriously reconsidering namespaces... they just end up being
+-- awkward when compiled to Lua.  Maybe there's a better way?
 ---
 do
 
 local symtab = {}
-local uses   = {'lemma'}
 local vararg = false
 
 function debug.printsyms()
@@ -41,19 +38,68 @@ function debug.printsyms()
 	print'--------'
 end
 
----
--- TODO: each namespace should have its own uses
----
-lemma['add-ns'] = function(ns)
-	_G[ns] = _G[ns] or {}
+
+
+local function ns_attach(t)
+	local o = getmetatable(t) or {}
+	o.__uses = o.__uses or {}
+
+	local function find_use(s, k)
+		local uses = o.__uses
+		for i = #uses, 1, -1 do
+			-- Prevent infinite recursion looking for a symbol
+			if uses[i] == lemma['cur-ns'] then
+				return nil
+			end
+			local u = _G[uses[i]][k]
+			if u ~= nil then return u end
+		end
+		return nil
+	end
+
+	-- favor any existing indexers when attaching
+	if o.__index then
+		local f = o.__index
+		local function lookup(s, k)
+			local v = nil
+			if type(f) == 'table' then
+				v = f[k]
+			elseif type(f) == 'function' then
+				v = f(s, k)
+			end
+			return v or find_use(s, k)
+		end
+		o.__index = lookup
+	else
+		o.__index = find_use
+	end
+
+	return setmetatable(t, o)
 end
 
-function lemma.use(ns)
+-- Mark the lemma namespace as a use-able namespace
+ns_attach(lemma)
+
+lemma['add-ns'] = function(ns)
+	if _G[ns] == nil then
+		_G[ns] = ns_attach{}
+		lemma.use('lemma', ns)
+	end
+end
+
+function lemma.use(ns, cur)
 	if type(ns) == 'string' then
-		if _G[ns] then
-			table.insert(uses, ns)
-		else
-			return error('use: '..ns..' is not a known namespace')
+		local t = cur or lemma['cur-ns']
+		if type(_G[t]) == 'table' then
+			local o = getmetatable(_G[t])
+			if not o then
+				error'current namespace is not a namespace?!'
+			end
+			if type(_G[ns]) == 'table' then
+				table.insert(o.__uses, ns)
+			else
+				return error('use: '..ns..' is not a known namespace')
+			end
 		end
 	else
 		return error'use: string expected'
@@ -76,16 +122,6 @@ local function resolve(str)
 	end
 	mem = str
 	ns = lemma['cur-ns']
-	imem = mem and string.match(mem, '([^%.]+)%..*') or mem
-	if _G[ns][imem] ~= nil then
-		return ns, mem
-	end
-	for i = #uses, 1, -1 do
-		if _G[uses[i]][imem] ~= nil then
-			ns = uses[i]
-			break
-		end
-	end
 	if type(ns) ~= 'string' then
 		debug.debug()
 	end
@@ -96,10 +132,10 @@ local function namespace(str)
 	local ns, mem = resolve(str)
 	if ns then
 		if not mem then
-			return error"This should not be a Symbol."
+			return error"read error: This should not be a Symbol."
 		end
 		
-		if (ns == '*ns*' or deffing) then
+		if (ns == '*ns*') then
 			ns = lemma['cur-ns']
 		end
 		
@@ -152,17 +188,15 @@ lemma['sym-new'] = function(s)
 				return error('Error parsing splice.')
 			end
 		else
-			print('Error in binding for '..f:string()..':'..type(f)..' '..tostring(s))
-			return error('Error in binding')
+			return error('Error in binding for '..
+			             f:string()..':'..type(f)..' '..tostring(s))
 		end
 	elseif type(s) ~= 'Symbol' then
 		return error('Symbol expected, got '..type(s))
 	end
 	
 	if not s.string then
-		print 'wtf is happening ?!'
-		print(type(s))
-		return error('Error')
+		return error('Error: wtf is happening?!'..type(s))
 	end
 	
 	local str = s:string()
@@ -200,7 +234,7 @@ lemma['sym-find'] = function(s)
 	end
 	
 	if not v[1] then
-		return error"This should not be a Symbol."
+		return error"reader error: This should not be a Symbol."
 	end
 	
 	for i = n, 1, -1 do
