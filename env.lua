@@ -319,3 +319,27 @@ function lemma.length(t)
 		return error("Don't know how to get length of "..type(t))
 	end
 end
+
+function lemma.range(a, b, by)
+	-- by defaults to 1
+	by = by or 1
+	
+	-- make a optional
+	if not b then
+		a, b = by, a
+	end
+	
+	a = a - by
+	
+	local function until_inc(s, v)
+		local n = v + by
+		if n <= s then
+			return n
+		end
+		return nil
+	end
+	
+	return Iter(until_inc, b, a)
+end
+
+
