@@ -160,6 +160,9 @@ function lemma.values(t)
 end
 
 function lemma.get(t, k)
+	if type(k) == 'Symbol' then
+		k = k:string()             -- TODO: is the really a good idea?
+	end
 	if not k then
 		return error'get: attempt to index table with nil'
 	end
@@ -219,14 +222,6 @@ function lemma.method(k)
 		return t[k](t, ...)
 	end
 end
-
----
--- This table stores any metadata associated with a particular object.
--- It uses weak keys so that the metadata will be garbage collected if
--- the associated object is garbage collected.
----
-lemma['*metadata*'] = {}
-setmetatable(lemma['*metadata*'], { __mode = 'k' })
 
 ---
 -- Set up the namespaces. All of the usual global stuff in Lua is moved

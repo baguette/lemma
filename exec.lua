@@ -1,5 +1,14 @@
 
 lemma = {}
+---
+-- This table stores any metadata associated with a particular object.
+-- It uses weak keys so that the metadata will be garbage collected if
+-- the associated object is garbage collected.
+---
+lemma['*metadata*'] = {}
+setmetatable(lemma['*metadata*'], { __mode = 'k' })
+
+
 
 require 'class/FileStream'
 require 'read'

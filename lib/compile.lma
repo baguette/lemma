@@ -94,7 +94,7 @@
              (let [k (first xs)
                    v (second xs)]
                (let [sym (sym-new k true)]
-                 (str "local " sym "; " sym " = " (compile v) ";\n"))))
+                 (str sym " = " (compile v) ";\n"))))
   :set!    (fn [xs]
              (let [k (first  xs)
                    v (second xs)]
@@ -144,8 +144,8 @@
                       ((specials (tostring head)) (rest x))
                     ;; Currently, macros only work if defined at top level
                     (and (= :Symbol (type head))
-                         (= :Macro (type (lua.eval head lua.env))))
-                      (let [f (get (lua.eval head lua.env) :func)]
+                         (= :Macro (type (get lua.lemma head))))
+                      (let [f (get (get lua.lemma head) :func)]
                         (compile (f @(rest x))))
                     :else
                       (let [r (rest x)

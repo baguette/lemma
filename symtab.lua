@@ -7,7 +7,6 @@
 -- body can be resolved with sym-find. At the end of function compilation,
 -- sym-pop should occur to discard its locals from the symbol table.
 ---
-require 'class/Set'
 
 ---
 -- This is ugly... but it's only temporary.
@@ -16,6 +15,8 @@ do
 
 local symtab = {}
 local vararg = false
+local symfile
+local loctab = {}
 
 function debug.printsyms()
 	print'--------'
@@ -44,6 +45,14 @@ local function compile_sym(str)
 	end
 	return table.concat(v)
 end
+
+lemma['sym-set-file'] = function(s)
+	symfile = '#lemma:file:'..s
+	lemma['*metadata*'][symfile] = lemma['*metadata*'][symfile] or {}
+	loctab[symfile] = loctab[symfile] or {}
+end
+
+lemma['sym-set-file']('lma-repl')
 
 lemma['sym-len'] = function()
 	return #symtab
@@ -95,8 +104,8 @@ lemma['sym-new'] = function(s, loc)
 	
 	if n == 0 then
 		if loc then
-			symtab[0] = symtab[0] or {}
-			symtab[0][1] = symtab[0][1] or 0
+			loctab[symfile][str] = "lemma['*metadata*']['"..symfile.."']['"..str.."']"
+			return loctab[symfile][str]
 		else
 			return compile_sym(str)
 		end
@@ -123,10 +132,14 @@ lemma['sym-find'] = function(s)
 		return error"reader error: This should not be a Symbol."
 	end
 	
-	local bottom = symtab[0] and 0 or 1
-
-	for i = n, bottom, -1 do
-		local q = symtab[i][v[1]]
+	for i = n, 0, -1 do
+		local q
+		if i == 0 then
+			q = loctab[symfile][v[1]]
+		else
+			q = symtab[i][v[1]]
+		end
+	
 		if q then
 			local r = {q}
 			for j = 2, #v do
@@ -137,7 +150,7 @@ lemma['sym-find'] = function(s)
 			return table.concat(r)
 		end
 	end
-
+	
 	return compile_sym(str)
 end
 

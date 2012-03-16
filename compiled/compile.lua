@@ -123,7 +123,7 @@ return lemma["str"]("(", lemma["mapstr"](lemma["compile"], _L1_0, " or "), ")")
 end), ["def-"] = (function(_L1_0)
 return (function(_L2_0, _L2_1)
 return (function(_L3_0)
-return lemma["str"]("local ", _L3_0, "; ", _L3_0, " = ", lemma["compile"](_L2_1), ";\
+return lemma["str"](_L3_0, " = ", lemma["compile"](_L2_1), ";\
 ")
 end)(lemma["sym-new"](_L2_0, true))
 end)(lemma["first"](_L1_0), lemma["second"](_L1_0))
@@ -177,14 +177,14 @@ return (function(_L2_0)
 return (function()
 if (lemma["specials"](lemma["tostring"](_L2_0))) then
 return lemma["specials"](lemma["tostring"](_L2_0))(lemma["rest"](_L1_0))
-elseif ((lemma["="]("Symbol", lemma["type"](_L2_0)) and lemma["="]("Macro", lemma["type"](lemma["lua"]["eval"](_L2_0, lemma["lua"]["env"]))))) then
+elseif ((lemma["="]("Symbol", lemma["type"](_L2_0)) and lemma["="]("Macro", lemma["type"](lemma["get"](lemma["lua"]["lemma"], _L2_0))))) then
 return (function(_L3_0)
 return lemma["compile"]((function()
 local gel = List();
 gel = lemma.unsplice(gel, lemma["splice"](lemma["rest"](_L1_0)));
 return _L3_0(lemma.splice(gel))
 end)())
-end)(lemma["get"](lemma["lua"]["eval"](_L2_0, lemma["lua"]["env"]), "func"))
+end)(lemma["get"](lemma["get"](lemma["lua"]["lemma"], _L2_0), "func"))
 elseif ("else") then
 return (function(_L3_0, _L3_1)
 return (function()

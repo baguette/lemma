@@ -5,8 +5,7 @@
 
 (lua.require :ltk)
 
-; TODO: alias mechanism
-(def ltk lua.ltk)
+(def- ltk lua.ltk)
 
 (defn on-click []
   (print "Okay, bye!")
