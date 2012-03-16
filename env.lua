@@ -232,8 +232,7 @@ setmetatable(lemma['*metadata*'], { __mode = 'k' })
 -- Set up the namespaces. All of the usual global stuff in Lua is moved
 -- into a lua namespace, and the lemma namespace becomes the default.
 ---
-lua = _G   -- give stock lua stuff its own namespace
-lemma['*ns*'] = 'lemma'
+lemma.lua = _G   -- give stock lua stuff its own namespace
 
 ---
 -- Copy some stuff from lua

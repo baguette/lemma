@@ -12,7 +12,7 @@
       (do-lines func file))))
 
 
-(let-if [quine (lua/io.open (*sys-args* 1) :r)]
+(let-if [quine (lua.io.open (*sys-args* 1) :r)]
   (do
     (do-lines print quine)
     (.close quine)))

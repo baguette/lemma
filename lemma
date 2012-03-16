@@ -12,10 +12,6 @@ LEMMA_VERSION = 0.2
 ---
 local o, f = ...
 
-function update_prompt()
-	prompt = lemma['*ns*']..'> '
-end
-
 if o and o:sub(1, 1) ~= '-' then
 	f, o = o, nil
 	lemma['*sys-args*'] = Vectorize{select(1, ...)}
@@ -33,7 +29,7 @@ end
 
 if not f or f == '--' then
 	f = io.input()
-	update_prompt()
+	prompt = 'lemma> '
 	print('Lemma '..LEMMA_VERSION..' (on '..LUA_VERSION..')')
 end
 

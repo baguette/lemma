@@ -16,8 +16,7 @@ local symbol = '(.+)'   -- this is perhaps a little too permissive
 function symbol_patterns()
 	return {
 		full = symbol,
-		table = '([^%.]*)',
-		ns = '([^/]*)'
+		table = '([^%.]*)'
 	}
 end
 

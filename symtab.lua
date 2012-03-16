@@ -11,13 +11,6 @@ require 'class/Set'
 
 ---
 -- This is ugly... but it's only temporary.
--- I am seriously reconsidering namespaces... they just end up being
--- awkward when compiled to Lua.  Maybe all new namespaces will use lemma,
--- but no use would be provided externally, only a nickname mechanism for
--- some cases to reduce keystrokes.
---
--- The way use works now, if you use a namespace, you're using every
--- namespace that it has ever used.  Slow and dirty... it just feels wrong.
 ---
 do
 
@@ -31,7 +24,6 @@ function debug.printsyms()
 	for i, v in ipairs(uses) do
 		print(v)
 	end
-	print(lemma['cur-ns'], '*')
 	print'--------'
 	print'Symbols'
 	print'--------'
@@ -43,125 +35,14 @@ function debug.printsyms()
 	print'--------'
 end
 
-
-
-local function ns_attach(t)
-	local o = getmetatable(t) or {}
-	o.__uses = o.__uses or {}
-	
-	local function find_use(s, k)
-		local uses = o.__uses
-		local checked = {}
-		for i = #uses, 1, -1 do
-			local u = uses[i]
-			-- Prevent infinite recursion looking for a symbol
-			if u == lemma['cur-ns'] then
-				return nil
-			end
-			if not checked[u] then
-				local u = _G[uses[i]][k]
-				if u ~= nil then return u end
-			end
-			checked[u] = true
-		end
-		return nil
+local function compile_sym(str)
+	local v = {'lemma'}
+	for m in string.gmatch(str, '([^%.]+)') do
+		table.insert(v, '["')
+		table.insert(v, m)
+		table.insert(v, '"]')
 	end
-	
-	-- favor any existing indexers when attaching
-	if o.__index then
-		local f = o.__index
-		local function lookup(s, k)
-			local v = nil
-			if type(f) == 'table' then
-				v = f[k]
-			elseif type(f) == 'function' then
-				v = f(s, k)
-			end
-			return v or find_use(s, k)
-		end
-		o.__index = lookup
-	else
-		o.__index = find_use
-	end
-	
-	return setmetatable(t, o)
-end
-
--- Mark the lemma namespace as a use-able namespace
-ns_attach(lemma)
-
-lemma['add-ns'] = function(ns)
-	if _G[ns] == nil then
-		_G[ns] = ns_attach{}
-		lemma.use('lemma', ns)
-	end
-end
-
-function lemma.use(ns, cur)
-	if type(ns) == 'string' then
-		local t = cur or lemma['cur-ns']
-		if type(_G[t]) == 'table' then
-			local o = getmetatable(_G[t])
-			if not o then
-				error'current namespace is not a namespace?!'
-			end
-			if type(_G[ns]) == 'table' then
-				table.insert(o.__uses, ns)
-			else
-				return error('use: '..ns..' is not a known namespace')
-			end
-		end
-	else
-		return error'use: string expected'
-	end
-end
-
-local function splitns(str)
-	local _, _, ns, mem = string.find(str, "(.+)/(.+)")
-	return ns, mem
-end
-
----
--- Maybe this function should be provided/exported so that quasiquote
--- can qualify symbols...
----
-local function resolve(str)
-	local ns, mem = splitns(str)
-	if ns and mem then
-		return ns, mem
-	end
-	mem = str
-	ns = lemma['cur-ns']
-	if type(ns) ~= 'string' then
-		debug.debug()
-	end
-	return ns, mem
-end
-
-local function namespace(str)
-	local ns, mem = resolve(str)
-	if ns then
-		if not mem then
-			return error"read error: This should not be a Symbol."
-		end
-		
-		if (ns == '*ns*') then
-			ns = lemma['cur-ns']
-		end
-		
-		if not _G[ns] then
-			return error('error: '..ns..' is not a known namespace.')
-		end
-		
-		local v = {'_G["', ns, '"]'}
-		for m in string.gmatch(mem, '([^%.]+)') do
-			table.insert(v, '["')
-			table.insert(v, m)
-			table.insert(v, '"]')
-		end
-		return table.concat(v)
-	end
-	return false
+	return table.concat(v)
 end
 
 lemma['sym-len'] = function()
@@ -212,13 +93,8 @@ lemma['sym-new'] = function(s)
 	local str = s:string()
 	local n = #symtab
 	
-	local ns, sp = splitns(str)
-	if ns and sp then
-		return namespace(str)
-	else
-		if n == 0 then
-			return namespace('*ns*/'..str)
-		end
+	if n == 0 then
+		return compile_sym(str)
 	end
 	
 	local a = '_L'..n..'_'..symtab[n][1]
@@ -232,11 +108,6 @@ end
 lemma['sym-find'] = function(s)
 	local str = s:string()
 	local n = #symtab
-	
-	local ns, s = splitns(str)
-	if ns and s then
-		return namespace(str)
-	end
 	
 	local v = {}
 	for m in string.gmatch(str, '([^%.]+)') do
@@ -260,7 +131,7 @@ lemma['sym-find'] = function(s)
 		end
 	end
 	
-	return namespace(str)
+	return compile_sym(str)
 end
 
 end

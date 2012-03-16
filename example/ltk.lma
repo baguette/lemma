@@ -3,15 +3,17 @@
 ;; from the website: http://tset.de/ltcltk/
 ;; It's another example of Lua interoperability.
 
-(lua/require :ltk)
-(use :ltk)
+(lua.require :ltk)
+
+; TODO: alias mechanism
+(def ltk lua.ltk)
 
 (defn on-click []
   (print "Okay, bye!")
-  (exit))
+  (ltk.exit))
 
-(let [msg (label  {:text "Hello, world!"})
-      btn (button {:text "Hi!", :command on-click})]
-  (pack [msg btn])
-  (mainloop))
+(let [msg (ltk.label  {:text "Hello, world!"})
+      btn (ltk.button {:text "Hi!", :command on-click})]
+  (ltk.pack [msg btn])
+  (ltk.mainloop))
 
