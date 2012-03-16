@@ -120,6 +120,13 @@ return lemma["str"](lemma["sym-find"](_L2_0), " = ", lemma["compile"](_L2_1), ";
 end)(lemma["first"](_L1_0), lemma["second"](_L1_0))
 end), ["or"] = (function(_L1_0)
 return lemma["str"]("(", lemma["mapstr"](lemma["compile"], _L1_0, " or "), ")")
+end), ["def-"] = (function(_L1_0)
+return (function(_L2_0, _L2_1)
+return (function(_L3_0)
+return lemma["str"]("local ", _L3_0, "; ", _L3_0, " = ", lemma["compile"](_L2_1), ";\
+")
+end)(lemma["sym-new"](_L2_0, true))
+end)(lemma["first"](_L1_0), lemma["second"](_L1_0))
 end), ["quote"] = lemma["handle-quote"], ["fn"] = lemma["handle-fn"], ["quasiquote"] = lemma["handle-quasiquote"], ["cond"] = (function(_L1_0)
 return (function(_L2_0, _L2_1)
 return lemma["str"]("(function()\

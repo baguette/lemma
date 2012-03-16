@@ -90,6 +90,11 @@
                              ""
                              (str "local " sym "; "))]
                    (str local sym " = " (compile v) ";\n")))))
+  :def-    (fn [xs]
+             (let [k (first xs)
+                   v (second xs)]
+               (let [sym (sym-new k true)]
+                 (str "local " sym "; " sym " = " (compile v) ";\n"))))
   :set!    (fn [xs]
              (let [k (first  xs)
                    v (second xs)]

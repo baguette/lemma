@@ -65,7 +65,7 @@ lemma['sym-pop'] = function()
 	return table.remove(symtab)
 end
 
-lemma['sym-new'] = function(s)
+lemma['sym-new'] = function(s, loc)
 	if type(s) == 'List' then
 		local f, r = s:first(), s:rest()
 		if  type(f) == 'Symbol'
@@ -94,7 +94,12 @@ lemma['sym-new'] = function(s)
 	local n = #symtab
 	
 	if n == 0 then
-		return compile_sym(str)
+		if loc then
+			symtab[0] = symtab[0] or {}
+			symtab[0][1] = symtab[0][1] or 0
+		else
+			return compile_sym(str)
+		end
 	end
 	
 	local a = '_L'..n..'_'..symtab[n][1]
@@ -118,7 +123,9 @@ lemma['sym-find'] = function(s)
 		return error"reader error: This should not be a Symbol."
 	end
 	
-	for i = n, 1, -1 do
+	local bottom = symtab[0] and 0 or 1
+
+	for i = n, bottom, -1 do
 		local q = symtab[i][v[1]]
 		if q then
 			local r = {q}
@@ -130,7 +137,7 @@ lemma['sym-find'] = function(s)
 			return table.concat(r)
 		end
 	end
-	
+
 	return compile_sym(str)
 end
 
