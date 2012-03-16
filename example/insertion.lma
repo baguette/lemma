@@ -1,0 +1,16 @@
+;; A functional insertion sort
+;; (Translated from http://en.literateprograms.org/Insertion_sort_(OCaml) )
+
+(defn insert [x lst]
+  (cond (empty? lst)      (lua/List x)
+        (> x (first lst)) (cons (first lst) (insert x (rest lst)))
+        :else             (cons x lst)))
+
+(defn sort [lst]
+  (if (empty? lst)
+    lst
+    (insert (first lst) (sort (rest lst)))))
+
+;(sort '(9 3 2 8 1 7))
+;(sort '(:f :d :z :a :e :w))
+
