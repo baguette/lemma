@@ -223,6 +223,7 @@ local reader_macros = {
 	['#']    = {
 		['|'] = read_multicomment,
 		[';'] = read_datumcomment,
+		['!'] = read_comment
 	}
 }
 

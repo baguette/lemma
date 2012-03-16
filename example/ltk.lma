@@ -1,3 +1,4 @@
+#!/usr/bin/env lemma
 ;; This example makes use of ltcltk. It can be installed with luarocks, or
 ;; from the website: http://tset.de/ltcltk/
 ;; It's another example of Lua interoperability.
