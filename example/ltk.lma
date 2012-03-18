@@ -5,6 +5,7 @@
 
 (lua.require :ltk)
 
+;; Copy the lua.ltk library to a file-local nickname
 (def- ltk lua.ltk)
 
 (defn on-click []
