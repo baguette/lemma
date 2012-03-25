@@ -71,6 +71,35 @@ lemma["handle-quasiquote"] = (function(_L1_0)
 return lemma["compile"](lemma["second"](lemma["invert-quasiquote"](_L1_0)))
 end);
 
+lemma["expand-1"] = (function(_L1_0)
+local _L1_1; _L1_1 = lemma["first"](_L1_0);
+return (function()
+if (lemma["symbol?"](_L1_1)) then
+return (function()
+local _L2_0; _L2_0 = lemma["get"](lemma["lua"]["lemma"], lemma["method"]("string")(_L1_1));
+return (function()
+if (lemma["="](lemma["type"](_L2_0), "Macro")) then
+return (function()
+local _L3_0; _L3_0 = lemma["get"](_L2_0, "func");
+return (function()
+local gel = List();
+gel = lemma.unsplice(gel, lemma["splice"](lemma["rest"](_L1_0)));
+return _L3_0(lemma.splice(gel))
+end)()
+end)()
+elseif (true) then
+return nil
+end
+end)()
+
+end)()
+elseif (true) then
+return nil
+end
+end)()
+
+end);
+
 lemma["handle-fn"] = (function(_L1_0)
 return (function(_L2_0, _L2_1)
 lemma["sym-push"]()return (function(_L3_0)
@@ -177,14 +206,8 @@ return (function(_L2_0)
 return (function()
 if (lemma["specials"](lemma["tostring"](_L2_0))) then
 return lemma["specials"](lemma["tostring"](_L2_0))(lemma["rest"](_L1_0))
-elseif ((lemma["="]("Symbol", lemma["type"](_L2_0)) and lemma["="]("Macro", lemma["type"](lemma["get"](lemma["lua"]["lemma"], _L2_0))))) then
-return (function(_L3_0)
-return lemma["compile"]((function()
-local gel = List();
-gel = lemma.unsplice(gel, lemma["splice"](lemma["rest"](_L1_0)));
-return _L3_0(lemma.splice(gel))
-end)())
-end)(lemma["get"](lemma["get"](lemma["lua"]["lemma"], _L2_0), "func"))
+elseif ((lemma["="]("Symbol", lemma["type"](_L2_0)) and lemma["="]("Macro", lemma["type"](lemma["get"](lemma["lua"]["lemma"], lemma["method"]("string")(_L2_0)))))) then
+return lemma["compile"](lemma["expand-1"](_L1_0))
 elseif ("else") then
 return (function(_L3_0, _L3_1)
 return (function()

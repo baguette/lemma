@@ -2,7 +2,6 @@
 ;; Work-in-progress compiler for Lemma
 ;; Still needs:
 ;;  - `return` insertion does not work properly.
-;;  - More special forms:  expand
 ;;  - Support for metadata (and subsequently doc-strings)
 ;;  - Better error handling
 ;;  - Support for aliasing the builtins?  e.g.: (def lambda fn)
@@ -62,6 +61,14 @@
 
 (defn handle-quasiquote [xs]
   (compile (second (invert-quasiquote xs))))
+
+(defn expand-1 [x]
+  (def head (first x))
+  (when (symbol? head)
+    (def m (get lua.lemma (.string head)))
+    (when (= (type m) :Macro)
+      (def f (get m :func))
+      (f @(rest x)))))
 
 (defn handle-fn [xs]
   (let [args (first xs)
@@ -144,9 +151,8 @@
                       ((specials (tostring head)) (rest x))
                     ;; Currently, macros only work if defined at top level
                     (and (= :Symbol (type head))
-                         (= :Macro (type (get lua.lemma head))))
-                      (let [f (get (get lua.lemma head) :func)]
-                        (compile (f @(rest x))))
+                         (= :Macro (type (get lua.lemma (.string head)))))
+                      (compile (expand-1 x))
                     :else
                       (let [r (rest x)
                             p (if stat? ");\n" ")")]
@@ -177,27 +183,20 @@
         (recur (compile (lua.read f true)))))))
 
 
-#;(let-if [f (lua/io.open (or (first *sys-args*) ""))]
-  (let [f (lua/FileStream f)]
-    (loop [code "-- Lemma 0.2 --"]
-      (when (not (= (lua/Error :eof) code))
-        (lua/io.write (str code "\n"))
-        (recur (compile (lua/read f true)))))
-    (lua/io.write "-- EOF --\n")
-    (.close f))
-  (do			;; Start a debug CLEPL (Compile-Load-Execute-Print-Loop)
+#;(do			;; Start a debug CLEPL (Compile-Load-Execute-Print-Loop)
     (print "Entering the debug CLEPL.")
-    (def f (lua/FileStream (lua/io.input)))
+    (def f (lua.FileStream (lua.io.input)))
     (loop []
-      (lua/io.write "\n> ")
-      (let [code (compile (lua/read f true))]
+      (lua.io.write "\n> ")
+      (let [code (compile (lua.read f true))]
         (print "-------")
         (print code)
         (print "-------")
-        (let [f (lua/assert (lua/loadstring code))]
+        (let [f (lua.assert (lua.loadstring code))]
           (if (= :function (type f))
               (do
-                (lua/io.write ";=> ")
+                (lua.io.write ";=> ")
                 (f))
               (print f))))
-      (recur))))
+      (recur)))
+
