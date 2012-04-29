@@ -96,7 +96,7 @@
                  (let [local (if (= 0 (sym-len))
                              ""
                              (str "local " sym "; "))]
-                   (str local sym " = " (compile v) ";\n")))))
+                   (str local sym " = " (compile v) "\n")))))
   :def-    (fn [xs]
              (let [k (first xs)
                    v (second xs)]
@@ -105,7 +105,7 @@
   :set!    (fn [xs]
              (let [k (first  xs)
                    v (second xs)]
-               (str (sym-find k) " = " (compile v) ";\n")))
+               (str (sym-find k) " = " (compile v) "\n")))
   :fn      handle-fn
   :macro   (fn [xs] (str "Macro" (handle-fn xs)))
   :cond    (fn [xs]
@@ -113,10 +113,10 @@
                    vs (evens xs)]
                (str "(function()\n"
                     "if (" (compile (first ks)) ") then\nreturn "
-                    (compile (first vs))
+                    (compile (first vs) true)
                     (str @(map (fn [k v]
                                  (str "\nelseif (" (compile k)
-                                  ") then\nreturn " (compile v)))
+                                  ") then\nreturn " (compile v true)))
                                  (rest ks)
                                  (rest vs)))
                     "\nend\nend)()\n")))
@@ -144,11 +144,11 @@
                   (str "Mapify{" mems "}")))
   :PreHashMap (fn [x] (compile (lua.HashMap @x)))
   :Symbol     (fn [x] (sym-find x))
-  :List       (fn [x]
+  :List       (fn [x stat?]
                 (let [head (first x)]
                   (cond
                     (specials (tostring head))
-                      ((specials (tostring head)) (rest x))
+                      (str ((specials (tostring head)) (rest x)) (if stat? ";\n" ""))
                     ;; Currently, macros only work if defined at top level
                     (and (= :Symbol (type head))
                          (= :Macro (type (get lua.lemma (.string head)))))
@@ -168,7 +168,7 @@
 
 (defn compile [exp stat?]
     (if (types (type exp))
-        ((types (type exp)) exp)
+        ((types (type exp)) exp stat?)
         (lua.error (str "Attempt to compile unrecognized type: "
                          exp " : " (type exp) "\n"))))
 

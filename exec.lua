@@ -27,11 +27,15 @@ function exec(f)
 	local done = false
 	
 	if type(f) == 'string' then
-		f = io.open(f, 'r')
+		f, msg = io.open(f, 'r')
+		if not f then
+			error(msg)
+		end
 		prompt = nil
 	end
-	
-	f = FileStream(f)
+	if type(f) ~= 'FileStream' then
+		f = FileStream(f)
+	end
 	lemma['*in-stream*'] = f
 
 	while not done do

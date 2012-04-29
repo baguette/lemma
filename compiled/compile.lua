@@ -126,7 +126,7 @@ lemma["specials"] = Mapify{["def"] = (function(_L1_0)
 return (function(_L2_0, _L2_1)
 return (function(_L3_0)
 return (function(_L4_0)
-return lemma["str"](_L4_0, _L3_0, " = ", lemma["compile"](_L2_1), ";\
+return lemma["str"](_L4_0, _L3_0, " = ", lemma["compile"](_L2_1), "\
 ")
 end)((function()
 if (lemma["="](0, lemma["sym-len"]())) then
@@ -144,7 +144,7 @@ end), ["and"] = (function(_L1_0)
 return lemma["str"]("(", lemma["mapstr"](lemma["compile"], _L1_0, " and "), ")")
 end), ["set!"] = (function(_L1_0)
 return (function(_L2_0, _L2_1)
-return lemma["str"](lemma["sym-find"](_L2_0), " = ", lemma["compile"](_L2_1), ";\
+return lemma["str"](lemma["sym-find"](_L2_0), " = ", lemma["compile"](_L2_1), "\
 ")
 end)(lemma["first"](_L1_0), lemma["second"](_L1_0))
 end), ["or"] = (function(_L1_0)
@@ -160,12 +160,12 @@ end), ["quote"] = lemma["handle-quote"], ["fn"] = lemma["handle-fn"], ["quasiquo
 return (function(_L2_0, _L2_1)
 return lemma["str"]("(function()\
 ", "if (", lemma["compile"](lemma["first"](_L2_0)), ") then\
-return ", lemma["compile"](lemma["first"](_L2_1)), (function()
+return ", lemma["compile"](lemma["first"](_L2_1), true), (function()
 local gel = List();
 gel = lemma.unsplice(gel, lemma["splice"](lemma["map"]((function(_L3_0, _L3_1)
 return lemma["str"]("\
 elseif (", lemma["compile"](_L3_0), ") then\
-return ", lemma["compile"](_L3_1))
+return ", lemma["compile"](_L3_1, true))
 end), lemma["rest"](_L2_0), lemma["rest"](_L2_1))));
 return lemma["str"](lemma.splice(gel))
 end)(), "\
@@ -201,11 +201,19 @@ local gel = List();
 gel = lemma.unsplice(gel, lemma["splice"](_L1_0));
 return lemma["lua"]["HashMap"](lemma.splice(gel))
 end)())
-end), ["List"] = (function(_L1_0)
+end), ["List"] = (function(_L1_0, _L1_1)
 return (function(_L2_0)
 return (function()
 if (lemma["specials"](lemma["tostring"](_L2_0))) then
-return lemma["specials"](lemma["tostring"](_L2_0))(lemma["rest"](_L1_0))
+return lemma["str"](lemma["specials"](lemma["tostring"](_L2_0))(lemma["rest"](_L1_0)), (function()
+if (_L1_1) then
+return ";\
+"
+elseif (true) then
+return ""
+end
+end)()
+)
 elseif ((lemma["="]("Symbol", lemma["type"](_L2_0)) and lemma["="]("Macro", lemma["type"](lemma["get"](lemma["lua"]["lemma"], lemma["method"]("string")(_L2_0)))))) then
 return lemma["compile"](lemma["expand-1"](_L1_0))
 elseif ("else") then
@@ -219,7 +227,7 @@ end
 end)()
 
 end)(lemma["rest"](_L1_0), (function()
-if (lemma["stat?"]) then
+if (_L1_1) then
 return ");\
 "
 elseif (true) then
@@ -251,7 +259,7 @@ end)};
 lemma["compile"] = (function(_L1_0, _L1_1)
 return (function()
 if (lemma["types"](lemma["type"](_L1_0))) then
-return lemma["types"](lemma["type"](_L1_0))(_L1_0)
+return lemma["types"](lemma["type"](_L1_0))(_L1_0, _L1_1)
 elseif (true) then
 return lemma["lua"]["error"](lemma["str"]("Attempt to compile unrecognized type: ", _L1_0, " : ", lemma["type"](_L1_0), "\
 "))

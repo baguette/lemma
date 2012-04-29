@@ -31,18 +31,23 @@ if not f or f == '--' then
 	f = io.input()
 	prompt = 'lemma> '
 	print('Lemma '..LEMMA_VERSION..' (on '..LUA_VERSION..')')
+else
+	f, msg = io.open(f)
+	if not f then
+		io.stderr:write(msg)
+		return 1
+	end
 end
+f = FileStream(f)
 
 if outfile then
 	local w
 	if outfile == '--' then
 		w = io.output()
 	else
- 		w = io.open(outfile, 'w')
- 	end
-	local f = FileStream(io.open(f))
+		w = io.open(outfile, 'w')
+	end
 	local code = "-- Lemma "..LEMMA_VERSION.." --"
-	
 	while code ~= Error'eof' do
 		if type(code) == 'Error' then
 			w:close()
