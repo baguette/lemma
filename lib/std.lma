@@ -102,6 +102,12 @@
              (= (lua.type a) s)))))
     types))
 
+;; Return a new seq with the values of ys appended to those of xs
+(defn append [xs ys]
+  (loop [xs (reverse xs) ys ys]
+    (if (empty? xs)
+      ys
+      (recur (rest xs) (cons (first xs) ys)))))
 
 ;; Map f over xs, then return the concatenated results separated by sep
 (defn mapstr [f xs sep]

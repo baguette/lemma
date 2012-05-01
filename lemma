@@ -55,7 +55,7 @@ if outfile then
 			error(code:string())
 		end
 		w:write(code..'\n')
-		code = lemma.compile(read(f, true))
+		code = lemma.compile(read(f, true), true)
 	end
 	w:write("-- EOF --\n")
 	w:close()

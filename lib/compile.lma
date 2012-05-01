@@ -152,7 +152,7 @@
                     ;; Currently, macros only work if defined at top level
                     (and (= :Symbol (type head))
                          (= :Macro (type (get lua.lemma (.string head)))))
-                      (compile (expand-1 x))
+                      (compile (expand-1 x) stat?)
                     :else
                       (let [r (rest x)
                             p (if stat? ");\n" ")")]
