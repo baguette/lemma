@@ -6,7 +6,7 @@ require '../interface/Stream'
 
 function FileStream(f)
 	local buffer = {}
-	local lines = 0
+	local lines = 1
 	
 	local t = {
 		get = function(self)

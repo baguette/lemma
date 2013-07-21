@@ -1,5 +1,14 @@
 
 lemma = {}
+---
+-- This table stores any metadata associated with a particular object.
+-- It uses weak keys so that the metadata will be garbage collected if
+-- the associated object is garbage collected.
+---
+lemma['*metadata*'] = {}
+setmetatable(lemma['*metadata*'], { __mode = 'k' })
+
+
 
 require 'class/FileStream'
 require 'read'
@@ -18,21 +27,32 @@ function exec(f)
 	local done = false
 	
 	if type(f) == 'string' then
-		f = io.open(f, 'r')
+		f, msg = io.open(f, 'r')
+		if not f then
+			error(msg)
+		end
 		prompt = nil
 	end
-	
-	f = FileStream(f)
+	if type(f) ~= 'FileStream' then
+		f = FileStream(f)
+	end
 	lemma['*in-stream*'] = f
 
 	while not done do
 		if prompt then io.write(prompt) end
 		
-		local t = read(f)                         -- read an expression!
-	
+		local t = read(f, true)                   -- read an expression!
+		
 		if type(t) ~= 'Error' then
-			local val = Vector(eval(t, env))      -- evaluate the expression!
+			local blarg = Vector(pcall(eval, t, env))
+			local good = blarg(1)
 			local err = false
+			if not good then
+				io.stderr:write (f:lines() .. ': ' .. tostring(blarg(2)) .. '\n')
+				err = true
+			end
+			                                      -- evaluate the expression!
+			local val = Vector(select(2, Seq.lib.unpack(blarg)))
 			
 			for i = 1, val:length() do
 				v = val[i]
@@ -40,9 +60,6 @@ function exec(f)
 					done = true
 					f:close()
 					return
-				elseif type(v) == 'Error' then
-					io.stderr:write (f:lines() .. ': ' .. tostring(v) .. '\n')
-					err = true
 				end
 			end
 			if prompt and not err then
@@ -55,7 +72,7 @@ function exec(f)
 				f:close()
 				return
 			else
-				io.stderr:write (f:lines() .. ': ' .. e:string() .. '\n')
+				io.stderr:write (f:lines() .. ': ' .. t:string() .. '\n')
 				if not prompt then
 					done = true
 					f:close()

@@ -7,20 +7,16 @@
 -- body can be resolved with sym-find. At the end of function compilation,
 -- sym-pop should occur to discard its locals from the symbol table.
 ---
-require 'class/Error'
-require 'class/Set'
 
 ---
 -- This is ugly... but it's only temporary.
--- TODO: reconsider namespaces
---       they affect interop and don't map to the filesystem
---       why not have ns, use take any table?
 ---
 do
 
 local symtab = {}
-local uses   = {'lemma'}
 local vararg = false
+local symfile
+local loctab = {}
 
 function debug.printsyms()
 	print'--------'
@@ -29,7 +25,6 @@ function debug.printsyms()
 	for i, v in ipairs(uses) do
 		print(v)
 	end
-	print(lemma['cur-ns'], '*')
 	print'--------'
 	print'Symbols'
 	print'--------'
@@ -41,82 +36,23 @@ function debug.printsyms()
 	print'--------'
 end
 
----
--- TODO: each namespace should have its own uses
----
-lemma['add-ns'] = function(ns)
-	_G[ns] = _G[ns] or {}
+local function compile_sym(str)
+	local v = {'lemma'}
+	for m in string.gmatch(str, '([^%.]+)') do
+		table.insert(v, '["')
+		table.insert(v, m)
+		table.insert(v, '"]')
+	end
+	return table.concat(v)
 end
 
-function lemma.use(ns)
-	if type(ns) == 'string' then
-		if _G[ns] then
-			table.insert(uses, ns)
-		else
-			return Error('use: '..ns..' is not a known namespace')
-		end
-	else
-		return Error'use: string expected'
-	end
+lemma['sym-set-file'] = function(s)
+	symfile = '#lemma:file:'..s
+	lemma['*metadata*'][symfile] = lemma['*metadata*'][symfile] or {}
+	loctab[symfile] = loctab[symfile] or {}
 end
 
-local function splitns(str)
-	local _, _, ns, mem = string.find(str, "(.+)/(.+)")
-	return ns, mem
-end
-
----
--- Maybe this function should be provided/exported so that quasiquote
--- can qualify symbols...
----
-local function resolve(str)
-	local ns, mem = splitns(str)
-	if ns and mem then
-		return ns, mem
-	end
-	mem = str
-	ns = lemma['cur-ns']
-	imem = mem and string.match(mem, '([^%.]+)%..*') or mem
-	if _G[ns][imem] ~= nil then
-		return ns, mem
-	end
-	for i = #uses, 1, -1 do
-		if _G[uses[i]][imem] ~= nil then
-			ns = uses[i]
-			break
-		end
-	end
-	if type(ns) ~= 'string' then
-		debug.debug()
-	end
-	return ns, mem
-end
-
-local function namespace(str)
-	local ns, mem = resolve(str)
-	if ns then
-		if not mem then
-			return Error"This should not be a Symbol."
-		end
-		
-		if (ns == '*ns*' or deffing) then
-			ns = lemma['cur-ns']
-		end
-		
-		if not _G[ns] then
-			return Error('error: '..ns..' is not a known namespace.')
-		end
-		
-		local v = {'_G["', ns, '"]'}
-		for m in string.gmatch(mem, '([^%.]+)') do
-			table.insert(v, '["')
-			table.insert(v, m)
-			table.insert(v, '"]')
-		end
-		return table.concat(v)
-	end
-	return false
-end
+lemma['sym-set-file']('lma-repl')
 
 lemma['sym-len'] = function()
 	return #symtab
@@ -138,7 +74,7 @@ lemma['sym-pop'] = function()
 	return table.remove(symtab)
 end
 
-lemma['sym-new'] = function(s)
+lemma['sym-new'] = function(s, loc)
 	if type(s) == 'List' then
 		local f, r = s:first(), s:rest()
 		if  type(f) == 'Symbol'
@@ -149,31 +85,29 @@ lemma['sym-new'] = function(s)
 				vararg = lemma['sym-new'](sym)
 				return '...'
 			else
-				return Error('Error parsing splice.')
+				return error('Error parsing splice.')
 			end
 		else
-			print('Error in binding for '..f:string()..':'..type(f)..' '..tostring(s))
-			return Error('Error in binding')
+			return error('Error in binding for '..
+			             f:string()..':'..type(f)..' '..tostring(s))
 		end
 	elseif type(s) ~= 'Symbol' then
-		return Error('Symbol expected, got '..type(s))
+		return error('Symbol expected, got '..type(s))
 	end
 	
 	if not s.string then
-		print 'wtf is happening ?!'
-		print(type(s))
-		return Error('Error')
+		return error('Error: wtf is happening?!'..type(s))
 	end
 	
 	local str = s:string()
 	local n = #symtab
 	
-	local ns, sp = splitns(str)
-	if ns and sp then
-		return namespace(str)
-	else
-		if n == 0 then
-			return namespace('*ns*/'..str)
+	if n == 0 then
+		if loc then
+			loctab[symfile][str] = "lemma['*metadata*']['"..symfile.."']['"..str.."']"
+			return loctab[symfile][str]
+		else
+			return compile_sym(str)
 		end
 	end
 	
@@ -189,22 +123,23 @@ lemma['sym-find'] = function(s)
 	local str = s:string()
 	local n = #symtab
 	
-	local ns, s = splitns(str)
-	if ns and s then
-		return namespace(str)
-	end
-	
 	local v = {}
 	for m in string.gmatch(str, '([^%.]+)') do
 		table.insert(v, m)
 	end
 	
 	if not v[1] then
-		return Error"This should not be a Symbol."
+		return error"reader error: This should not be a Symbol."
 	end
 	
-	for i = n, 1, -1 do
-		local q = symtab[i][v[1]]
+	for i = n, 0, -1 do
+		local q
+		if i == 0 then
+			q = loctab[symfile][v[1]]
+		else
+			q = symtab[i][v[1]]
+		end
+	
 		if q then
 			local r = {q}
 			for j = 2, #v do
@@ -216,7 +151,7 @@ lemma['sym-find'] = function(s)
 		end
 	end
 	
-	return namespace(str)
+	return compile_sym(str)
 end
 
 end

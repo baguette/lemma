@@ -98,10 +98,16 @@
   (for-each
     (fn [s]
       (let [name (str (.lower s) "?")]
-        (table-set! lua/lemma name (fn [a]
-             (= (lua/type a) s)))))
+        (table-set! lua.lemma name (fn [a]
+             (= (lua.type a) s)))))
     types))
 
+;; Return a new seq with the values of ys appended to those of xs
+(defn append [xs ys]
+  (loop [xs (reverse xs) ys ys]
+    (if (empty? xs)
+      ys
+      (recur (rest xs) (cons (first xs) ys)))))
 
 ;; Map f over xs, then return the concatenated results separated by sep
 (defn mapstr [f xs sep]
@@ -109,12 +115,12 @@
                 ""
                 sep))
   (let [strs (map (fn [a] (str (f a) sep)) xs)]
-    (lua/string.sub (str @strs) 1 (- -1 (length sep)))))   ; remove trailing sep
+    (lua.string.sub (str @strs) 1 (- -1 (length sep)))))   ; remove trailing sep
 
 ;; A convenience macro for Lua interop
 (defmacro defmethod [t-dot-f args @body]
   (if (not (vector? args))
-    (lua/Error (str "defmethod: expected vector, got " (lua/tostring args) " : " (lua/type args)))
+    (lua.Error (str "defmethod: expected vector, got " (lua.tostring args) " : " (lua.type args)))
     `(defn ~t-dot-f [self ~@args] ~@body)))
 
 ;; True if any element x in xs satisfies (p? x), false otherwise
@@ -129,7 +135,7 @@
 ;; Temporarily here for debugging purposes
 ;; Dumps the *metadata* info
 (defn dump-meta []
-  ((lua/loadstring "
+  ((lua.loadstring "
     for k, v in pairs(lemma['*metadata*']) do
       for m, w in pairs(v) do
         io.write(tostring(k)..': '..m..' =  '..w..'\\n')
@@ -138,5 +144,5 @@
   ")))
 
 ;; Collect garbage after loading
-(lua/collectgarbage :collect)
+(lua.collectgarbage :collect)
 

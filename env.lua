@@ -17,8 +17,7 @@ require 'type'
 ---
 -- Some Lua functions that could really use customizing.
 ---
-tostring, print = (function()
-	local xtostring = tostring
+towrite, print = (function()
 	return function(s)
 		if type(s) == 'string' then
 			return string.format('%q', s)
@@ -27,14 +26,14 @@ tostring, print = (function()
 		elseif s == nil then
 			return "nil"
 		end
-		return xtostring(s)
+		return tostring(s)
 	end,
 	function(...)
 		local n = select('#', ...)
 		local args = {...}
 		
 		for i = 1, n do
-			args[i] = xtostring(args[i])
+			args[i] = tostring(args[i])
 		end
 		
 		io.write(table.concat(args, '\t'))
@@ -56,10 +55,10 @@ end
 function write(...)
 	local n = select('#', ...)
 	local args = {...}
-	
+
 	if n > 0 then
 		for i = 1, n do
-			io.write(tostring(args[i]))
+			io.write(towrite(args[i]))
 			io.write(' ')
 		end
 	else
@@ -161,21 +160,24 @@ function lemma.values(t)
 end
 
 function lemma.get(t, k)
+	if type(k) == 'Symbol' then
+		k = k:string()             -- TODO: is the really a good idea?
+	end
 	if not k then
-		return Error'get: attempt to index table with nil'
+		return error'get: attempt to index table with nil'
 	end
 	if not t then
-		return Error('get: attempt to index nil ['..k..']')
+		return error('get: attempt to index nil ['..k..']')
 	end
 	return t[k]
 end
 
 lemma['table-set!'] = function(t, k, v)
 	if not k then
-		return Error'table-set!: attempt to index table with nil'
+		return error'table-set!: attempt to index table with nil'
 	end
 	if not t then
-		return Error('table-set!: attempt to index nil ['..k..']')
+		return error('table-set!: attempt to index nil ['..k..']')
 	end
 	t[k] = v
 	return v
@@ -206,37 +208,26 @@ end
 
 function lemma.method(k)
 	if type(k) ~= 'string' then
-		return Error('method: expected string, got '..tostring(k))
+		return error('method: expected string, got '..tostring(k))
 	end
 	--k = k:string()
 	
 	return function(t, ...)
 		if t == nil then
-			return Error('method: attempt to index nil ['..k..']')
+			return error('method: attempt to index nil ['..k..']')
 		end
 		if t[k] == nil then
-			return Error('method: method is nil ['..k..']')
+			return error('method: method is nil ['..k..']')
 		end
 		return t[k](t, ...)
 	end
 end
 
 ---
--- This table stores any metadata associated with a particular object.
--- It uses weak keys so that the metadata will be garbage collected if
--- the associated object is garbage collected.
----
-lemma['*metadata*'] = {}
-setmetatable(lemma['*metadata*'], { __mode = 'k' })
-
----
 -- Set up the namespaces. All of the usual global stuff in Lua is moved
 -- into a lua namespace, and the lemma namespace becomes the default.
 ---
-_NS = {lua = _G, lemma = lemma}  -- this is going away soon
-lua = _G   -- give stock lua stuff its own namespace
--- lemma['*namespaces*'] = _NS
-lemma['*ns*'] = 'lemma'
+lemma.lua = _G   -- give stock lua stuff its own namespace
 
 ---
 -- Copy some stuff from lua
@@ -259,10 +250,10 @@ end
 
 function lemma.take(n, seq)
 	if type(n) ~= 'number' then
-		return Error('take: number expected, got ', tostring(n))
+		return error('take: number expected, got ', tostring(n))
 	end
 	if not implements(seq, 'Seq') then
-		return Error('take: seq expected, got ', tostring(seq))
+		return error('take: seq expected, got ', tostring(seq))
 	end
 	lst = {}
 	for i = 1, n do
@@ -278,10 +269,10 @@ end
 
 function lemma.drop(n, seq)
 	if type(n) ~= 'number' then
-		return Error('take: number expected, got ', tostring(n))
+		return error('take: number expected, got ', tostring(n))
 	end
 	if not implements(seq, 'Seq') then
-		return Error('take: seq expected, got ', tostring(seq))
+		return error('take: seq expected, got ', tostring(seq))
 	end
 	for i = 1, n do
 		if seq['empty?'](seq) then
@@ -319,6 +310,30 @@ function lemma.length(t)
 	elseif type(t) == 'string' then
 		return string.len(t)
 	else
-		return Error("Don't know how to get length of "..type(t))
+		return error("Don't know how to get length of "..type(t))
 	end
 end
+
+function lemma.range(a, b, by)
+	-- by defaults to 1
+	by = by or 1
+	
+	-- make a optional
+	if not b then
+		a, b = by, a
+	end
+	
+	a = a - by
+	
+	local function until_inc(s, v)
+		local n = v + by
+		if n <= s then
+			return n
+		end
+		return nil
+	end
+	
+	return Iter(until_inc, b, a)
+end
+
+

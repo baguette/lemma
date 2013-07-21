@@ -1,12 +1,12 @@
+#!/usr/bin/env lemma
 ;; This example makes use of ltcltk. It can be installed with luarocks, or
 ;; from the website: http://tset.de/ltcltk/
 ;; It's another example of Lua interoperability.
 
-(lua/require :ltk)
+(lua.require :ltk)
 
-;; Copy the ltk table from the lua namespace to save some typing.
-;; Soon, this won't be necessary.
-(def ltk lua/ltk)
+;; Copy the lua.ltk library to a file-local nickname
+(def- ltk lua.ltk)
 
 (defn on-click []
   (print "Okay, bye!")

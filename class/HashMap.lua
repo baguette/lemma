@@ -8,9 +8,9 @@ local function __tostring(e)
 	local str = {}
 	
 	for k, v in pairs(e) do
-		table.insert(str, tostring(k))
+		table.insert(str, towrite(k))
 		table.insert(str, ' ')
-		table.insert(str, tostring(v))
+		table.insert(str, towrite(v))
 		table.insert(str, ', ')
 	end
 	
@@ -127,9 +127,7 @@ function HashMap(...)
 end
 
 function t:seq()
-	local o = {}
-	setmetatable(o, mt)
-	return o
+	return Iter(pairs(self))
 end
 
 end

@@ -12,10 +12,6 @@ LEMMA_VERSION = 0.2
 ---
 local o, f = ...
 
-function update_prompt()
-	prompt = lemma['*ns*']..'> '
-end
-
 if o and o:sub(1, 1) ~= '-' then
 	f, o = o, nil
 	lemma['*sys-args*'] = Vectorize{select(1, ...)}
@@ -33,20 +29,25 @@ end
 
 if not f or f == '--' then
 	f = io.input()
-	update_prompt()
+	prompt = 'lemma> '
 	print('Lemma '..LEMMA_VERSION..' (on '..LUA_VERSION..')')
+else
+	f, msg = io.open(f)
+	if not f then
+		io.stderr:write(msg)
+		return 1
+	end
 end
+f = FileStream(f)
 
 if outfile then
 	local w
 	if outfile == '--' then
 		w = io.output()
 	else
- 		w = io.open(outfile, 'w')
- 	end
-	local f = FileStream(io.open(f))
+		w = io.open(outfile, 'w')
+	end
 	local code = "-- Lemma "..LEMMA_VERSION.." --"
-	
 	while code ~= Error'eof' do
 		if type(code) == 'Error' then
 			w:close()
@@ -54,7 +55,7 @@ if outfile then
 			error(code:string())
 		end
 		w:write(code..'\n')
-		code = lemma.compile(read(f, true))
+		code = lemma.compile(read(f, true), true)
 	end
 	w:write("-- EOF --\n")
 	w:close()

@@ -1,18 +1,14 @@
 ;;;
 ;; Work-in-progress compiler for Lemma
 ;; Still needs:
-;;  - Make namespaces a compile-time feature; generate better code for them.
 ;;  - `return` insertion does not work properly.
-;;  - More special forms:  expand
 ;;  - Support for metadata (and subsequently doc-strings)
 ;;  - Better error handling
 ;;  - Support for aliasing the builtins?  e.g.: (def lambda fn)
 ;;  - Probably other stuff I'm not thinking of right now...
 ;;;
 
-(def format lua/string.format)
-
-(def cur-ns :lemma)
+(def format lua.string.format)
 
 
 (defn tag-splice? [x]
@@ -57,7 +53,7 @@
   (cond (seq? xs)
           (if (= 'unquote (first xs))
               (second xs)
-              (cons 'lua/List (map invert-quasiquote xs)))
+              (cons 'lua.List (map invert-quasiquote xs)))
         (= :Vector (type xs))
           (vec (map invert-quasiquote xs))
         :else
@@ -65,6 +61,14 @@
 
 (defn handle-quasiquote [xs]
   (compile (second (invert-quasiquote xs))))
+
+(defn expand-1 [x]
+  (def head (first x))
+  (when (symbol? head)
+    (def m (get lua.lemma (.string head)))
+    (when (= (type m) :Macro)
+      (def f (get m :func))
+      (f @(rest x)))))
 
 (defn handle-fn [xs]
   (let [args (first xs)
@@ -77,20 +81,12 @@
                            (str "local " s " = List(...);\n")
                            "")
                          @(map (fn [x] (compile x true)) body)]]
-        (lua/table.insert hyperbanana (length hyperbanana) "return ")
+        (lua.table.insert hyperbanana (length hyperbanana) "return ")
         (sym-pop)
         ; "\n-- function(" (comma-map (fn[x]x) args) ")\n"
-        (str (lua/table.concat hyperbanana) "\nend)"))))
+        (str (lua.table.concat hyperbanana) "\nend)"))))
 
 (def specials {
-  :ns     (fn [xs]
-             (let [ns (first xs)]
-               (if (not (= :string (type ns)))
-                   (lua/Error (str "ns: string expected (Got " (type ns) ")"))
-                   (do
-                     (add-ns ns)
-                     (set! cur-ns ns)
-                     (str "lemma['*ns*'] = '" ns "';\n")))))
   :quote   handle-quote
   :quasiquote handle-quasiquote
   :def     (fn [xs]
@@ -100,11 +96,16 @@
                  (let [local (if (= 0 (sym-len))
                              ""
                              (str "local " sym "; "))]
-                   (str local sym " = " (compile v) ";\n")))))
+                   (str local sym " = " (compile v) "\n")))))
+  :def-    (fn [xs]
+             (let [k (first xs)
+                   v (second xs)]
+               (let [sym (sym-new k true)]
+                 (str sym " = " (compile v) ";\n"))))
   :set!    (fn [xs]
              (let [k (first  xs)
                    v (second xs)]
-               (str (sym-find k) " = " (compile v) ";\n")))
+               (str (sym-find k) " = " (compile v) "\n")))
   :fn      handle-fn
   :macro   (fn [xs] (str "Macro" (handle-fn xs)))
   :cond    (fn [xs]
@@ -112,10 +113,10 @@
                    vs (evens xs)]
                (str "(function()\n"
                     "if (" (compile (first ks)) ") then\nreturn "
-                    (compile (first vs))
+                    (compile (first vs) true)
                     (str @(map (fn [k v]
                                  (str "\nelseif (" (compile k)
-                                  ") then\nreturn " (compile v)))
+                                  ") then\nreturn " (compile v true)))
                                  (rest ks)
                                  (rest vs)))
                     "\nend\nend)()\n")))
@@ -127,7 +128,7 @@
 
 (def types {
   :Number     (fn [x] (.string x))
-  :number     (fn [x] (lua/tostring x))
+  :number     (fn [x] (lua.tostring x))
   :string     (fn [x] (format "%q" x))
   :boolean    (fn [x] (if x :true :false))
   :nil        (fn [x] :nil)
@@ -141,18 +142,17 @@
                                      (keys x)
                                      ", ")]
                   (str "Mapify{" mems "}")))
-  :PreHashMap (fn [x] (compile (lua/HashMap @x)))
+  :PreHashMap (fn [x] (compile (lua.HashMap @x)))
   :Symbol     (fn [x] (sym-find x))
-  :List       (fn [x]
+  :List       (fn [x stat?]
                 (let [head (first x)]
                   (cond
                     (specials (tostring head))
-                      ((specials (tostring head)) (rest x))
+                      (str ((specials (tostring head)) (rest x)) (if stat? ";\n" ""))
                     ;; Currently, macros only work if defined at top level
                     (and (= :Symbol (type head))
-                         (= :Macro (type (lua/eval head lua/env))))
-                      (let [f (get (lua/eval head lua/env) :func)]
-                        (compile (f @(rest x))))
+                         (= :Macro (type (get lua.lemma (.string head)))))
+                      (compile (expand-1 x) stat?)
                     :else
                       (let [r (rest x)
                             p (if stat? ");\n" ")")]
@@ -162,48 +162,41 @@
                                  "("
                                  (mapstr compile r ", ")
                                  p))))))
-  :Iter       (fn [x] (compile (lua/List @x)))  ;; TODO: temporary workaround
+  :Iter       (fn [x] (compile (lua.List @x)))  ;; TODO: temporary workaround
   :Error      (fn [x] x)
   })
 
 (defn compile [exp stat?]
     (if (types (type exp))
-        ((types (type exp)) exp)
-        (lua/Error (str "Attempt to compile unrecognized type: "
+        ((types (type exp)) exp stat?)
+        (lua.error (str "Attempt to compile unrecognized type: "
                          exp " : " (type exp) "\n"))))
 
 (defn load [filename]
-  (let [f (lua/FileStream (lua/io.open filename))]
+  (let [f (lua.FileStream (lua.io.open filename))]
     (loop [code "-- Loading"]
-      (when (not (= (lua/Error :eof) code))
-        (let [s (lua/assert (lua/loadstring code))]
+      (when (not (= (lua.Error :eof) code))
+        (let [s (lua.assert (lua.loadstring code))]
           (if (= :function (type s))
               (s)
               (print s)))
-        (recur (compile (lua/read f true)))))))
+        (recur (compile (lua.read f true)))))))
 
 
-#;(let-if [f (lua/io.open (or (first *sys-args*) ""))]
-  (let [f (lua/FileStream f)]
-    (loop [code "-- Lemma 0.2 --"]
-      (when (not (= (lua/Error :eof) code))
-        (lua/io.write (str code "\n"))
-        (recur (compile (lua/read f true)))))
-    (lua/io.write "-- EOF --\n")
-    (.close f))
-  (do			;; Start a debug CLEPL (Compile-Load-Execute-Print-Loop)
+#;(do			;; Start a debug CLEPL (Compile-Load-Execute-Print-Loop)
     (print "Entering the debug CLEPL.")
-    (def f (lua/FileStream (lua/io.input)))
+    (def f (lua.FileStream (lua.io.input)))
     (loop []
-      (lua/io.write "\n> ")
-      (let [code (compile (lua/read f true))]
+      (lua.io.write "\n> ")
+      (let [code (compile (lua.read f true))]
         (print "-------")
         (print code)
         (print "-------")
-        (let [f (lua/assert (lua/loadstring code))]
+        (let [f (lua.assert (lua.loadstring code))]
           (if (= :function (type f))
               (do
-                (lua/io.write ";=> ")
+                (lua.io.write ";=> ")
                 (f))
               (print f))))
-      (recur))))
+      (recur)))
+

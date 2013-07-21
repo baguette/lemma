@@ -1,8 +1,24 @@
-;; Something along the lines of Common Lisp's getf for plists
-(defn getf [plist key]
-  (loop [lst plist]
-    (if (= key (first lst))
-        (second lst)
-        (when (not (empty? lst))
-          (recur (rest (rest lst)))))))
+;; Some functions for dealing with property lists (flat association lists)
+;;
+;; Both of the get functions return nil if no association is found.
+;;
+
+; Generate a get function based on get-key and get-val
+(defn get* [get-key get-val]
+  (fn [plist key]
+    (loop [lst plist]
+      (when (not (empty? lst))
+        (if (= key (get-key lst))
+          (get-val lst)
+          (recur (rest (rest lst))))))))
+
+; Lookup the value associated with key ("get forward") 
+(def getf (get* first second))
+
+; Lookup the key associated with value ("get backward")
+(def getb (get* second first))
+
+; Associate key with val in plist
+(defn assocf [key val plist]
+  (cons key (cons val plist)))
 
