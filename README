@@ -4,10 +4,10 @@ a constant state of change. Lemma is currently a work in progress and as such
 is incomplete and inefficient.
 
 The idea is to create a modern version of Lisp that integrates with the Lua
-virtual machine.  Currently, there is a slow, ugly interpreter that
-supports a handful of special forms, lexical scope, directly calling Lua
-functions, and macros.  There is also some preliminary syntactic sugar for
-dealing with Lua tables.
+virtual machine.  Currently, there is a prototype interpreter that compiles
+to Lua and executes it on the fly.  It supports most of the things that are
+expected in a Lisp while offering nearly seamless integration with Lua.
+Lua functions and tables can be used in Lemma code, and vice-versa.
 
 To reiterate: Lemma the language as well as lemma the interpreter are works
 in progress.  The language is experimental while the interpreter provides a
