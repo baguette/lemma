@@ -11,14 +11,16 @@ dealing with Lua tables.
 
 To reiterate: Lemma the language as well as lemma the interpreter are works
 in progress.  The language is experimental while the interpreter provides a
-playground for the experimentation.  The interpreter is also very slow.  My
-plan is to continue modifying the interpreter until it accepts a language that
-I'm satisfied with.  After the language becomes fairly stable, I plan to begin
-work on a self-hosting compiler that targets the LVM.
+playground for the experimentation.  The interpreter is rather slow.  It
+works by compiling the input into Lua, loading it into the Lua interpreter,
+and immediately executing it.  There is only limited support for batch
+compilation at this time (most things work, but macros don't work properly
+during batch compile).
 
 Any file with the .lma extension in this repository is a Lemma source file.
-There are quite a few located in the example/ directory, plus some macros in 
-lib/std.lma. Have a look if you're curious.
+There are quite a few located in the example/ directory, the compiler in
+lib/compile.lma, plus some macros in lib/std.lma. Have a look if you're
+curious.
 
 To use the interpreter, you need to have Lua installed (http://lua.org/).  It
 was developed with version 5.1 but might work with 5.2.  First, cd to the
@@ -40,5 +42,9 @@ will typically be something along these lines:
    PATH=$PATH:$LEMMA_PATH
    LUA_PATH="$LEMMA_PATH/?.lua;$LEMMA_PATH/?/?.lua;./?.lua;;"
    export LEMMA_PATH PATH LUA_PATH
+
+It is also recommended to install rlwrap and add a bash alias:
+
+   alias lemma='rlwrap -q "\"" lemma'
 
 That's all for now...
