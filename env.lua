@@ -240,6 +240,7 @@ lemma.type = type
 lemma.tostring = tostring
 lemma.foldl = Seq.lib.foldl
 lemma.foldr = Seq.lib.foldr
+lemma.filter = Seq.lib.filter
 lemma.map = Seq.lib.map
 lemma['for-each'] = Seq.lib.foreach
 lemma.iter = Iter

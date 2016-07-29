@@ -3,6 +3,17 @@
 -- The Lemma REPL
 ---
 
+if _VERSION ~= 'Lua 5.1' then
+	print('------------------------------------------------------')
+	print('| WARNING!                                           |')
+	print('------------------------------------------------------')
+	print('  Unsupported interpreter version '.._VERSION)
+	print('  Please use Lua 5.1 or compatible (such as LuaJIT).')
+	print('------------------------------------------------------')
+	print()
+end
+
+
 require 'exec'
 LUA_VERSION = jit and jit.version or _VERSION
 LEMMA_VERSION = 0.2

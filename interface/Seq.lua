@@ -87,6 +87,33 @@ function Seq.lib.foldr(f, init, ...)
 	end
 end
 
+local function package(r, f)
+	return r, f
+end
+
+local function filter(f, xs)
+	local x
+
+	repeat
+		if xs['empty?'](xs) then
+			return nil, List()
+		end
+
+		x = xs:first()
+		xs = xs:rest()
+	until f(x)
+
+	return xs, x
+end
+
+function Seq.lib.filter(f, xs)
+	if not implements(xs, 'Seq') then
+		return error('filter: Seq expected, got '..tostring(xs))
+	end
+
+	return Iter(filter, f, xs, package)
+end
+
 local function map(f, lsts)
 	local firsts = {}
 	local rests = {}
@@ -103,17 +130,13 @@ local function map(f, lsts)
 	end
 end
 
-local function package(r, f)
-	return r, f
-end
-
 function Seq.lib.map(f, ...)
 	local lsts = {...}
 
 	if #lsts == 0 then
 		return
 	elseif not implements(lsts[1], 'Seq') then
-		return error('map: Seq expected, got'..tostring(lsts[1]))
+		return error('map: Seq expected, got '..tostring(lsts[1]))
 	end
 
 	return Iter(map, f, lsts, package)
