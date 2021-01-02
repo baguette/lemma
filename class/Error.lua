@@ -20,7 +20,7 @@ function Error(s, trace)
 	setmetatable(o, mt)
 	
 	if trace then
-		if type(trace) == 'Error' then
+		if lemma.type(trace) == 'Error' then
 			trace = trace:string()
 		end
 		s = trace..'\n'..s

@@ -99,7 +99,7 @@
     (fn [s]
       (let [name (str (.lower s) "?")]
         (table-set! lua.lemma name (fn [a]
-             (= (lua.type a) s)))))
+             (= (type a) s)))))
     types))
 
 ;; Return a new seq with the values of ys appended to those of xs
@@ -120,7 +120,7 @@
 ;; A convenience macro for Lua interop
 (defmacro defmethod [t-dot-f args @body]
   (if (not (vector? args))
-    (lua.Error (str "defmethod: expected vector, got " (lua.tostring args) " : " (lua.type args)))
+    (lua.Error (str "defmethod: expected vector, got " (lua.tostring args) " : " (type args)))
     `(defn ~t-dot-f [self ~@args] ~@body)))
 
 ;; True if any element x in xs satisfies (p? x), false otherwise

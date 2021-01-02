@@ -5,7 +5,7 @@
 do
 
 local function __eq(a, b)
-	return (type(a) == type(b)) and (tostring(a) == tostring(b))
+	return (lemma.type(a) == lemma.type(b)) and (tostring(a) == tostring(b))
 end
 
 local function __tostring(e)
@@ -22,9 +22,9 @@ local mt = {
 }
 
 Number = function(n)
-	if type(n) ~= 'string' then
+	if lemma.type(n) ~= 'string' then
 		return error('Number objects serve to wrap numbers (as strings) at'..
-		             'compile time. (Got '..type(n)..')')
+		             'compile time. (Got '..lemma.type(n)..')')
 	end
 	
 	local o = { str = n }

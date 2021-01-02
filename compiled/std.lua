@@ -174,7 +174,7 @@ end)
 return lemma["for-each"]((function(_L2_0)
 return (function(_L3_0)
 return lemma["table-set!"](lemma["lua"]["lemma"], _L3_0, (function(_L4_0)
-return lemma["="](lemma["lua"]["type"](_L4_0), _L2_0);
+return lemma["="](lemma["type"](_L4_0), _L2_0);
 
 end));
 
@@ -235,7 +235,7 @@ lemma["defmethod"] = Macro(function(_L1_0, _L1_1, ...)
 local _L1_2 = List(...);
 return (function()
 if (lemma["not"](lemma["vector?"](_L1_1))) then
-return lemma["lua"]["Error"](lemma["str"]("defmethod: expected vector, got ", lemma["lua"]["tostring"](_L1_1), " : ", lemma["lua"]["type"](_L1_1)));
+return lemma["lua"]["Error"](lemma["str"]("defmethod: expected vector, got ", lemma["lua"]["tostring"](_L1_1), " : ", lemma["type"](_L1_1)));
 
 elseif (true) then
 return (function()

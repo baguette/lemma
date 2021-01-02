@@ -20,9 +20,9 @@ lemma.compile = function(s) return "" end
 function eval(t, env)
 	local undefined = false
 	
-	if type(t) == 'List' then
+	if lemma.type(t) == 'List' then
 		local h = t:first()
-		if type(h) == 'Symbol' then
+		if lemma.type(h) == 'Symbol' then
 			local undef = string.sub(h:string(), 1, 3)
 			if undef == 'def' or undef == 'set' or undef == 'ns' then
 				undefined = true
@@ -31,7 +31,7 @@ function eval(t, env)
 	end
 	
 	local code = lemma.compile(t)
-	if type(code) == 'Error' then
+	if lemma.type(code) == 'Error' then
 		return code
 	end
 	

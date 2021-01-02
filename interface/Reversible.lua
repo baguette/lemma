@@ -13,7 +13,7 @@ for i, v in pairs(Reversible.sig) do
 		if x and x[v] then
 			return x[v](x, ...)
 		else
-			return Error(tostring(x)..' has type '..type(x)..', not Reversible')
+			return Error(tostring(x)..' has type '..lemma.type(x)..', not Reversible')
 		end
 	end
 end

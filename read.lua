@@ -85,7 +85,7 @@ local function read_seq(eos, func)
 			end
 			
 			if c == eos then
-				return func(unpack(list, 1, n))
+				return func(table.unpack(list, 1, n))
 			else
 				f:unget(c)
 				local form = read(f, co, true)
@@ -198,7 +198,7 @@ end
 local function table_idx(func)
 	return function(f, c)
 		local k = read(f, c)
-		if type(k) ~= 'Symbol' then
+		if lemma.type(k) ~= 'Symbol' then
 			return error'read: dot syntax requires symbol'
 		end
 		return List():cons(k:string()):cons(Symbol(func))
@@ -247,13 +247,13 @@ function read(f, compiling, waiting)
 	end
 	
 	local macro = reader_macros[c]
-	while type(macro) == 'table' do
+	while lemma.type(macro) == 'table' do
 		c = f:get()
 		if c == Error'eof' then return Error'eof' end
 		macro = macro[c]
 	end
 	
-	if type(macro) == 'function' then
+	if lemma.type(macro) == 'function' then
 		form = macro(f, compiling)
 		if form == Nil then
 			if waiting then

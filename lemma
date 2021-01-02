@@ -3,20 +3,16 @@
 -- The Lemma REPL
 ---
 
-if _VERSION ~= 'Lua 5.1' then
-	print('------------------------------------------------------')
-	print('| WARNING!                                           |')
-	print('------------------------------------------------------')
-	print('  Unsupported interpreter version '.._VERSION)
-	print('  Please use Lua 5.1 or compatible (such as LuaJIT).')
-	print('------------------------------------------------------')
-	print()
+if _VERSION == 'Lua 5.1' then
+	table.unpack = unpack
+else
+	loadstring = load
 end
 
 
 require 'exec'
 LUA_VERSION = jit and jit.version or _VERSION
-LEMMA_VERSION = 0.2
+LEMMA_VERSION = 0.3
 
 ---
 -- Execute command line argument or start a REPL
@@ -60,7 +56,7 @@ if outfile then
 	end
 	local code = "-- Lemma "..LEMMA_VERSION.." --"
 	while code ~= Error'eof' do
-		if type(code) == 'Error' then
+		if lemma.type(code) == 'Error' then
 			w:close()
 			f:close()
 			error(code:string())

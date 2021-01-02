@@ -26,14 +26,14 @@ require 'type'
 function exec(f)
 	local done = false
 	
-	if type(f) == 'string' then
+	if lemma.type(f) == 'string' then
 		f, msg = io.open(f, 'r')
 		if not f then
 			error(msg)
 		end
 		prompt = nil
 	end
-	if type(f) ~= 'FileStream' then
+	if lemma.type(f) ~= 'FileStream' then
 		f = FileStream(f)
 	end
 	lemma['*in-stream*'] = f
@@ -43,7 +43,7 @@ function exec(f)
 		
 		local t = read(f, true)                   -- read an expression!
 		
-		if type(t) ~= 'Error' then
+		if lemma.type(t) ~= 'Error' then
 			local blarg = Vector(pcall(eval, t, env))
 			local good = blarg(1)
 			local err = false

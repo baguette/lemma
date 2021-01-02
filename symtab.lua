@@ -75,13 +75,13 @@ lemma['sym-pop'] = function()
 end
 
 lemma['sym-new'] = function(s, loc)
-	if type(s) == 'List' then
+	if lemma.type(s) == 'List' then
 		local f, r = s:first(), s:rest()
-		if  type(f) == 'Symbol'
+		if  lemma.type(f) == 'Symbol'
 		and f:string() == 'splice'
 		then
 			local sym = r:first()
-			if type(sym) == 'Symbol' then
+			if lemma.type(sym) == 'Symbol' then
 				vararg = lemma['sym-new'](sym)
 				return '...'
 			else
@@ -89,14 +89,14 @@ lemma['sym-new'] = function(s, loc)
 			end
 		else
 			return error('Error in binding for '..
-			             f:string()..':'..type(f)..' '..tostring(s))
+			             f:string()..':'..lemma.type(f)..' '..tostring(s))
 		end
-	elseif type(s) ~= 'Symbol' then
-		return error('Symbol expected, got '..type(s))
+	elseif lemma.type(s) ~= 'Symbol' then
+		return error('Symbol expected, got '..lemma.type(s))
 	end
 	
 	if not s.string then
-		return error('Error: wtf is happening?!'..type(s))
+		return error('Error: wtf is happening?!'..lemma.type(s))
 	end
 	
 	local str = s:string()

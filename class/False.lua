@@ -5,7 +5,7 @@
 do
 
 local function __eq(a, b)
-	return (type(a) == type(b)) and (tostring(a) == tostring(b))
+	return (lemma.type(a) == lemma.type(b)) and (tostring(a) == tostring(b))
 end
 
 local function __tostring(e)

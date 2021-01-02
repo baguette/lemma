@@ -17,6 +17,9 @@ local function __tostring(e)
 end
 
 local function __eq(self, e)
+	if lemma.type(self) ~= lemma.type(e) then
+		return false
+	end
 	if self:length() ~= e:length() then
 		return false
 	end

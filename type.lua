@@ -2,7 +2,7 @@
 -- Custom type tracking
 ---
 
-type = (function()
+lemma.type = (function()
 	local xtype = type
 	return function(o)
 		local t = xtype(o)

@@ -15,11 +15,15 @@ require 'symtab'
 require 'type'
 
 ---
+-- NOTE:  `lemma` table is defined in `exec.lua`
+---
+
+---
 -- Some Lua functions that could really use customizing.
 ---
 towrite, print = (function()
 	return function(s)
-		if type(s) == 'string' then
+		if lemma.type(s) == 'string' then
 			return string.format('%q', s)
 		elseif s == false then
 			return "false"
@@ -125,7 +129,7 @@ function lemma.str(...)
 	local t = {...}
 	for i = 1, n do
 		local v = t[i]
-		if type(v) ~= 'string' then
+		if lemma.type(v) ~= 'string' then
 			t[i] = tostring(v)
 		end
 	end
@@ -160,7 +164,7 @@ function lemma.values(t)
 end
 
 function lemma.get(t, k)
-	if type(k) == 'Symbol' then
+	if lemma.type(k) == 'Symbol' then
 		k = k:string()             -- TODO: is the really a good idea?
 	end
 	if not k then
@@ -207,7 +211,7 @@ function lemma.table(a, h)
 end
 
 function lemma.method(k)
-	if type(k) ~= 'string' then
+	if lemma.type(k) ~= 'string' then
 		return error('method: expected string, got '..tostring(k))
 	end
 	--k = k:string()
@@ -236,7 +240,7 @@ lemma.eval = eval
 lemma.read = read
 lemma.write = write
 lemma.print = print
-lemma.type = type
+--lemma.type = type   -- defined in `type.lua`
 lemma.tostring = tostring
 lemma.foldl = Seq.lib.foldl
 lemma.foldr = Seq.lib.foldr
@@ -250,7 +254,7 @@ function lemma.undefined()
 end
 
 function lemma.take(n, seq)
-	if type(n) ~= 'number' then
+	if lemma.type(n) ~= 'number' then
 		return error('take: number expected, got ', tostring(n))
 	end
 	if not implements(seq, 'Seq') then
@@ -265,11 +269,11 @@ function lemma.take(n, seq)
 		lst[i] = seq:first()
 		seq = seq:rest()
 	end
-	return List(unpack(lst, 1, n))
+	return List(table.unpack(lst, 1, n))
 end
 
 function lemma.drop(n, seq)
-	if type(n) ~= 'number' then
+	if lemma.type(n) ~= 'number' then
 		return error('take: number expected, got ', tostring(n))
 	end
 	if not implements(seq, 'Seq') then
@@ -306,12 +310,12 @@ end
 function lemma.length(t)
 	if implements(t, 'Seq') then
 		return t:length()
-	elseif type(t) == 'table' then
+	elseif lemma.type(t) == 'table' then
 		return #t
-	elseif type(t) == 'string' then
+	elseif lemma.type(t) == 'string' then
 		return string.len(t)
 	else
-		return error("Don't know how to get length of "..type(t))
+		return error("Don't know how to get length of "..lemma.type(t))
 	end
 end
 

@@ -82,6 +82,7 @@
                            "")
                          @(map (fn [x] (compile x true)) body)]]
         (lua.table.insert hyperbanana (length hyperbanana) "return ")
+        (assoc-meta hyperbanana :length (+ 1 (length hyperbanana)))
         (sym-pop)
         ; "\n-- function(" (comma-map (fn[x]x) args) ")\n"
         (str (lua.table.concat hyperbanana) "\nend)"))))

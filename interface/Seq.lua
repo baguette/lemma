@@ -19,7 +19,7 @@ for i, v in pairs(Seq.sig) do
 		if x and x[v] then
 			return x[v](x, ...)
 		else
-			return error(tostring(x)..' has type '..type(x)..', not a Seq')
+			return error(tostring(x)..' has type '..lemma.type(x)..', not a Seq')
 		end
 	end
 end
@@ -44,7 +44,7 @@ function Seq.lib.foldl(f, init, ...)
 	if #lsts == 0 then
 		return
 	elseif not implements(lsts[1], 'Seq') then
-		return error('foldl: Seq expected, got '..type(lsts[1]))
+		return error('foldl: Seq expected, got '..lemma.type(lsts[1]))
 	end
 	
 	local function foldl(f, init, lsts)
@@ -58,7 +58,7 @@ function Seq.lib.foldl(f, init, ...)
 				firsts[m] = v:first()
 				rests[m]  = v:rest()
 			end
-			return foldl(f, f(init, unpack(firsts, 1, m)), rests)
+			return foldl(f, f(init, table.unpack(firsts, 1, m)), rests)
 		else
 			return init
 		end
@@ -70,7 +70,7 @@ function Seq.lib.foldr(f, init, ...)
 	local lsts = {...}
 	
 	if #lsts > 0 and not implements(lsts[1], 'Seq') then
-		return error('foldr: Seq expected, got '..type(lsts[1]))
+		return error('foldr: Seq expected, got '..lemma.type(lsts[1]))
 	end
 	
 	if not implements(lsts[1], 'Reversible') then
@@ -81,7 +81,7 @@ function Seq.lib.foldr(f, init, ...)
 		for i, v in ipairs(lsts) do
 			lsts[i] = v:reverse()
 		end
-		return Seq.lib.foldl(f, init, unpack(lsts))
+		return Seq.lib.foldl(f, init, table.unpack(lsts))
 	else
 		return init
 	end
@@ -124,7 +124,7 @@ local function map(f, lsts)
 			table.insert(rests, v:rest())
 		end
 
-		return rests, f(unpack(firsts))
+		return rests, f(table.unpack(firsts))
 	else
 		return nil, List()
 	end
@@ -146,7 +146,7 @@ function Seq.lib.foreach(f, ...)
 	local lsts = {...}
 	
 	if #lsts > 0 and not implements(lsts[1], 'Seq') then
-		return error('for-each: Seq expected, got '..type(lsts[1]))
+		return error('for-each: Seq expected, got '..lemma.type(lsts[1]))
 	end
 	
 	local function foreach(f, lsts)
@@ -159,7 +159,7 @@ function Seq.lib.foreach(f, ...)
 				firsts[m] = v:first()
 				rests[m] = v:rest()
 			end
-			f(unpack(firsts, 1, m))
+			f(table.unpack(firsts, 1, m))
 			return foreach(f, rests)
 		else
 			return nil
@@ -174,7 +174,7 @@ function Seq.lib.unpack(lst)
 	local n = 0
 	
 	if not implements(lst, 'Seq') then
-		return error('unpack: Seq expected, got '..type(lst)..': '..tostring(lst))
+		return error('unpack: Seq expected, got '..lemma.type(lst)..': '..tostring(lst))
 	end
 	
 	while not curr['empty?'](curr) do
@@ -183,7 +183,7 @@ function Seq.lib.unpack(lst)
 		curr = curr:rest()
 	end
 	
-	return unpack(t, 1, n)
+	return table.unpack(t, 1, n)
 end
 
 function Seq.lib.pack(lst, ...)
@@ -225,7 +225,7 @@ function Seq.lib.flatten(...)
 				q[c] = s[j]
 				c = c + 1
 			end
-		elseif type(v) == 'table' then
+		elseif lemma.type(v) == 'table' then
 			for j = 1, #v do
 				q[c] = v[j]
 				c = c + 1
