@@ -1,5 +1,6 @@
 Besides the TODOs listed in comments:
 
+- wrappers for new operators introduced in newer Luas
 - (auto?) gensym
 - destructuring
 - multimethods
