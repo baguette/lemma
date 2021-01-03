@@ -9,23 +9,25 @@ to Lua and executes it on the fly.  It supports most of the things that are
 expected in a Lisp while offering nearly seamless integration with Lua.
 Lua functions and tables can be used in Lemma code, and vice-versa.
 
-To reiterate: Lemma the language as well as lemma the interpreter are works
+To reiterate:  Lemma the language as well as lemma the interpreter are works
 in progress.  The language is experimental while the interpreter provides a
-playground for the experimentation.  The interpreter is rather slow.  It
-works by compiling the input into Lua, loading it into the Lua interpreter,
-and immediately executing it.  There is only limited support for batch
-compilation at this time (most things work, but macros don't work properly
-during batch compile).
+playground for the experimentation.  The interpreter is rather slow, as it
+does no optimizations.  It works by compiling the input into Lua, loading it
+into the Lua interpreter, and immediately executing it.  There is only limited
+support for batch compilation at this time (most things work, but macros don't
+work properly during batch compile).  It is, however, self-hosting.
 
 Any file with the .lma extension in this repository is a Lemma source file.
 There are quite a few located in the example/ directory, the compiler in
 lib/compile.lma, plus some macros in lib/std.lma. Have a look if you're
 curious.
 
-To use the interpreter, you need to have Lua installed (http://lua.org/).  It
-was developed with version 5.1 but might work with 5.2.  First, cd to the
-directory containing the Lemma source files.  Make sure the lemma script is
-executable:
+To use the interpreter, you need to have Lua installed (https://lua.org/).
+It was developed primarily with version 5.1 in mind, but should work with
+newer versions and with LuaJIT.  If it does not, that is considered a bug.
+
+First, cd to the directory containing the Lemma source files.  Make sure the
+lemma script is executable:
 
    $ chmod +x lemma
 
